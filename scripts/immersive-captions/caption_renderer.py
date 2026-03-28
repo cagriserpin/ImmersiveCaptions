@@ -90,6 +90,7 @@ class WordGraphicsItem(QGraphicsItem):
         self.reveal_progress = 0.0
         self.scale_factor = 1.0
         self.offset_y = 0.0
+        self.rotation_deg = 0.0
 
         self.metrics = QFontMetricsF(self.font)
         self.text_width = self.metrics.horizontalAdvance(self.text)
@@ -118,6 +119,12 @@ class WordGraphicsItem(QGraphicsItem):
         if abs(offset_y - self.offset_y) > 1e-6:
             self.offset_y = offset_y
 
+    def set_rotation_deg(self, rotation_deg: float) -> None:
+        rotation_deg = float(rotation_deg)
+        if abs(rotation_deg - self.rotation_deg) > 1e-6:
+            self.rotation_deg = rotation_deg
+            self.update()
+
     def paint(self, painter: QPainter, option, widget=None) -> None:
         painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
         painter.setFont(self.font)
@@ -128,6 +135,7 @@ class WordGraphicsItem(QGraphicsItem):
 
         painter.save()
         painter.translate(center_x, center_y)
+        painter.rotate(self.rotation_deg)
         painter.scale(self.scale_factor, self.scale_factor)
         painter.translate(-center_x, -center_y)
 
@@ -368,10 +376,19 @@ class CaptionRenderer:
         max_amplitude = 0.0
 
         for animation in animations:
-            if animation.get("type") == "bounce":
+            animation_type = animation.get("type")
+
+            if animation_type == "bounce":
                 amplitude_px = float(animation.get("amplitude_px", 8))
                 amplitude_px = max(0.0, amplitude_px)
                 max_amplitude = max(max_amplitude, amplitude_px)
+
+            elif animation_type == "jiggle":
+                angle_deg = float(animation.get("angle_deg", 5))
+                angle_deg = max(0.0, abs(angle_deg))
+                # simple extra padding estimate for rotation
+                estimated_extra = 6.0 + angle_deg
+                max_amplitude = max(max_amplitude, estimated_extra)
 
         return max_amplitude
 
@@ -560,24 +577,52 @@ class CaptionRenderer:
                 eased_envelope = ease_in_out_cubic(pulse_t)
 
                 if direction == "up":
-                    oscillation = -math.sin(progress * cycles * math.pi)
+                    # one upward arc per cycle
+                    oscillation = -abs(math.sin(progress * cycles * math.pi))
                 elif direction == "down":
-                    oscillation = math.sin(progress * cycles * math.pi)
+                    # one downward arc per cycle
+                    oscillation = abs(math.sin(progress * cycles * math.pi))
                 else:
+                    # one full up-down oscillation per cycle
                     oscillation = math.sin(progress * cycles * 2.0 * math.pi)
 
                 offset_y += amplitude_px * eased_envelope * oscillation
 
         return offset_y
 
+    def resolve_rotation_deg(self, animation_owner: dict, progress: float) -> float:
+        animations = self.normalize_animation_list(animation_owner.get("animation"))
+        rotation_deg = 0.0
+
+        for animation in animations:
+            if animation.get("type") == "jiggle":
+                angle_deg = float(animation.get("angle_deg", 5))
+                cycles = float(animation.get("cycles", 3))
+
+                angle_deg = max(0.0, abs(angle_deg))
+                cycles = max(0.0, cycles)
+
+                if angle_deg <= 0.0 or cycles <= 0.0:
+                    continue
+
+                pulse_t = 1.0 - abs((progress * 2.0) - 1.0)
+                eased_envelope = ease_in_out_cubic(pulse_t)
+                oscillation = math.sin(progress * cycles * 2.0 * math.pi)
+
+                rotation_deg += angle_deg * eased_envelope * oscillation
+
+        return rotation_deg
+
     def apply_item_animation_state(self, item: WordGraphicsItem, owner: dict, time_seconds: float) -> None:
         progress = self.caption_model.compute_owner_effective_progress(owner, time_seconds)
         scale_factor = self.resolve_scale_factor(owner, progress)
         offset_y = self.resolve_vertical_offset(owner, progress)
+        rotation_deg = self.resolve_rotation_deg(owner, progress)
 
         item.set_reveal_progress(progress)
         item.set_scale_factor(scale_factor)
         item.set_offset_y(offset_y)
+        item.set_rotation_deg(rotation_deg)
 
     def update_group_items(self, time_seconds: float) -> None:
         if self.caption_model is None or self.current_group is None:
