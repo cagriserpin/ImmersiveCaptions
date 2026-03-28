@@ -12,9 +12,6 @@ BOTTOM_MARGIN = 110
 WORD_GAP = 10
 REVEAL_FEATHER_PX = 12
 
-ANIMATION_BEGIN_TIME_MARGIN = 0.30
-ANIMATION_END_TIME_MARGIN = 0.30
-
 
 def to_qfont_weight(weight_value: int):
     if weight_value <= 150:
@@ -149,7 +146,6 @@ class WordGraphicsItem(QGraphicsItem):
             return
 
         feather_width = min(REVEAL_FEATHER_PX, self.text_width)
-
         solid_width = max(0.0, reveal_width - feather_width)
 
         if solid_width > 0:
@@ -212,60 +208,7 @@ class CaptionRenderer:
         return font
 
     def normalize_animation_list(self, animation_value) -> list[dict]:
-        if animation_value is None:
-            return []
-
-        if isinstance(animation_value, str):
-            return [{"type": animation_value}]
-
-        if isinstance(animation_value, dict):
-            return [animation_value]
-
-        if isinstance(animation_value, list):
-            normalized = []
-            for entry in animation_value:
-                if isinstance(entry, str):
-                    normalized.append({"type": entry})
-                elif isinstance(entry, dict) and "type" in entry:
-                    normalized.append(entry)
-            return normalized
-
-        return []
-
-    def compute_progress_from_range(self, start, end, time_seconds: float) -> float:
-        if start is not None and end is not None:
-            start = float(start)
-            end = float(end)
-
-            if time_seconds <= start:
-                return 0.0
-            if time_seconds >= end:
-                return 1.0
-
-            duration = max(0.001, end - start)
-            return (time_seconds - start) / duration
-
-        if start is not None:
-            return 1.0 if time_seconds >= float(start) else 0.0
-
-        if end is not None:
-            return 1.0 if time_seconds >= float(end) else 0.0
-
-        return 0.0
-
-    def compute_animation_progress(self, owner: dict, time_seconds: float) -> float:
-        start = owner.get("start")
-        end = owner.get("end")
-
-        if start is None and end is None:
-            return 0.0
-
-        if start is not None:
-            start = float(start) - ANIMATION_BEGIN_TIME_MARGIN
-        if end is not None:
-            end = float(end) + ANIMATION_END_TIME_MARGIN
-
-        return self.compute_progress_from_range(start, end, time_seconds)
+        return self.caption_model.normalize_animation_list(animation_value)
 
     def resolve_dialogue_style(self, section: dict, word: dict, defaults: dict, speakers: dict) -> dict:
         default_font = defaults.get("font", "Arial")
@@ -617,13 +560,10 @@ class CaptionRenderer:
                 eased_envelope = ease_in_out_cubic(pulse_t)
 
                 if direction == "up":
-                    # One upward bounce arc per cycle
                     oscillation = -math.sin(progress * cycles * math.pi)
                 elif direction == "down":
-                    # One downward bounce arc per cycle
                     oscillation = math.sin(progress * cycles * math.pi)
                 else:
-                    # Full up-down oscillation
                     oscillation = math.sin(progress * cycles * 2.0 * math.pi)
 
                 offset_y += amplitude_px * eased_envelope * oscillation
@@ -631,13 +571,11 @@ class CaptionRenderer:
         return offset_y
 
     def apply_item_animation_state(self, item: WordGraphicsItem, owner: dict, time_seconds: float) -> None:
-        reveal_progress = self.compute_progress_from_range(owner.get("start"), owner.get("end"), time_seconds)
-        animation_progress = self.compute_animation_progress(owner, time_seconds)
+        progress = self.caption_model.compute_owner_effective_progress(owner, time_seconds)
+        scale_factor = self.resolve_scale_factor(owner, progress)
+        offset_y = self.resolve_vertical_offset(owner, progress)
 
-        scale_factor = self.resolve_scale_factor(owner, animation_progress)
-        offset_y = self.resolve_vertical_offset(owner, animation_progress)
-
-        item.set_reveal_progress(reveal_progress)
+        item.set_reveal_progress(progress)
         item.set_scale_factor(scale_factor)
         item.set_offset_y(offset_y)
 
@@ -646,16 +584,22 @@ class CaptionRenderer:
             return
 
         for entry in self.section_entries:
+            background_rect = entry["background_item"].rect()
+
             for slot in entry["slot_layout"]:
                 item = slot["item"]
                 owner = slot["owner"]
 
                 self.apply_item_animation_state(item, owner, time_seconds)
 
-                base_pos = item.pos()
-                static_x = item.x()
+                static_x = (
+                    background_rect.x()
+                    + PADDING_X
+                    + slot["slot_x"]
+                    + slot["base_x_in_slot"]
+                )
                 static_y = (
-                    entry["background_item"].rect().y()
+                    background_rect.y()
                     + PADDING_Y
                     + slot["slot_y"]
                     + slot["base_y_in_slot"]

@@ -2,8 +2,9 @@ import json
 from pathlib import Path
 
 
-GROUP_SHOW_TIME_MARGIN = 0.10
+GROUP_SHOW_TIME_MARGIN = 0.20
 GROUP_DISAPPEAR_TIME_MARGIN = 1.0
+DEFAULT_ANIMATION_TIME_MARGIN = 0.1
 
 
 class CaptionModel:
@@ -24,28 +25,128 @@ class CaptionModel:
     def get_groups(self) -> list:
         return self.data.get("groups", [])
 
+    def normalize_animation_list(self, animation_value) -> list[dict]:
+        if animation_value is None:
+            return []
+
+        if isinstance(animation_value, str):
+            return [{"type": animation_value}]
+
+        if isinstance(animation_value, dict):
+            return [animation_value]
+
+        if isinstance(animation_value, list):
+            normalized = []
+            for entry in animation_value:
+                if isinstance(entry, str):
+                    normalized.append({"type": entry})
+                elif isinstance(entry, dict) and "type" in entry:
+                    normalized.append(entry)
+            return normalized
+
+        return []
+
+    def get_animation_time_margins(self, owner: dict) -> tuple[float, float]:
+        animations = self.normalize_animation_list(owner.get("animation"))
+
+        if not animations:
+            return 0.0, 0.0
+
+        max_begin_margin = 0.0
+        max_end_margin = 0.0
+
+        for animation in animations:
+            if "time_margin" in animation:
+                shared_margin = float(animation.get("time_margin", DEFAULT_ANIMATION_TIME_MARGIN))
+                begin_margin = shared_margin
+                end_margin = shared_margin
+            elif "begin_time_margin" in animation or "end_time_margin" in animation:
+                begin_margin = float(animation.get("begin_time_margin", 0.0))
+                end_margin = float(animation.get("end_time_margin", 0.0))
+            else:
+                begin_margin = DEFAULT_ANIMATION_TIME_MARGIN
+                end_margin = DEFAULT_ANIMATION_TIME_MARGIN
+
+            max_begin_margin = max(max_begin_margin, begin_margin)
+            max_end_margin = max(max_end_margin, end_margin)
+
+        return max_begin_margin, max_end_margin
+
+    def get_owner_effective_time_range(self, owner: dict) -> tuple[float | None, float | None]:
+        start = owner.get("start")
+        end = owner.get("end")
+
+        if start is None or end is None:
+            return None, None
+
+        start = float(start)
+        end = float(end)
+
+        begin_margin, end_margin = self.get_animation_time_margins(owner)
+
+        effective_start = start - begin_margin
+        effective_end = end + end_margin
+
+        return effective_start, effective_end
+
+    def compute_owner_effective_progress(self, owner: dict, time_seconds: float) -> float:
+        start, end = self.get_owner_effective_time_range(owner)
+
+        if start is None and end is None:
+            return 0.0
+
+        if start is not None and end is not None:
+            if time_seconds <= start:
+                return 0.0
+            if time_seconds >= end:
+                return 1.0
+
+            duration = max(0.001, end - start)
+            return (time_seconds - start) / duration
+
+        if start is not None:
+            return 1.0 if time_seconds >= start else 0.0
+
+        if end is not None:
+            return 1.0 if time_seconds >= end else 0.0
+
+        return 0.0
+
+    def get_dialogue_section_effective_time_range(self, section: dict) -> tuple[float | None, float | None]:
+        words = section.get("words", [])
+        if not words:
+            return None, None
+
+        word_ranges = []
+
+        for word in words:
+            start, end = self.get_owner_effective_time_range(word)
+            if start is not None and end is not None:
+                word_ranges.append((start, end))
+
+        if not word_ranges:
+            return None, None
+
+        effective_start = min(start for start, _ in word_ranges)
+        effective_end = max(end for _, end in word_ranges)
+
+        section_begin_margin, section_end_margin = self.get_animation_time_margins(section)
+        effective_start -= section_begin_margin
+        effective_end += section_end_margin
+
+        return effective_start, effective_end
+
+    def get_sfx_section_effective_time_range(self, section: dict) -> tuple[float | None, float | None]:
+        return self.get_owner_effective_time_range(section)
+
     def get_section_time_range(self, section: dict) -> tuple[float | None, float | None]:
         section_type = section.get("type")
 
         if section_type == "dialogue":
-            words = section.get("words", [])
-            if not words:
-                return None, None
-
-            starts = [float(w["start"]) for w in words if "start" in w]
-            ends = [float(w["end"]) for w in words if "end" in w]
-
-            if not starts or not ends:
-                return None, None
-
-            return min(starts), max(ends)
+            return self.get_dialogue_section_effective_time_range(section)
 
         if section_type == "sfx":
-            start = section.get("start")
-            end = section.get("end")
-            if start is None or end is None:
-                return None, None
-            return float(start), float(end)
+            return self.get_sfx_section_effective_time_range(section)
 
         return None, None
 
