@@ -3,7 +3,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QLinearGradient,
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
 
 
-SECTION_GAP = 14
+SECTION_GAP = 0
 PADDING_X = 18
 PADDING_Y = 10
 BOTTOM_MARGIN = 110
@@ -65,6 +65,15 @@ def dim_color(color_string: str, dim_opacity: float) -> str:
     dim_b = int(b * factor)
 
     return rgb_to_hex(dim_r, dim_g, dim_b)
+
+
+def ease_in_out_cubic(t: float) -> float:
+    t = max(0.0, min(1.0, float(t)))
+
+    if t < 0.5:
+        return 4.0 * t * t * t
+
+    return 1.0 - ((-2.0 * t + 2.0) ** 3) / 2.0
 
 
 class WordGraphicsItem(QGraphicsItem):
@@ -266,19 +275,18 @@ class CaptionRenderer:
         scale_factor = 1.0
 
         for animation in animations:
-            animation_type = animation.get("type")
-
-            if animation_type == "scale":
+            if animation.get("type") == "scale":
                 target_scale = float(animation.get("scale", 1.2))
                 target_scale = max(0.01, target_scale)
 
-                # Ease-in-out pulse:
-                # progress 0.0 -> scale 1.0
-                # progress 0.5 -> peak scale
-                # progress 1.0 -> scale 1.0
-                pulse = 1.0 - abs((word_progress * 2.0) - 1.0)
-                animated_scale = 1.0 + ((target_scale - 1.0) * pulse)
+                # Pulse shape:
+                # progress 0.0 -> 0
+                # progress 0.5 -> 1
+                # progress 1.0 -> 0
+                pulse_t = 1.0 - abs((word_progress * 2.0) - 1.0)
+                eased_pulse = ease_in_out_cubic(pulse_t)
 
+                animated_scale = 1.0 + ((target_scale - 1.0) * eased_pulse)
                 scale_factor *= animated_scale
 
         return scale_factor
@@ -356,10 +364,77 @@ class CaptionRenderer:
         else:
             progress = 0.0
 
+        scale_factor = self.resolve_word_scale_factor(section, progress)
+
         item = WordGraphicsItem(text, font, dim_hex, font_color)
         item.set_reveal_progress(progress)
-        item.set_scale_factor(1.0)
+        item.set_scale_factor(scale_factor)
         return item
+
+    def compute_dialogue_section_bounds(self, word_items: list[WordGraphicsItem]) -> tuple[float, float, list[dict]]:
+        """
+        Returns:
+        - content_width
+        - content_height
+        - layout_data for each word item
+        """
+        layout_data = []
+
+        base_x = 0.0
+        union_left = 0.0
+        union_right = 0.0
+        union_top = 0.0
+        union_bottom = 0.0
+        first = True
+
+        for index, item in enumerate(word_items):
+            rect = item.boundingRect()
+
+            base_width = rect.width()
+            base_height = rect.height()
+
+            center_x = base_x + (base_width / 2.0)
+            center_y = base_height / 2.0
+
+            scaled_width = base_width * item.scale_factor
+            scaled_height = base_height * item.scale_factor
+
+            animated_left = center_x - (scaled_width / 2.0)
+            animated_right = center_x + (scaled_width / 2.0)
+            animated_top = center_y - (scaled_height / 2.0)
+            animated_bottom = center_y + (scaled_height / 2.0)
+
+            if first:
+                union_left = animated_left
+                union_right = animated_right
+                union_top = animated_top
+                union_bottom = animated_bottom
+                first = False
+            else:
+                union_left = min(union_left, animated_left)
+                union_right = max(union_right, animated_right)
+                union_top = min(union_top, animated_top)
+                union_bottom = max(union_bottom, animated_bottom)
+
+            layout_data.append({
+                "item": item,
+                "base_x": base_x,
+                "base_width": base_width,
+                "base_height": base_height,
+            })
+
+            base_x += base_width
+            if index < len(word_items) - 1:
+                base_x += WORD_GAP
+
+        content_width = union_right - union_left
+        content_height = union_bottom - union_top
+
+        for data in layout_data:
+            data["union_left"] = union_left
+            data["union_top"] = union_top
+
+        return content_width, content_height, layout_data
 
     def render(self, time_seconds: float) -> None:
         self.clear()
@@ -387,20 +462,12 @@ class CaptionRenderer:
                 if not word_items:
                     continue
 
-                content_width = 0.0
-                content_height = 0.0
-
-                for index, item in enumerate(word_items):
-                    rect = item.boundingRect()
-                    content_width += rect.width()
-                    content_height = max(content_height, rect.height())
-
-                    if index < len(word_items) - 1:
-                        content_width += WORD_GAP
+                content_width, content_height, layout_data = self.compute_dialogue_section_bounds(word_items)
 
                 prepared_sections.append({
                     "type": "dialogue",
                     "word_items": word_items,
+                    "layout_data": layout_data,
                     "content_width": content_width,
                     "content_height": content_height,
                 })
@@ -410,13 +477,14 @@ class CaptionRenderer:
                 if text_item is None:
                     continue
 
-                rect = text_item.boundingRect()
+                content_width, content_height, layout_data = self.compute_dialogue_section_bounds([text_item])
 
                 prepared_sections.append({
                     "type": "sfx",
                     "text_item": text_item,
-                    "content_width": rect.width(),
-                    "content_height": rect.height(),
+                    "layout_data": layout_data,
+                    "content_width": content_width,
+                    "content_height": content_height,
                 })
 
         if not prepared_sections:
@@ -448,28 +516,37 @@ class CaptionRenderer:
             self.scene.addItem(bg_item)
             self.caption_background_items.append(bg_item)
 
-            content_x = bg_x + (bg_width - content_width) / 2
-            content_y = bg_y + (bg_height - content_height) / 2
+            content_x = bg_x + PADDING_X
+            content_y = bg_y + PADDING_Y
 
             if section_data["type"] == "dialogue":
-                word_x = content_x
+                for data in section_data["layout_data"]:
+                    item = data["item"]
+                    base_x = data["base_x"]
+                    union_left = data["union_left"]
+                    union_top = data["union_top"]
 
-                for item in section_data["word_items"]:
-                    rect = item.boundingRect()
-                    word_y = content_y + (content_height - rect.height()) / 2
+                    item_x = content_x + (base_x - union_left)
+                    item_y = content_y + (0.0 - union_top)
 
-                    item.setPos(word_x, word_y)
+                    item.setPos(item_x, item_y)
                     item.setZValue(11)
                     self.scene.addItem(item)
                     self.caption_text_items.append(item)
 
-                    word_x += rect.width() + WORD_GAP
-
             elif section_data["type"] == "sfx":
-                text_item = section_data["text_item"]
-                text_item.setPos(content_x, content_y)
-                text_item.setZValue(11)
-                self.scene.addItem(text_item)
-                self.caption_text_items.append(text_item)
+                for data in section_data["layout_data"]:
+                    item = data["item"]
+                    base_x = data["base_x"]
+                    union_left = data["union_left"]
+                    union_top = data["union_top"]
+
+                    item_x = content_x + (base_x - union_left)
+                    item_y = content_y + (0.0 - union_top)
+
+                    item.setPos(item_x, item_y)
+                    item.setZValue(11)
+                    self.scene.addItem(item)
+                    self.caption_text_items.append(item)
 
             current_y += bg_height + SECTION_GAP

@@ -95,7 +95,7 @@ class PlayerWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         self.ui_timer = QTimer(self)
-        self.ui_timer.setInterval(50)
+        self.ui_timer.setInterval(10)
         self.ui_timer.timeout.connect(self.update_time_ui)
         self.ui_timer.timeout.connect(self.update_caption_display)
         self.ui_timer.start()
