@@ -3,11 +3,6 @@ import json
 from pathlib import Path
 
 
-GROUP_SHOW_TIME_MARGIN = 0.20
-GROUP_DISAPPEAR_TIME_MARGIN = 1.0
-DEFAULT_ANIMATION_TIME_MARGIN = 0.1
-
-
 class CaptionModel:
     def __init__(self, json_path: Path) -> None:
         self.json_path = json_path
@@ -21,11 +16,7 @@ class CaptionModel:
         result = copy.deepcopy(base)
 
         for key, value in override.items():
-            if (
-                key in result
-                and isinstance(result[key], dict)
-                and isinstance(value, dict)
-            ):
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
                 result[key] = self._deep_merge_dicts(result[key], value)
             else:
                 result[key] = copy.deepcopy(value)
@@ -39,11 +30,7 @@ class CaptionModel:
         return defaults if isinstance(defaults, dict) else {}
 
     def _strip_animation_defaults(self, defaults_dict: dict) -> dict:
-        return {
-            key: value
-            for key, value in defaults_dict.items()
-            if key != "animation_defaults"
-        }
+        return {key: value for key, value in defaults_dict.items() if key != "animation_defaults"}
 
     def get_root_defaults(self) -> dict:
         defaults = self.data.get("defaults", {})
@@ -115,16 +102,12 @@ class CaptionModel:
         word: dict | None = None,
     ) -> list[dict]:
         layers = []
-
-        root_defaults = self.get_root_defaults()
-        layers.append(self._animation_defaults_from_defaults(root_defaults))
+        layers.append(self._animation_defaults_from_defaults(self.get_root_defaults()))
 
         if group is not None:
             layers.append(self._animation_defaults_from_defaults(self._object_defaults(group)))
-
         if section is not None:
             layers.append(self._animation_defaults_from_defaults(self._object_defaults(section)))
-
         if word is not None:
             layers.append(self._animation_defaults_from_defaults(self._object_defaults(word)))
 
@@ -170,10 +153,42 @@ class CaptionModel:
         word: dict | None = None,
     ) -> list[dict]:
         animation_list = self.normalize_animation_list(owner.get("animation"))
-        return [
-            self.resolve_animation_entry(entry, group=group, section=section, word=word)
-            for entry in animation_list
-        ]
+        return [self.resolve_animation_entry(entry, group=group, section=section, word=word) for entry in animation_list]
+
+    def get_default_animation_time_margin(
+        self,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+    ) -> float:
+        resolved_defaults = self.get_style_defaults_for_context(
+            group=group,
+            section=section,
+            word=word,
+            speaker_name=None,
+            include_word_defaults=True,
+        )
+        return float(resolved_defaults.get("default_animation_time_margin", 0.0))
+
+    def get_group_show_time_margin(self, group: dict | None = None) -> float:
+        resolved_defaults = self.get_style_defaults_for_context(
+            group=group,
+            section=None,
+            word=None,
+            speaker_name=None,
+            include_word_defaults=False,
+        )
+        return float(resolved_defaults.get("group_show_time_margin", 0.0))
+
+    def get_group_disappear_time_margin(self, group: dict | None = None) -> float:
+        resolved_defaults = self.get_style_defaults_for_context(
+            group=group,
+            section=None,
+            word=None,
+            speaker_name=None,
+            include_word_defaults=False,
+        )
+        return float(resolved_defaults.get("group_disappear_time_margin", 0.0))
 
     def get_animation_time_margins(
         self,
@@ -185,30 +200,31 @@ class CaptionModel:
     ) -> tuple[float, float]:
         animations = resolved_animations
         if animations is None:
-            animations = self.get_resolved_animation_list(
-                owner,
-                group=group,
-                section=section,
-                word=word,
-            )
+            animations = self.get_resolved_animation_list(owner, group=group, section=section, word=word)
 
         if not animations:
             return 0.0, 0.0
+
+        default_time_margin = self.get_default_animation_time_margin(
+            group=group,
+            section=section,
+            word=word,
+        )
 
         max_begin_margin = 0.0
         max_end_margin = 0.0
 
         for animation in animations:
             if "time_margin" in animation:
-                shared_margin = float(animation.get("time_margin", DEFAULT_ANIMATION_TIME_MARGIN))
+                shared_margin = float(animation.get("time_margin", default_time_margin))
                 begin_margin = shared_margin
                 end_margin = shared_margin
             elif "begin_time_margin" in animation or "end_time_margin" in animation:
                 begin_margin = float(animation.get("begin_time_margin", 0.0))
                 end_margin = float(animation.get("end_time_margin", 0.0))
             else:
-                begin_margin = DEFAULT_ANIMATION_TIME_MARGIN
-                end_margin = DEFAULT_ANIMATION_TIME_MARGIN
+                begin_margin = default_time_margin
+                end_margin = default_time_margin
 
             max_begin_margin = max(max_begin_margin, begin_margin)
             max_end_margin = max(max_end_margin, end_margin)
@@ -240,10 +256,7 @@ class CaptionModel:
             resolved_animations=resolved_animations,
         )
 
-        effective_start = start - begin_margin
-        effective_end = end + end_margin
-
-        return effective_start, effective_end
+        return start - begin_margin, end + end_margin
 
     def compute_owner_effective_progress(
         self,
@@ -270,13 +283,11 @@ class CaptionModel:
                 return 0.0
             if time_seconds >= end:
                 return 1.0
-
             duration = max(0.001, end - start)
             return (time_seconds - start) / duration
 
         if start is not None:
             return 1.0 if time_seconds >= start else 0.0
-
         if end is not None:
             return 1.0 if time_seconds >= end else 0.0
 
@@ -293,12 +304,10 @@ class CaptionModel:
             include_word_defaults=True,
         )
 
-        # Explicit section fields override defaults/speaker/group/root
         for key in ("font", "font_size", "font_weight", "font_color"):
             if key in section:
                 resolved[key] = section[key]
 
-        # Explicit word fields override everything below
         for key in ("font", "font_size", "font_weight", "font_color"):
             if key in word:
                 resolved[key] = word[key]
@@ -327,12 +336,7 @@ class CaptionModel:
         word_ranges = []
 
         for word in words:
-            resolved_animations = self.get_resolved_animation_list(
-                word,
-                group=group,
-                section=section,
-                word=word,
-            )
+            resolved_animations = self.get_resolved_animation_list(word, group=group, section=section, word=word)
             start, end = self.get_owner_effective_time_range(
                 word,
                 group=group,
@@ -349,12 +353,7 @@ class CaptionModel:
         effective_start = min(start for start, _ in word_ranges)
         effective_end = max(end for _, end in word_ranges)
 
-        section_resolved_animations = self.get_resolved_animation_list(
-            section,
-            group=group,
-            section=section,
-            word=None,
-        )
+        section_resolved_animations = self.get_resolved_animation_list(section, group=group, section=section, word=None)
         section_begin_margin, section_end_margin = self.get_animation_time_margins(
             section,
             group=group,
@@ -363,18 +362,10 @@ class CaptionModel:
             resolved_animations=section_resolved_animations,
         )
 
-        effective_start -= section_begin_margin
-        effective_end += section_end_margin
-
-        return effective_start, effective_end
+        return effective_start - section_begin_margin, effective_end + section_end_margin
 
     def get_sfx_section_effective_time_range(self, group: dict, section: dict) -> tuple[float | None, float | None]:
-        resolved_animations = self.get_resolved_animation_list(
-            section,
-            group=group,
-            section=section,
-            word=None,
-        )
+        resolved_animations = self.get_resolved_animation_list(section, group=group, section=section, word=None)
         return self.get_owner_effective_time_range(
             section,
             group=group,
@@ -388,17 +379,15 @@ class CaptionModel:
 
         if section_type == "dialogue":
             return self.get_dialogue_section_effective_time_range(group, section)
-
         if section_type == "sfx":
             return self.get_sfx_section_effective_time_range(group, section)
 
         return None, None
 
     def get_group_natural_time_range(self, group: dict) -> tuple[float | None, float | None]:
-        sections = group.get("sections", [])
         section_ranges = []
 
-        for section in sections:
+        for section in group.get("sections", []):
             start, end = self.get_section_time_range(group, section)
             if start is not None and end is not None:
                 section_ranges.append((start, end))
@@ -406,19 +395,17 @@ class CaptionModel:
         if not section_ranges:
             return None, None
 
-        group_start = min(start for start, _ in section_ranges)
-        group_end = max(end for _, end in section_ranges)
-        return group_start, group_end
+        return min(start for start, _ in section_ranges), max(end for _, end in section_ranges)
 
     def get_group_effective_time_range(self, group: dict) -> tuple[float | None, float | None]:
         natural_start, natural_end = self.get_group_natural_time_range(group)
         if natural_start is None or natural_end is None:
             return None, None
 
-        effective_start = natural_start - GROUP_SHOW_TIME_MARGIN
-        effective_end = natural_end + GROUP_DISAPPEAR_TIME_MARGIN
+        show_margin = self.get_group_show_time_margin(group)
+        disappear_margin = self.get_group_disappear_time_margin(group)
 
-        return effective_start, effective_end
+        return natural_start - show_margin, natural_end + disappear_margin
 
     def is_group_active(self, group: dict, time_seconds: float) -> bool:
         start, end = self.get_group_effective_time_range(group)
@@ -426,10 +413,25 @@ class CaptionModel:
             return False
         return start <= time_seconds <= end
 
-    def get_active_group(self, time_seconds: float) -> dict | None:
-        active_candidates = []
+    def group_requests_overlap_previous(self, group: dict) -> bool:
+        for section in group.get("sections", []):
+            if bool(section.get("overlap_previous", False)):
+                return True
+        return False
 
-        for group in self.get_groups():
+    def group_requests_overlap_next(self, group: dict) -> bool:
+        for section in group.get("sections", []):
+            if bool(section.get("overlap_next", False)):
+                return True
+        return False
+
+    def groups_should_overlap(self, older_group: dict, newer_group: dict) -> bool:
+        return self.group_requests_overlap_next(older_group) or self.group_requests_overlap_previous(newer_group)
+
+    def get_active_groups(self, time_seconds: float) -> list[dict]:
+        active = []
+
+        for index, group in enumerate(self.get_groups()):
             if not self.is_group_active(group, time_seconds):
                 continue
 
@@ -441,34 +443,48 @@ class CaptionModel:
             if effective_start is None or effective_end is None:
                 continue
 
-            active_candidates.append({
+            active.append({
                 "group": group,
+                "index": index,
                 "natural_start": natural_start,
                 "natural_end": natural_end,
                 "effective_start": effective_start,
                 "effective_end": effective_end,
             })
 
-        if not active_candidates:
-            return None
+        active.sort(key=lambda item: item["natural_start"])
 
-        active_candidates.sort(key=lambda item: item["natural_start"], reverse=True)
-        return active_candidates[0]["group"]
+        if not active:
+            return []
+
+        if len(active) == 1:
+            return [active[0]["group"]]
+
+        older = active[-2]["group"]
+        newer = active[-1]["group"]
+
+        if self.groups_should_overlap(older, newer):
+            return [older, newer]
+
+        return [newer]
+
+    def get_active_group(self, time_seconds: float) -> dict | None:
+        active_groups = self.get_active_groups(time_seconds)
+        if not active_groups:
+            return None
+        return active_groups[-1]
 
     def get_active_sections(self, time_seconds: float) -> list[dict]:
         active_group = self.get_active_group(time_seconds)
         if active_group is None:
             return []
-
         return active_group.get("sections", [])
 
     def section_to_display_text(self, section: dict) -> str:
         section_type = section.get("type")
 
         if section_type == "dialogue":
-            words = section.get("words", [])
-            return " ".join(word.get("text", "") for word in words).strip()
-
+            return " ".join(word.get("text", "") for word in section.get("words", [])).strip()
         if section_type == "sfx":
             return section.get("text", "").strip()
 

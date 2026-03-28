@@ -1,10 +1,20 @@
 {
   "defaults": {
-    "font": "Calibri",
-    "font_size": 30,
-    "font_weight": 400,
-    "font_color": "#ffffff",
-    "dim_opacity": 0.35
+	"font": "Calibri",
+	"font_size": 30,
+	"font_weight": 400,
+	"font_color": "#ffffff",
+	"dim_opacity": 0.35,
+	"group_show_time_margin": 0.2,
+	"group_disappear_time_margin": 1.0,
+	"default_animation_time_margin": 0.1,
+	"group_gap": 8,
+	"section_gap": 0,
+	"section_to_bg_padding_x": 18,
+	"section_to_bg_padding_y": 10,
+	"section_video_bottom_margin": 110,
+	"word_gap": 10,
+	"reveal_feather_px": 12
   },
   "speakers": {
     "john": { "font_color": "#CD7F32" },
@@ -216,6 +226,7 @@
         {
           "type": "dialogue",
           "speaker": "stranger",
+		  "overlap_next": true,
           "defaults": {
             "animation_defaults": {
               "bounce": { "amplitude_px": 15, "cycles": 1, "time_margin": 0 }

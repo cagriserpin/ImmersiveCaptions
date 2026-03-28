@@ -5,14 +5,6 @@ from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QLinearGradient,
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
 
-SECTION_GAP = 0
-PADDING_X = 18
-PADDING_Y = 10
-BOTTOM_MARGIN = 110
-WORD_GAP = 10
-REVEAL_FEATHER_PX = 12
-
-
 def to_qfont_weight(weight_value: int):
     if weight_value <= 150:
         return QFont.Weight.Thin
@@ -35,7 +27,6 @@ def to_qfont_weight(weight_value: int):
 
 def parse_hex_color(color_string: str) -> tuple[int, int, int]:
     color_string = color_string.strip()
-
     if color_string.startswith("#"):
         color_string = color_string[1:]
 
@@ -43,10 +34,7 @@ def parse_hex_color(color_string: str) -> tuple[int, int, int]:
         return 255, 255, 255
 
     try:
-        r = int(color_string[0:2], 16)
-        g = int(color_string[2:4], 16)
-        b = int(color_string[4:6], 16)
-        return r, g, b
+        return int(color_string[0:2], 16), int(color_string[2:4], 16), int(color_string[4:6], 16)
     except ValueError:
         return 255, 255, 255
 
@@ -60,32 +48,26 @@ def rgb_to_hex(r: int, g: int, b: int) -> str:
 
 def dim_color(color_string: str, dim_opacity: float) -> str:
     r, g, b = parse_hex_color(color_string)
-
     factor = max(0.0, min(1.0, float(dim_opacity)))
-    dim_r = int(r * factor)
-    dim_g = int(g * factor)
-    dim_b = int(b * factor)
-
-    return rgb_to_hex(dim_r, dim_g, dim_b)
+    return rgb_to_hex(int(r * factor), int(g * factor), int(b * factor))
 
 
 def ease_in_out_cubic(t: float) -> float:
     t = max(0.0, min(1.0, float(t)))
-
     if t < 0.5:
         return 4.0 * t * t * t
-
     return 1.0 - ((-2.0 * t + 2.0) ** 3) / 2.0
 
 
 class WordGraphicsItem(QGraphicsItem):
-    def __init__(self, text: str, font: QFont, dim_color_hex: str, active_color_hex: str) -> None:
+    def __init__(self, text: str, font: QFont, dim_color_hex: str, active_color_hex: str, reveal_feather_px: float) -> None:
         super().__init__()
 
         self.text = text
         self.font = font
         self.dim_color = QColor(dim_color_hex)
         self.active_color = QColor(active_color_hex)
+        self.reveal_feather_px = max(0.0, float(reveal_feather_px))
 
         self.reveal_progress = 0.0
         self.scale_factor = 1.0
@@ -96,7 +78,6 @@ class WordGraphicsItem(QGraphicsItem):
         self.text_width = self.metrics.horizontalAdvance(self.text)
         self.text_height = self.metrics.height()
         self.ascent = self.metrics.ascent()
-
         self.bounds = QRectF(0, 0, self.text_width, self.text_height)
 
     def boundingRect(self) -> QRectF:
@@ -153,7 +134,7 @@ class WordGraphicsItem(QGraphicsItem):
             painter.restore()
             return
 
-        feather_width = min(REVEAL_FEATHER_PX, self.text_width)
+        feather_width = min(self.reveal_feather_px, self.text_width)
         solid_width = max(0.0, reveal_width - feather_width)
 
         if solid_width > 0:
@@ -172,7 +153,6 @@ class WordGraphicsItem(QGraphicsItem):
 
             start_color = QColor(self.active_color)
             start_color.setAlpha(255)
-
             end_color = QColor(self.active_color)
             end_color.setAlpha(0)
 
@@ -192,31 +172,71 @@ class CaptionRenderer:
         self.scene = scene
         self.caption_model = caption_model
 
-        self.current_group = None
+        self.current_group_set = tuple()
         self.current_scene_size = None
-        self.section_entries = []
+        self.group_entries = []
 
     def clear(self) -> None:
-        for entry in self.section_entries:
-            self.scene.removeItem(entry["background_item"])
-            for item in entry["items"]:
-                self.scene.removeItem(item)
+        for group_entry in self.group_entries:
+            for section_entry in group_entry["section_entries"]:
+                self.scene.removeItem(section_entry["background_item"])
+                for item in section_entry["items"]:
+                    self.scene.removeItem(item)
 
-        self.section_entries.clear()
-        self.current_group = None
+        self.group_entries.clear()
+        self.current_group_set = tuple()
         self.current_scene_size = None
 
-    def get_default_dim_opacity(self, defaults: dict) -> float:
-        return float(defaults.get("dim_opacity", 0.35))
+    def resolve_layout_defaults(
+        self,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+    ) -> dict:
+        return self.caption_model.get_style_defaults_for_context(
+            group=group,
+            section=section,
+            word=word,
+            speaker_name=None,
+            include_word_defaults=(word is not None),
+        )
+
+    def get_group_gap(self, group: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group)
+        return float(defaults.get("group_gap", 0.0))
+
+    def get_section_gap(self, group: dict | None = None, section: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group, section=section)
+        return float(defaults.get("section_gap", 0.0))
+
+    def get_section_to_bg_padding_x(self, group: dict | None = None, section: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group, section=section)
+        return float(defaults.get("section_to_bg_padding_x", 0.0))
+
+    def get_section_to_bg_padding_y(self, group: dict | None = None, section: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group, section=section)
+        return float(defaults.get("section_to_bg_padding_y", 0.0))
+
+    def get_section_video_bottom_margin(self, group: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group)
+        return float(defaults.get("section_video_bottom_margin", 0.0))
+
+    def get_word_gap(self, group: dict | None = None, section: dict | None = None, word: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group, section=section, word=word)
+        return float(defaults.get("word_gap", 0.0))
+
+    def get_reveal_feather_px(self, group: dict | None = None, section: dict | None = None, word: dict | None = None) -> float:
+        defaults = self.resolve_layout_defaults(group=group, section=section, word=word)
+        return float(defaults.get("reveal_feather_px", 0.0))
+
+    def get_default_dim_opacity(self, style_dict: dict) -> float:
+        return float(style_dict.get("dim_opacity", 0.35))
 
     def build_font(self, font_name: str, font_size: int, font_weight: int) -> QFont:
         font = QFont(font_name)
         font.setPointSize(int(font_size))
         font.setWeight(to_qfont_weight(int(font_weight)))
         return font
-
-    def normalize_animation_list(self, animation_value) -> list[dict]:
-        return self.caption_model.normalize_animation_list(animation_value)
 
     def create_background_item(self) -> QGraphicsRectItem:
         background_item = QGraphicsRectItem()
@@ -226,26 +246,29 @@ class CaptionRenderer:
         self.scene.addItem(background_item)
         return background_item
 
-    def create_word_item(self, text: str, font: QFont, dim_hex: str, active_color: str) -> WordGraphicsItem:
-        item = WordGraphicsItem(text, font, dim_hex, active_color)
+    def create_word_item(self, text: str, font: QFont, dim_hex: str, active_color: str, reveal_feather_px: float) -> WordGraphicsItem:
+        item = WordGraphicsItem(text, font, dim_hex, active_color, reveal_feather_px)
         item.setZValue(11)
         self.scene.addItem(item)
         return item
 
-    def build_dialogue_word_item_meta(self, group: dict, section: dict, word: dict, defaults: dict, speakers: dict) -> dict | None:
+    def build_dialogue_word_item_meta(self, group: dict, section: dict, word: dict, defaults: dict) -> dict | None:
         word_text = word.get("text", "")
         if not word_text:
             return None
 
         style = self.caption_model.resolve_dialogue_style(group, section, word)
+        merged_style = {**defaults, **style}
+
         font = self.build_font(
-            style.get("font", defaults.get("font", "Arial")),
-            style.get("font_size", defaults.get("font_size", 42)),
-            style.get("font_weight", defaults.get("font_weight", 400)),
+            merged_style.get("font", "Arial"),
+            merged_style.get("font_size", 42),
+            merged_style.get("font_weight", 400),
         )
 
-        active_color = style.get("font_color", defaults.get("font_color", "#ffffff"))
-        dim_hex = dim_color(active_color, self.get_default_dim_opacity(style | defaults))
+        active_color = merged_style.get("font_color", "#ffffff")
+        dim_hex = dim_color(active_color, self.get_default_dim_opacity(merged_style))
+        reveal_feather_px = self.get_reveal_feather_px(group=group, section=section, word=word)
 
         resolved_animations = self.caption_model.get_resolved_animation_list(
             word,
@@ -254,7 +277,7 @@ class CaptionRenderer:
             word=word,
         )
 
-        item = self.create_word_item(word_text, font, dim_hex, active_color)
+        item = self.create_word_item(word_text, font, dim_hex, active_color, reveal_feather_px)
         rect = item.boundingRect()
 
         return {
@@ -263,6 +286,7 @@ class CaptionRenderer:
             "resolved_animations": resolved_animations,
             "base_width": rect.width(),
             "base_height": rect.height(),
+            "word_gap": self.get_word_gap(group=group, section=section, word=word),
         }
 
     def build_sfx_item_meta(self, group: dict, section: dict, defaults: dict) -> dict | None:
@@ -271,14 +295,17 @@ class CaptionRenderer:
             return None
 
         style = self.caption_model.resolve_sfx_style(group, section)
+        merged_style = {**defaults, **style}
+
         font = self.build_font(
-            style.get("font", defaults.get("font", "Arial")),
-            style.get("font_size", defaults.get("font_size", 42)),
-            style.get("font_weight", defaults.get("font_weight", 400)),
+            merged_style.get("font", "Arial"),
+            merged_style.get("font_size", 42),
+            merged_style.get("font_weight", 400),
         )
 
-        active_color = style.get("font_color", defaults.get("font_color", "#ffffff"))
-        dim_hex = dim_color(active_color, self.get_default_dim_opacity(style | defaults))
+        active_color = merged_style.get("font_color", "#ffffff")
+        dim_hex = dim_color(active_color, self.get_default_dim_opacity(merged_style))
+        reveal_feather_px = self.get_reveal_feather_px(group=group, section=section)
 
         resolved_animations = self.caption_model.get_resolved_animation_list(
             section,
@@ -287,7 +314,7 @@ class CaptionRenderer:
             word=None,
         )
 
-        item = self.create_word_item(text, font, dim_hex, active_color)
+        item = self.create_word_item(text, font, dim_hex, active_color, reveal_feather_px)
         rect = item.boundingRect()
 
         return {
@@ -296,17 +323,17 @@ class CaptionRenderer:
             "resolved_animations": resolved_animations,
             "base_width": rect.width(),
             "base_height": rect.height(),
+            "word_gap": self.get_word_gap(group=group, section=section),
         }
 
-    def build_dialogue_section_entry(self, group: dict, section: dict, defaults: dict, speakers: dict, background_item: QGraphicsRectItem) -> dict:
+    def build_dialogue_section_entry(self, group: dict, section: dict, defaults: dict, background_item: QGraphicsRectItem) -> dict:
         items = []
         item_meta = []
 
         for word in section.get("words", []):
-            meta = self.build_dialogue_word_item_meta(group, section, word, defaults, speakers)
+            meta = self.build_dialogue_word_item_meta(group, section, word, defaults)
             if meta is None:
                 continue
-
             items.append(meta["item"])
             item_meta.append(meta)
 
@@ -317,6 +344,9 @@ class CaptionRenderer:
             "background_item": background_item,
             "items": items,
             "item_meta": item_meta,
+            "section_gap": self.get_section_gap(group=group, section=section),
+            "padding_x": self.get_section_to_bg_padding_x(group=group, section=section),
+            "padding_y": self.get_section_to_bg_padding_y(group=group, section=section),
         }
 
     def build_sfx_section_entry(self, group: dict, section: dict, defaults: dict, background_item: QGraphicsRectItem) -> dict:
@@ -330,6 +360,9 @@ class CaptionRenderer:
                 "background_item": background_item,
                 "items": [],
                 "item_meta": [],
+                "section_gap": self.get_section_gap(group=group, section=section),
+                "padding_x": self.get_section_to_bg_padding_x(group=group, section=section),
+                "padding_y": self.get_section_to_bg_padding_y(group=group, section=section),
             }
 
         return {
@@ -339,18 +372,18 @@ class CaptionRenderer:
             "background_item": background_item,
             "items": [meta["item"]],
             "item_meta": [meta],
+            "section_gap": self.get_section_gap(group=group, section=section),
+            "padding_x": self.get_section_to_bg_padding_x(group=group, section=section),
+            "padding_y": self.get_section_to_bg_padding_y(group=group, section=section),
         }
 
     def max_scale_for_resolved_animations(self, resolved_animations: list[dict]) -> float:
         max_scale = 1.0
-
         for animation in resolved_animations:
             animation_type = animation.get("type")
             if animation_type in ("scale", "pop"):
                 target_scale = float(animation.get("scale", 1.25))
-                target_scale = max(0.01, target_scale)
-                max_scale = max(max_scale, target_scale)
-
+                max_scale = max(max_scale, max(0.01, target_scale))
         return max_scale
 
     def max_vertical_amplitude_for_resolved_animations(self, resolved_animations: list[dict]) -> float:
@@ -361,25 +394,17 @@ class CaptionRenderer:
 
             if animation_type == "bounce":
                 amplitude_px = float(animation.get("amplitude_px", 8))
-                amplitude_px = max(0.0, amplitude_px)
-                max_amplitude = max(max_amplitude, amplitude_px)
-
+                max_amplitude = max(max_amplitude, max(0.0, amplitude_px))
             elif animation_type == "jiggle":
                 angle_deg = float(animation.get("angle_deg", 5))
-                angle_deg = max(0.0, abs(angle_deg))
-                estimated_extra = 6.0 + angle_deg
-                max_amplitude = max(max_amplitude, estimated_extra)
+                max_amplitude = max(max_amplitude, 6.0 + max(0.0, abs(angle_deg)))
 
         return max_amplitude
 
-    def compute_reserved_section_layout(self, entry: dict) -> dict:
-        item_meta = entry["item_meta"]
+    def compute_reserved_section_layout(self, section_entry: dict) -> dict:
+        item_meta = section_entry["item_meta"]
         if not item_meta:
-            return {
-                "reserved_content_width": 0.0,
-                "reserved_content_height": 0.0,
-                "slot_layout": [],
-            }
+            return {"reserved_content_width": 0.0, "reserved_content_height": 0.0, "slot_layout": []}
 
         slot_layout = []
         current_x = 0.0
@@ -389,6 +414,7 @@ class CaptionRenderer:
             resolved_animations = meta["resolved_animations"]
             base_width = meta["base_width"]
             base_height = meta["base_height"]
+            word_gap = meta["word_gap"]
 
             max_scale = self.max_scale_for_resolved_animations(resolved_animations)
             max_amplitude = self.max_vertical_amplitude_for_resolved_animations(resolved_animations)
@@ -409,7 +435,7 @@ class CaptionRenderer:
 
             current_x += reserved_width
             if index < len(item_meta) - 1:
-                current_x += WORD_GAP
+                current_x += word_gap
 
             max_reserved_height = max(max_reserved_height, reserved_height)
 
@@ -424,63 +450,34 @@ class CaptionRenderer:
             "slot_layout": slot_layout,
         }
 
-    def layout_group_static(self) -> None:
-        if not self.section_entries:
-            return
-
-        view_width = self.scene.sceneRect().width()
-        view_height = self.scene.sceneRect().height()
-
+    def compute_group_layout_metrics(self, section_entries: list[dict]) -> dict:
         total_height = 0.0
-        for entry in self.section_entries:
-            total_height += entry["reserved_content_height"] + (PADDING_Y * 2)
+        max_width = 0.0
 
-        total_height += SECTION_GAP * (len(self.section_entries) - 1)
+        for entry in section_entries:
+            bg_height = entry["reserved_content_height"] + (entry["padding_y"] * 2)
+            bg_width = entry["reserved_content_width"] + (entry["padding_x"] * 2)
+            total_height += bg_height
+            max_width = max(max_width, bg_width)
 
-        current_y = view_height - BOTTOM_MARGIN - total_height
+        for index, entry in enumerate(section_entries[:-1]):
+            total_height += entry["section_gap"]
 
-        for entry in self.section_entries:
-            content_width = entry["reserved_content_width"]
-            content_height = entry["reserved_content_height"]
+        return {
+            "group_total_height": total_height,
+            "group_max_width": max_width,
+        }
 
-            bg_width = content_width + (PADDING_X * 2)
-            bg_height = content_height + (PADDING_Y * 2)
-
-            bg_x = (view_width - bg_width) / 2.0
-            bg_y = current_y
-
-            entry["background_item"].setRect(QRectF(bg_x, bg_y, bg_width, bg_height))
-
-            content_x = bg_x + PADDING_X
-            content_y = bg_y + PADDING_Y
-
-            for slot in entry["slot_layout"]:
-                item = slot["item"]
-                item_x = content_x + slot["slot_x"] + slot["base_x_in_slot"]
-                item_y = content_y + slot["slot_y"] + slot["base_y_in_slot"]
-                item.setPos(item_x, item_y)
-
-            current_y += bg_height + SECTION_GAP
-
-    def build_group(self, group: dict) -> None:
-        self.clear()
-        self.current_group = group
-
-        scene_rect = self.scene.sceneRect()
-        self.current_scene_size = (scene_rect.width(), scene_rect.height())
-
-        if self.caption_model is None:
-            return
-
+    def build_group_entry(self, group: dict) -> dict:
         defaults = self.caption_model.get_root_defaults()
-        speakers = self.caption_model.get_speakers()
+        section_entries = []
 
         for section in group.get("sections", []):
             section_type = section.get("type")
             background_item = self.create_background_item()
 
             if section_type == "dialogue":
-                entry = self.build_dialogue_section_entry(group, section, defaults, speakers, background_item)
+                entry = self.build_dialogue_section_entry(group, section, defaults, background_item)
             elif section_type == "sfx":
                 entry = self.build_sfx_section_entry(group, section, defaults, background_item)
             else:
@@ -491,6 +488,9 @@ class CaptionRenderer:
                     "background_item": background_item,
                     "items": [],
                     "item_meta": [],
+                    "section_gap": self.get_section_gap(group=group, section=section),
+                    "padding_x": self.get_section_to_bg_padding_x(group=group, section=section),
+                    "padding_y": self.get_section_to_bg_padding_y(group=group, section=section),
                 }
 
             reserved_layout = self.compute_reserved_section_layout(entry)
@@ -498,9 +498,73 @@ class CaptionRenderer:
             entry["reserved_content_height"] = reserved_layout["reserved_content_height"]
             entry["slot_layout"] = reserved_layout["slot_layout"]
 
-            self.section_entries.append(entry)
+            section_entries.append(entry)
 
-        self.layout_group_static()
+        metrics = self.compute_group_layout_metrics(section_entries)
+
+        return {
+            "group": group,
+            "section_entries": section_entries,
+            "group_total_height": metrics["group_total_height"],
+            "group_max_width": metrics["group_max_width"],
+            "group_gap": self.get_group_gap(group=group),
+            "bottom_margin": self.get_section_video_bottom_margin(group=group),
+        }
+
+    def layout_groups_static(self) -> None:
+        if not self.group_entries:
+            return
+
+        view_width = self.scene.sceneRect().width()
+        view_height = self.scene.sceneRect().height()
+
+        total_stack_height = sum(group_entry["group_total_height"] for group_entry in self.group_entries)
+        for group_entry in self.group_entries[:-1]:
+            total_stack_height += group_entry["group_gap"]
+
+        bottom_margin = self.group_entries[-1]["bottom_margin"]
+        current_y = view_height - bottom_margin - total_stack_height
+
+        for group_index, group_entry in enumerate(self.group_entries):
+            for section_index, section_entry in enumerate(group_entry["section_entries"]):
+                content_width = section_entry["reserved_content_width"]
+                content_height = section_entry["reserved_content_height"]
+                padding_x = section_entry["padding_x"]
+                padding_y = section_entry["padding_y"]
+
+                bg_width = content_width + (padding_x * 2)
+                bg_height = content_height + (padding_y * 2)
+
+                bg_x = (view_width - bg_width) / 2.0
+                bg_y = current_y
+
+                section_entry["background_item"].setRect(QRectF(bg_x, bg_y, bg_width, bg_height))
+
+                content_x = bg_x + padding_x
+                content_y = bg_y + padding_y
+
+                for slot in section_entry["slot_layout"]:
+                    item = slot["item"]
+                    item_x = content_x + slot["slot_x"] + slot["base_x_in_slot"]
+                    item_y = content_y + slot["slot_y"] + slot["base_y_in_slot"]
+                    item.setPos(item_x, item_y)
+
+                current_y += bg_height
+                if section_index < len(group_entry["section_entries"]) - 1:
+                    current_y += section_entry["section_gap"]
+
+            if group_index < len(self.group_entries) - 1:
+                current_y += group_entry["group_gap"]
+
+    def build_groups(self, groups: list[dict]) -> None:
+        self.clear()
+        self.current_group_set = tuple(id(g) for g in groups)
+
+        scene_rect = self.scene.sceneRect()
+        self.current_scene_size = (scene_rect.width(), scene_rect.height())
+
+        self.group_entries = [self.build_group_entry(group) for group in groups]
+        self.layout_groups_static()
 
     def resolve_scale_factor(self, resolved_animations: list[dict], progress: float) -> float:
         scale_factor = 1.0
@@ -509,32 +573,24 @@ class CaptionRenderer:
             animation_type = animation.get("type")
 
             if animation_type == "scale":
-                target_scale = float(animation.get("scale", 1.25))
-                target_scale = max(0.01, target_scale)
-
+                target_scale = max(0.01, float(animation.get("scale", 1.25)))
                 pulse_t = 1.0 - abs((progress * 2.0) - 1.0)
                 eased_pulse = ease_in_out_cubic(pulse_t)
-
-                animated_scale = 1.0 + ((target_scale - 1.0) * eased_pulse)
-                scale_factor *= animated_scale
+                scale_factor *= 1.0 + ((target_scale - 1.0) * eased_pulse)
 
             elif animation_type == "pop":
-                target_scale = float(animation.get("scale", 1.25))
-                target_scale = max(0.01, target_scale)
-
+                target_scale = max(0.01, float(animation.get("scale", 1.25)))
                 attack_portion = 0.18
 
                 if progress <= 0.0 or progress >= 1.0:
                     pop_amount = 0.0
                 elif progress < attack_portion:
-                    attack_t = progress / attack_portion
-                    pop_amount = ease_in_out_cubic(attack_t)
+                    pop_amount = ease_in_out_cubic(progress / attack_portion)
                 else:
                     decay_t = (progress - attack_portion) / max(0.001, 1.0 - attack_portion)
                     pop_amount = 1.0 - ease_in_out_cubic(decay_t)
 
-                animated_scale = 1.0 + ((target_scale - 1.0) * pop_amount)
-                scale_factor *= animated_scale
+                scale_factor *= 1.0 + ((target_scale - 1.0) * pop_amount)
 
         return scale_factor
 
@@ -543,12 +599,9 @@ class CaptionRenderer:
 
         for animation in resolved_animations:
             if animation.get("type") == "bounce":
-                amplitude_px = float(animation.get("amplitude_px", 8))
-                cycles = float(animation.get("cycles", 2))
+                amplitude_px = max(0.0, float(animation.get("amplitude_px", 8)))
+                cycles = max(0.0, float(animation.get("cycles", 2)))
                 direction = animation.get("direction", "up")
-
-                amplitude_px = max(0.0, amplitude_px)
-                cycles = max(0.0, cycles)
 
                 if amplitude_px <= 0.0 or cycles <= 0.0:
                     continue
@@ -572,11 +625,8 @@ class CaptionRenderer:
 
         for animation in resolved_animations:
             if animation.get("type") == "jiggle":
-                angle_deg = float(animation.get("angle_deg", 5))
-                cycles = float(animation.get("cycles", 3))
-
-                angle_deg = max(0.0, abs(angle_deg))
-                cycles = max(0.0, cycles)
+                angle_deg = max(0.0, abs(float(animation.get("angle_deg", 5))))
+                cycles = max(0.0, float(animation.get("cycles", 3)))
 
                 if angle_deg <= 0.0 or cycles <= 0.0:
                     continue
@@ -598,76 +648,64 @@ class CaptionRenderer:
         section: dict,
         time_seconds: float,
     ) -> None:
+        is_word = owner in section.get("words", [])
         progress = self.caption_model.compute_owner_effective_progress(
             owner,
             time_seconds,
             group=group,
             section=section,
-            word=owner if owner in section.get("words", []) else None,
+            word=owner if is_word else None,
             resolved_animations=resolved_animations,
         )
 
-        scale_factor = self.resolve_scale_factor(resolved_animations, progress)
-        offset_y = self.resolve_vertical_offset(resolved_animations, progress)
-        rotation_deg = self.resolve_rotation_deg(resolved_animations, progress)
-
         item.set_reveal_progress(progress)
-        item.set_scale_factor(scale_factor)
-        item.set_offset_y(offset_y)
-        item.set_rotation_deg(rotation_deg)
+        item.set_scale_factor(self.resolve_scale_factor(resolved_animations, progress))
+        item.set_offset_y(self.resolve_vertical_offset(resolved_animations, progress))
+        item.set_rotation_deg(self.resolve_rotation_deg(resolved_animations, progress))
 
     def update_group_items(self, time_seconds: float) -> None:
-        if self.caption_model is None or self.current_group is None:
+        if self.caption_model is None or not self.group_entries:
             return
 
-        for entry in self.section_entries:
-            background_rect = entry["background_item"].rect()
-            group = entry["group"]
-            section = entry["section"]
+        for group_index, group_entry in enumerate(self.group_entries):
+            for section_entry in group_entry["section_entries"]:
+                background_rect = section_entry["background_item"].rect()
+                group = section_entry["group"]
+                section = section_entry["section"]
+                padding_x = section_entry["padding_x"]
+                padding_y = section_entry["padding_y"]
 
-            for slot in entry["slot_layout"]:
-                item = slot["item"]
-                owner = slot["owner"]
-                resolved_animations = slot["resolved_animations"]
+                base_z = 20 + (group_index * 20)
+                section_entry["background_item"].setZValue(base_z)
 
-                self.apply_item_animation_state(
-                    item,
-                    owner,
-                    resolved_animations,
-                    group,
-                    section,
-                    time_seconds,
-                )
+                for slot in section_entry["slot_layout"]:
+                    item = slot["item"]
+                    owner = slot["owner"]
+                    resolved_animations = slot["resolved_animations"]
 
-                static_x = (
-                    background_rect.x()
-                    + PADDING_X
-                    + slot["slot_x"]
-                    + slot["base_x_in_slot"]
-                )
-                static_y = (
-                    background_rect.y()
-                    + PADDING_Y
-                    + slot["slot_y"]
-                    + slot["base_y_in_slot"]
-                )
+                    self.apply_item_animation_state(item, owner, resolved_animations, group, section, time_seconds)
 
-                item.setPos(static_x, static_y + item.offset_y)
+                    static_x = background_rect.x() + padding_x + slot["slot_x"] + slot["base_x_in_slot"]
+                    static_y = background_rect.y() + padding_y + slot["slot_y"] + slot["base_y_in_slot"]
+
+                    item.setPos(static_x, static_y + item.offset_y)
+                    item.setZValue(base_z + 1)
 
     def render(self, time_seconds: float) -> None:
         if self.caption_model is None:
             return
 
-        active_group = self.caption_model.get_active_group(time_seconds)
+        active_groups = self.caption_model.get_active_groups(time_seconds)
         scene_rect = self.scene.sceneRect()
         scene_size = (scene_rect.width(), scene_rect.height())
+        group_set = tuple(id(g) for g in active_groups)
 
-        if active_group is None:
-            if self.current_group is not None:
+        if not active_groups:
+            if self.group_entries:
                 self.clear()
             return
 
-        if self.current_group is not active_group or self.current_scene_size != scene_size:
-            self.build_group(active_group)
+        if self.current_group_set != group_set or self.current_scene_size != scene_size:
+            self.build_groups(active_groups)
 
         self.update_group_items(time_seconds)
