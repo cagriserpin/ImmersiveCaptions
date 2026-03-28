@@ -3,7 +3,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QLinearGradient,
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
 
 
-SECTION_GAP = 0
+SECTION_GAP = 14
 PADDING_X = 18
 PADDING_Y = 10
 BOTTOM_MARGIN = 110
@@ -75,7 +75,9 @@ class WordGraphicsItem(QGraphicsItem):
         self.font = font
         self.dim_color = QColor(dim_color_hex)
         self.active_color = QColor(active_color_hex)
-        self.progress = 0.0
+
+        self.reveal_progress = 0.0
+        self.scale_factor = 1.0
 
         self.metrics = QFontMetricsF(self.font)
         self.text_width = self.metrics.horizontalAdvance(self.text)
@@ -87,10 +89,16 @@ class WordGraphicsItem(QGraphicsItem):
     def boundingRect(self) -> QRectF:
         return self.bounds
 
-    def set_progress(self, progress: float) -> None:
+    def set_reveal_progress(self, progress: float) -> None:
         clamped = max(0.0, min(1.0, float(progress)))
-        if abs(clamped - self.progress) > 1e-6:
-            self.progress = clamped
+        if abs(clamped - self.reveal_progress) > 1e-6:
+            self.reveal_progress = clamped
+            self.update()
+
+    def set_scale_factor(self, scale_factor: float) -> None:
+        scale_factor = max(0.01, float(scale_factor))
+        if abs(scale_factor - self.scale_factor) > 1e-6:
+            self.scale_factor = scale_factor
             self.update()
 
     def paint(self, painter: QPainter, option, widget=None) -> None:
@@ -98,23 +106,30 @@ class WordGraphicsItem(QGraphicsItem):
         painter.setFont(self.font)
 
         baseline_y = self.ascent
+        center_x = self.text_width / 2.0
+        center_y = self.text_height / 2.0
 
-        # 1. Draw dim base text
+        painter.save()
+        painter.translate(center_x, center_y)
+        painter.scale(self.scale_factor, self.scale_factor)
+        painter.translate(-center_x, -center_y)
+
         painter.setPen(self.dim_color)
         painter.drawText(0, baseline_y, self.text)
 
-        reveal_width = self.text_width * self.progress
+        reveal_width = self.text_width * self.reveal_progress
         if reveal_width <= 0:
+            painter.restore()
             return
 
-        if self.progress >= 1.0:
+        if self.reveal_progress >= 1.0:
             painter.setPen(self.active_color)
             painter.drawText(0, baseline_y, self.text)
+            painter.restore()
             return
 
         feather_width = min(REVEAL_FEATHER_PX, self.text_width)
 
-        # 2. Draw fully active left side
         solid_width = max(0.0, reveal_width - feather_width)
 
         if solid_width > 0:
@@ -124,7 +139,6 @@ class WordGraphicsItem(QGraphicsItem):
             painter.drawText(0, baseline_y, self.text)
             painter.restore()
 
-        # 3. Draw soft gradient edge
         feather_start = max(0.0, solid_width)
         feather_end = min(self.text_width, reveal_width)
 
@@ -145,6 +159,8 @@ class WordGraphicsItem(QGraphicsItem):
             painter.setPen(QPen(QBrush(gradient), 0))
             painter.drawText(0, baseline_y, self.text)
             painter.restore()
+
+        painter.restore()
 
 
 class CaptionRenderer:
@@ -224,6 +240,49 @@ class CaptionRenderer:
 
         return 0.0
 
+    def normalize_animation_list(self, animation_value) -> list[dict]:
+        if animation_value is None:
+            return []
+
+        if isinstance(animation_value, str):
+            return [{"type": animation_value}]
+
+        if isinstance(animation_value, dict):
+            return [animation_value]
+
+        if isinstance(animation_value, list):
+            normalized = []
+            for entry in animation_value:
+                if isinstance(entry, str):
+                    normalized.append({"type": entry})
+                elif isinstance(entry, dict) and "type" in entry:
+                    normalized.append(entry)
+            return normalized
+
+        return []
+
+    def resolve_word_scale_factor(self, word: dict, word_progress: float) -> float:
+        animations = self.normalize_animation_list(word.get("animation"))
+        scale_factor = 1.0
+
+        for animation in animations:
+            animation_type = animation.get("type")
+
+            if animation_type == "scale":
+                target_scale = float(animation.get("scale", 1.2))
+                target_scale = max(0.01, target_scale)
+
+                # Ease-in-out pulse:
+                # progress 0.0 -> scale 1.0
+                # progress 0.5 -> peak scale
+                # progress 1.0 -> scale 1.0
+                pulse = 1.0 - abs((word_progress * 2.0) - 1.0)
+                animated_scale = 1.0 + ((target_scale - 1.0) * pulse)
+
+                scale_factor *= animated_scale
+
+        return scale_factor
+
     def build_dialogue_section_items(self, section: dict, time_seconds: float, defaults: dict, speakers: dict):
         default_dim_opacity = float(defaults.get("dim_opacity", 0.35))
 
@@ -244,9 +303,11 @@ class CaptionRenderer:
             active_color = style["font_color"]
             dim_hex = dim_color(active_color, default_dim_opacity)
             progress = self.compute_word_progress(word, time_seconds)
+            scale_factor = self.resolve_word_scale_factor(word, progress)
 
             item = WordGraphicsItem(word_text, font, dim_hex, active_color)
-            item.set_progress(progress)
+            item.set_reveal_progress(progress)
+            item.set_scale_factor(scale_factor)
 
             word_items.append(item)
 
@@ -296,7 +357,8 @@ class CaptionRenderer:
             progress = 0.0
 
         item = WordGraphicsItem(text, font, dim_hex, font_color)
-        item.set_progress(progress)
+        item.set_reveal_progress(progress)
+        item.set_scale_factor(1.0)
         return item
 
     def render(self, time_seconds: float) -> None:

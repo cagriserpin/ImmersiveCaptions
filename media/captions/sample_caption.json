@@ -51,7 +51,10 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "What?", "start": 4.52, "end": 4.88 }
+            { 
+			  "text": "What?", "start": 4.52, "end": 4.88,
+			  "animation":[	{ "type": "scale", "scale": 1.25 } ]
+			}
           ]
         }
       ]
