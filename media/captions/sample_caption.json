@@ -1,7 +1,7 @@
 {
   "defaults": {
     "font": "Arial",
-    "font_size": 42,
+    "font_size": 30,
     "font_weight": 400,
     "font_color": "#ffffff",
     "animation": "none",
