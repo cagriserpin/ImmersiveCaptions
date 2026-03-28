@@ -13,15 +13,21 @@ If the JSON format changes, this document should be updated as well.
 The format is designed to support:
 
 * global default styling
-* per-speaker default styling
+* group-level default styling
+* section-level default styling
+* word-level default styling
+* per-speaker default styling for dialogue
 * grouped simultaneous captions
+* optional group overlap during transitions
 * dialogue captions
 * sound-effect captions (SFX)
 * per-word timing
 * per-word style overrides
 * per-word animation lists
 * per-section animation lists
+* animation default inheritance
 * animation timing margins
+* JSON-driven renderer and layout defaults
 
 The format is intentionally hand-editable for rapid prototyping.
 
@@ -49,61 +55,96 @@ Example:
 
 ## 1. `defaults`
 
-`defaults` contains global fallback styling values.
-These values are used whenever a more specific setting is not provided.
+`defaults` contains fallback values.
+It may appear at multiple levels:
 
-Supported fields:
+* root
+* group
+* section
+* word
+
+This means defaults can be inherited and refined as content becomes more specific.
+
+### Normal fields allowed inside `defaults`
 
 * `font`
 * `font_size`
 * `font_weight`
 * `font_color`
 * `dim_opacity`
+* `group_show_time_margin`
+* `group_disappear_time_margin`
+* `default_animation_time_margin`
+* `group_gap`
+* `section_gap`
+* `section_to_bg_padding_x`
+* `section_to_bg_padding_y`
+* `section_video_bottom_margin`
+* `word_gap`
+* `reveal_feather_px`
+* `animation_defaults`
 
 Example:
 
 ```json
 "defaults": {
-  "font": "Arial",
-  "font_size": 42,
+  "font": "Calibri",
+  "font_size": 30,
   "font_weight": 400,
   "font_color": "#ffffff",
-  "dim_opacity": 0.35
+  "dim_opacity": 0.35,
+  "group_show_time_margin": 0.0,
+  "group_disappear_time_margin": 0.0,
+  "default_animation_time_margin": 0.1,
+  "group_gap": 8,
+  "section_gap": 0,
+  "section_to_bg_padding_x": 18,
+  "section_to_bg_padding_y": 10,
+  "section_video_bottom_margin": 110,
+  "word_gap": 10,
+  "reveal_feather_px": 12,
+  "animation_defaults": {
+    "shared": {
+      "time_margin": 0.1
+    },
+    "bounce": {
+      "amplitude_px": 15,
+      "cycles": 1,
+      "direction": "up"
+    },
+    "pop": {
+      "scale": 1.25
+    }
+  }
 }
 ```
 
-### Field meanings
-
-* `font`: font family name
-* `font_size`: default text size
-* `font_weight`: default font weight
-* `font_color`: default text color
-* `dim_opacity`: opacity/intensity used for inactive or not-yet-highlighted text
-
 ### Notes
 
-* There is no default `animation` field.
+* Word-level `defaults` is valid, even if it is often unnecessary.
+* There is no explicit `none` animation.
 * If a word or section has no `animation` field, no animation is applied.
 
 ---
 
 ## 2. `speakers`
 
-`speakers` defines style defaults for spoken dialogue by character/speaker.
+`speakers` defines style defaults for spoken dialogue by character or speaker.
 
-Each speaker entry may contain any styling fields that should override `defaults`.
-
-At minimum, speakers will usually define a unique color.
+Each speaker entry may contain styling fields that override broader defaults.
 
 Example:
 
 ```json
 "speakers": {
-  "zee": {
-    "font_color": "#66ccff"
+  "john": {
+    "font_color": "#CD7F32"
   },
-  "stranger_1": {
-    "font_color": "#ffcc66"
+  "zee": {
+    "font_color": "#FCBA03"
+  },
+  "stranger": {
+    "font_color": "#FFFFFF"
   }
 }
 ```
@@ -112,6 +153,7 @@ Example:
 
 * Speaker definitions apply only to dialogue sections.
 * SFX sections do not use speakers.
+* Speaker defaults affect normal style values, not animation defaults.
 
 ---
 
@@ -138,9 +180,10 @@ Example:
 ]
 ```
 
-### Fields
+### Allowed fields on a group
 
-* `sections`: array of section objects that belong to the group
+* `defaults`
+* `sections`
 
 ### Notes
 
@@ -149,10 +192,11 @@ Example:
 * Group visibility is based on:
 
   * section timing
+  * word timing
   * animation timing margins
-  * global group show/disappear margins used by the renderer/model
-* Only one group is intended to be visible at a time.
-* If groups overlap, the most recently starting active group should win.
+  * inherited group show/disappear margins
+* Only one group is visible by default.
+* Two adjacent groups may overlap only when explicitly requested by section overlap flags.
 
 ---
 
@@ -166,9 +210,25 @@ There are currently two section types:
 * `dialogue`
 * `sfx`
 
-Sections may also contain animation lists.
+Sections may also contain defaults, overlap flags, and animations.
 Section animation is conceptually applied to the whole section together, not word by word.
 Word animation support has higher priority and should be implemented first.
+
+### Allowed shared fields on a section
+
+* `defaults`
+* `animation`
+* `overlap_previous`
+* `overlap_next`
+
+### Overlap flags
+
+These flags may appear **only on sections**.
+
+* `overlap_previous: true` means this section’s group may overlap with the previous group if both are active.
+* `overlap_next: true` means this section’s group may overlap with the next group if both are active.
+
+If no section requests overlap, only one group is shown.
 
 ---
 
@@ -183,6 +243,15 @@ Example:
 {
   "type": "dialogue",
   "speaker": "zee",
+  "defaults": {
+    "animation_defaults": {
+      "bounce": {
+        "amplitude_px": 15,
+        "cycles": 1,
+        "direction": "up"
+      }
+    }
+  },
   "words": [
     { "text": "This", "start": 12.2, "end": 12.45 },
     { "text": "is", "start": 12.46, "end": 12.60 },
@@ -204,16 +273,21 @@ Example:
 * `speaker`: key referencing an entry in `speakers`
 * `words`: array of timed word objects
 
-### Optional style fields
+### Optional explicit style fields
 
-A dialogue section may optionally contain style fields such as:
+A dialogue section may optionally contain explicit style fields such as:
 
 * `font`
 * `font_size`
 * `font_weight`
 * `font_color`
 
-These act as section-level overrides.
+These are direct section-level overrides.
+
+### Optional defaults field
+
+A dialogue section may contain a `defaults` object.
+Those defaults can be inherited by the words inside that section.
 
 ### Optional animation field
 
@@ -224,14 +298,6 @@ A dialogue section may optionally contain:
 `animation` must be a list.
 Section animation applies to the whole section as one unit.
 This is a later-stage feature and should not replace word-level animation.
-
-Example:
-
-```json
-"animation": [
-  { "type": "bounce", "amplitude_px": 6, "cycles": 2, "direction": "up" }
-]
-```
 
 ---
 
@@ -248,7 +314,7 @@ SFX does not belong to a speaker.
 It uses either:
 
 * values set directly in the SFX section
-* or fallback values from `defaults`
+* or fallback values inherited from defaults
 
 Example:
 
@@ -273,14 +339,19 @@ Example:
 * `start`: start time in seconds
 * `end`: end time in seconds
 
-### Optional style fields
+### Optional explicit style fields
 
-An SFX section may contain style override fields:
+An SFX section may contain explicit style override fields:
 
 * `font`
 * `font_size`
 * `font_weight`
 * `font_color`
+
+### Optional defaults field
+
+An SFX section may contain a `defaults` object.
+This is valid, even if it is less common than at group or dialogue section level.
 
 ### Optional animation field
 
@@ -296,7 +367,7 @@ SFX animation applies to the whole SFX text item.
 ## 5. `words`
 
 `words` is used only inside dialogue sections.
-Each word contains timing data and may optionally override style values and animations.
+Each word contains timing data and may optionally override style values, defaults, and animations.
 
 Example:
 
@@ -318,12 +389,17 @@ Example:
 * `start`: word start time in seconds
 * `end`: word end time in seconds
 
-### Optional style fields
+### Optional explicit style fields
 
 * `font`
 * `font_size`
 * `font_weight`
 * `font_color`
+
+### Optional defaults field
+
+A word may contain a `defaults` object.
+This is valid, although explicit word fields are usually simpler.
 
 ### Optional animation field
 
@@ -349,10 +425,13 @@ Example:
 
 For dialogue words, styling should be resolved in this order:
 
-1. field set on the word
-2. field set on the dialogue section
-3. field set on the speaker
-4. field set in `defaults`
+1. explicit field set on the word
+2. values from word `defaults`
+3. explicit field set on the section
+4. values from section `defaults`
+5. speaker defaults
+6. values from group `defaults`
+7. values from root `defaults`
 
 This applies to:
 
@@ -360,19 +439,58 @@ This applies to:
 * `font_size`
 * `font_weight`
 * `font_color`
+* `dim_opacity`
 
 ### SFX style priority
 
 For SFX sections, styling should be resolved in this order:
 
-1. field set on the SFX section
-2. field set in `defaults`
+1. explicit field set on the section
+2. values from section `defaults`
+3. values from group `defaults`
+4. values from root `defaults`
 
 SFX does not use speaker-based styling.
 
 ---
 
-## Animation Format
+## JSON-Driven Layout and Renderer Defaults
+
+The renderer reads these values from `defaults` instead of hardcoded Python constants.
+All of them participate in the normal defaults inheritance chain.
+
+### Group-level / stack-related values
+
+* `group_show_time_margin`
+* `group_disappear_time_margin`
+* `group_gap`
+* `section_video_bottom_margin`
+
+### Section-level values
+
+* `section_gap`
+* `section_to_bg_padding_x`
+* `section_to_bg_padding_y`
+
+### Word-level values
+
+* `word_gap`
+* `reveal_feather_px`
+
+### Fallback behavior
+
+If these values are missing:
+
+* `group_show_time_margin` defaults to `0.0`
+* `group_disappear_time_margin` defaults to `0.0`
+* `default_animation_time_margin` defaults to `0.0`
+* all layout spacing / padding values default to `0.0`
+
+In practice, you usually set them at root `defaults`.
+
+---
+
+## Animation System
 
 ### General rules
 
@@ -380,7 +498,7 @@ SFX does not use speaker-based styling.
 * If `animation` is missing, no animation is applied.
 * `animation` must be a list.
 * Multiple animations may be combined on the same word or section.
-* Animation timing is based on the owner's `start` and `end`, extended by optional animation timing margins.
+* Animation timing is based on the owner's `start` and `end`, extended by resolved timing margins.
 
 ### Supported animation types
 
@@ -394,38 +512,123 @@ Current supported or planned animation names:
 
 ---
 
-## Animation Timing Margins
+## Animation Defaults
 
-Each animation object may optionally contain:
+Animation defaults are stored inside `defaults.animation_defaults`.
+They may appear at:
 
-* `begin_time_margin`
-* `end_time_margin`
+* root level
+* group level
+* section level
+* word level
 
-If omitted, both default to `0.0`.
+### Structure
+
+`animation_defaults` is a dictionary keyed by animation type.
+It may also contain a special `shared` key for values that apply to all animation types.
 
 Example:
 
 ```json
-{
-  "type": "bounce",
-  "amplitude_px": 25,
-  "cycles": 1,
-  "direction": "up",
-  "begin_time_margin": 0.1,
-  "end_time_margin": 0.1
+"defaults": {
+  "animation_defaults": {
+    "shared": {
+      "time_margin": 0.1
+    },
+    "bounce": {
+      "amplitude_px": 15,
+      "cycles": 1,
+      "direction": "up"
+    },
+    "pop": {
+      "scale": 1.25
+    },
+    "jiggle": {
+      "angle_deg": 6,
+      "cycles": 3
+    }
+  }
 }
 ```
 
+### Resolution order for animation parameters
+
+For each animation entry, parameters should be resolved in this order:
+
+1. explicit fields on the animation object
+2. word-level `defaults.animation_defaults`
+3. section-level `defaults.animation_defaults`
+4. group-level `defaults.animation_defaults`
+5. root-level `defaults.animation_defaults`
+
+Within each level:
+
+* `shared` values apply first
+* type-specific values apply after `shared`
+* explicit animation object values override inherited defaults
+
+### Important note
+
+Normal animation parameters use override priority.
+Timing margins use special **maximum-based merging** described below.
+
+---
+
+## Animation Timing Margins
+
+Each animation object may optionally contain:
+
+* `time_margin`
+* `begin_time_margin`
+* `end_time_margin`
+
+### Rules
+
+#### 1. `time_margin`
+
+If `time_margin` is present, it sets both:
+
+* begin margin
+* end margin
+
+and overrides `begin_time_margin` and `end_time_margin` for that animation object.
+
+#### 2. Explicit begin/end margins
+
+If `time_margin` is absent:
+
+* `begin_time_margin` applies only to begin
+* `end_time_margin` applies only to end
+
+#### 3. Default animation time margin
+
+If an animation exists and no timing margin fields are present at that animation level, the system uses:
+
+* `default_animation_time_margin`
+
+This is read from inherited `defaults`.
+If not specified anywhere, it becomes `0.0`.
+
+#### 4. Final owner timing margins
+
+If timing margins are provided at multiple levels, the final owner timing margins are:
+
+* `final_begin_margin = max(all begin contributors)`
+* `final_end_margin = max(all end contributors)`
+
+This means timing margins are merged with `max()`, not simple override.
+
 ### Meaning
 
-These values extend the effective timing window used by animation and highlight timing.
+These values extend the effective timing window used by both:
 
-For a word:
+* animation progress
+* highlight / reveal progress
 
-* effective start = `start - max(begin_time_margin)`
-* effective end = `end + max(end_time_margin)`
+For an owner:
 
-The maximum is taken across all animations applied to that owner.
+* effective start = `start - final_begin_margin`
+* effective end = `end + final_end_margin`
 
 ### Important rule
 
@@ -449,8 +652,7 @@ Purpose:
 Parameters:
 
 * `scale`
-* optional `begin_time_margin`
-* optional `end_time_margin`
+* optional timing margin fields
 
 Example:
 
@@ -472,8 +674,7 @@ Parameters:
 * `amplitude_px`
 * `cycles`
 * `direction`
-* optional `begin_time_margin`
-* optional `end_time_margin`
+* optional timing margin fields
 
 `direction` allowed values:
 
@@ -495,7 +696,7 @@ Example:
 
 * For `direction: "up"`, `cycles` means the number of upward bounce arcs.
 * For `direction: "down"`, `cycles` means the number of downward bounce arcs.
-* For `direction: "up-down"`, `cycles` means the number of full oscillation cycles.
+* For `direction: "up-down"`, `cycles` means the number of full up/down oscillation cycles.
 
 ---
 
@@ -503,14 +704,13 @@ Example:
 
 Purpose:
 
-* sustained scale pulse across the word timing
+* sustained scale pulse across the timing window
 * grows and returns smoothly
 
 Parameters:
 
 * `scale`
-* optional `begin_time_margin`
-* optional `end_time_margin`
+* optional timing margin fields
 
 Example:
 
@@ -529,8 +729,7 @@ Purpose:
 Parameters:
 
 * `active_weight`
-* optional `begin_time_margin`
-* optional `end_time_margin`
+* optional timing margin fields
 
 Example:
 
@@ -551,8 +750,7 @@ Parameters:
 
 * `angle_deg`
 * `cycles`
-* optional `begin_time_margin`
-* optional `end_time_margin`
+* optional timing margin fields
 
 Example:
 
@@ -569,28 +767,58 @@ Instead, group timing is derived from the sections they contain.
 
 A group's effective time range should account for:
 
-* raw section timing
+* section timing
+* word timing
 * animation timing margins on words and/or sections
-* global group show/disappear margins
+* inherited `group_show_time_margin`
+* inherited `group_disappear_time_margin`
 
 Conceptually:
 
 * earliest effective content start inside the group
 * latest effective content end inside the group
-* minus `GROUP_SHOW_TIME_MARGIN`
-* plus `GROUP_DISAPPEAR_TIME_MARGIN`
+* minus `group_show_time_margin`
+* plus `group_disappear_time_margin`
 
-If the first word has an animation with `begin_time_margin`, the group should appear early enough for that animation to be visible.
+If the first word has animation timing that starts early, the group should appear early enough for that animation to be visible.
 
 Example:
 
 * word start = `10.0`
-* `GROUP_SHOW_TIME_MARGIN = 0.1`
+* `group_show_time_margin = 0.1`
 * animation `begin_time_margin = 0.1`
 
 Then effective group show time should be:
 
 * `10.0 - 0.1 - 0.1 = 9.8`
+
+---
+
+## Overlap Rules
+
+By default:
+
+* only one active group is displayed
+
+Two adjacent groups are shown together only if overlap is explicitly requested.
+
+### Overlap enable rule
+
+If two groups are active at the same time:
+
+* show both if the older group has any section with `overlap_next: true`
+* or if the newer group has any section with `overlap_previous: true`
+
+Otherwise:
+
+* show only the newer active group
+
+### Display order during overlap
+
+When overlap is enabled:
+
+* older active group is shown above
+* newer active group is shown below
 
 ---
 
@@ -618,9 +846,9 @@ Current preferred rendering behavior:
 ### Dialogue rendering behavior
 
 * words start dim
-* highlight/reveal progresses using the word's effective timing window
+* highlight/reveal progresses using the owner's effective timing window
 * animations use the same effective timing window
-* already-highlighted words may remain visible after highlight completes depending on the renderer
+* already-highlighted words may remain visible after highlight completes depending on renderer behavior
 
 ### SFX rendering behavior
 
@@ -635,18 +863,48 @@ Current preferred rendering behavior:
 ```json
 {
   "defaults": {
-    "font": "Arial",
-    "font_size": 42,
+    "font": "Calibri",
+    "font_size": 30,
     "font_weight": 400,
     "font_color": "#ffffff",
-    "dim_opacity": 0.35
+    "dim_opacity": 0.35,
+    "group_show_time_margin": 0.0,
+    "group_disappear_time_margin": 0.0,
+    "default_animation_time_margin": 0.1,
+    "group_gap": 8,
+    "section_gap": 0,
+    "section_to_bg_padding_x": 18,
+    "section_to_bg_padding_y": 10,
+    "section_video_bottom_margin": 110,
+    "word_gap": 10,
+    "reveal_feather_px": 12,
+    "animation_defaults": {
+      "shared": {
+        "time_margin": 0.1
+      },
+      "bounce": {
+        "amplitude_px": 15,
+        "cycles": 1,
+        "direction": "up"
+      },
+      "pop": {
+        "scale": 1.25
+      },
+      "jiggle": {
+        "angle_deg": 6,
+        "cycles": 3
+      }
+    }
   },
   "speakers": {
-    "zee": {
-      "font_color": "#66ccff"
+    "john": {
+      "font_color": "#CD7F32"
     },
-    "stranger_3": {
-      "font_color": "#ffcc66"
+    "zee": {
+      "font_color": "#FCBA03"
+    },
+    "stranger": {
+      "font_color": "#FFFFFF"
     }
   },
   "groups": [
@@ -654,18 +912,26 @@ Current preferred rendering behavior:
       "sections": [
         {
           "type": "dialogue",
-          "speaker": "stranger_3",
+          "speaker": "stranger",
           "words": [
-            { "text": "That's", "start": 27.38, "end": 27.94 },
-            { "text": "AI", "start": 27.94, "end": 28.32 },
-            {
-              "text": "generated!",
-              "start": 28.32,
-              "end": 28.86,
-              "animation": [
-                { "type": "pop", "scale": 1.25 }
-              ]
+            { "text": "That", "start": 26.24, "end": 26.44 },
+            { "text": "ain't", "start": 26.44, "end": 26.54 },
+            { "text": "real.", "start": 26.54, "end": 26.82 }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "stranger",
+          "overlap_next": true,
+          "defaults": {
+            "animation_defaults": {
+              "bounce": { "amplitude_px": 15, "cycles": 1, "time_margin": 0 }
             }
+          },
+          "words": [
+            { "text": "That's", "start": 27.38, "end": 27.94, "animation": [ { "type": "bounce" } ] },
+            { "text": "AI", "start": 27.94, "end": 28.32, "animation": [ { "type": "bounce" } ] },
+            { "text": "generated!", "start": 28.32, "end": 28.86, "animation": [ { "type": "bounce" } ] }
           ]
         }
       ]
@@ -675,39 +941,19 @@ Current preferred rendering behavior:
         {
           "type": "dialogue",
           "speaker": "zee",
+          "overlap_previous": true,
+          "defaults": {
+            "animation_defaults": {
+              "bounce": { "amplitude_px": 15, "cycles": 1, "time_margin": 0 }
+            }
+          },
           "words": [
-            {
-              "text": "And",
-              "start": 10.92,
-              "end": 13.08,
-              "animation": [
-                {
-                  "type": "bounce",
-                  "amplitude_px": 25,
-                  "cycles": 1,
-                  "direction": "up",
-                  "begin_time_margin": 0.1,
-                  "end_time_margin": 0.1
-                }
-              ]
-            },
-            { "text": "I", "start": 11.08, "end": 11.28 },
-            { "text": "said,", "start": 11.28, "end": 11.8 },
-            { "text": "that's", "start": 12.26, "end": 12.5 },
-            { "text": "AI,", "start": 12.5, "end": 12.82 },
-            { "text": "man.", "start": 13.06, "end": 13.14 }
+            { "text": "It's", "start": 29.0, "end": 29.5, "animation": [ { "type": "bounce" } ] },
+            { "text": "artificial", "start": 29.5, "end": 30.15, "animation": [ { "type": "bounce" } ] },
+            { "text": "intelligence.", "start": 30.15, "end": 31.0, "animation": [ { "type": "bounce" } ] }
           ]
         },
-        {
-          "type": "sfx",
-          "text": "[huh huhh]",
-          "start": 31.18,
-          "end": 32.0,
-          "font_color": "#bbbbbb",
-          "animation": [
-            { "type": "scale", "scale": 1.2 }
-          ]
-        }
+        { "type": "sfx", "text": "[HUH HUHH]", "start": 31.0, "end": 31.8 }
       ]
     }
   ]
@@ -734,6 +980,6 @@ Possible future additions:
 
 ## Current Version
 
-Version: `v2`
+Version: `v4`
 
-This specification reflects the current agreed JSON structure and animation behavior for the prototype.
+This specification reflects the current agreed JSON structure, inheritance rules, overlap rules, animation defaults model, JSON-driven layout defaults, and timing behavior for the prototype.
