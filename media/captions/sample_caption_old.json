@@ -28,7 +28,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "Ohh,", "start": 0.0, "end": 0.38, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "Ohh,", "start": 0.0, "end": 0.38 },
             { "text": "look", "start": 0.46, "end": 0.62 },
             { "text": "at", "start": 0.62, "end": 0.7 },
             { "text": "him", "start": 0.7, "end": 1.1 }
@@ -39,7 +39,7 @@
           "speaker": "zee",
           "words": [
             { "text": "That's", "start": 1.42, "end": 1.9 },
-            { "text": "AI,", "start": 1.9, "end": 2.06, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "AI,", "start": 1.9, "end": 2.06 },
             { "text": "man.", "start": 2.38, "end": 2.55 }
           ]
         }
@@ -69,10 +69,10 @@
             { "text": "at", "start": 8.34, "end": 8.42 },
             { "text": "this", "start": 8.42, "end": 8.56 },
             { "text": "guy's", "start": 8.56, "end": 8.88 },
-            { "text": "flips", "start": 8.88, "end": 9.08, "animation": [ { "type": "bounce", "amplitude_px": 10, "cycles": 1 } ] },
+            { "text": "flips", "start": 8.88, "end": 9.08 },
             { "text": "and", "start": 9.08, "end": 9.46 },
             { "text": "he's", "start": 9.46, "end": 10.1 },
-            { "text": "talented.", "start": 10.1, "end": 10.46, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "talented.", "start": 10.1, "end": 10.46 }
           ]
         }
       ]
@@ -92,7 +92,7 @@
             { "text": "I", "start": 11.08, "end": 11.28, "animation": [ { "type": "bounce" } ] },
             { "text": "said,", "start": 11.28, "end": 11.8, "animation": [ { "type": "bounce" } ] },
             { "text": "that's", "start": 12.26, "end": 12.5 },
-            { "text": "AI,", "start": 12.5, "end": 12.82, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "AI,", "start": 12.5, "end": 12.82 },
             { "text": "man.", "start": 13.06, "end": 13.14 }
           ]
         }
@@ -140,13 +140,13 @@
           "words": [
             { "text": "That", "start": 16.8, "end": 16.94 },
             { "text": "ain't", "start": 16.94, "end": 17.04 },
-            { "text": "real.", "start": 17.04, "end": 17.3, "animation": [ { "type": "scale", "scale": 1.12 } ] },
+            { "text": "real.", "start": 17.04, "end": 17.3 },
             { "text": "They're", "start": 17.66, "end": 17.82 },
             { "text": "trying", "start": 17.82, "end": 18.0 },
             { "text": "to", "start": 18.0, "end": 18.18 },
-            { "text": "trick", "start": 18.18, "end": 18.4, "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
+            { "text": "trick", "start": 18.18, "end": 18.4 },
             { "text": "us,", "start": 18.4, "end": 18.62 },
-            { "text": "man!", "start": 18.7, "end": 18.88, "animation": [ { "type": "pop", "scale": 1.18 } ] }
+            { "text": "man!", "start": 18.7, "end": 18.88 }
           ]
         }
       ]
@@ -165,7 +165,7 @@
           "words": [
             { "text": "Tricking", "start": 19.34, "end": 19.66, "animation": [ { "type": "scale" }, { "type": "jiggle" } ] },
             { "text": "our", "start": 19.66, "end": 20.02 },
-            { "text": "heads,", "start": 20.02, "end": 20.42, "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
+            { "text": "heads,", "start": 20.02, "end": 20.42 },
             { "text": "man.", "start": 20.7, "end": 20.9 }
           ]
         }
@@ -182,7 +182,7 @@
             { "text": "been", "start": 22.76, "end": 22.88 },
             { "text": "smoking", "start": 22.88, "end": 23.14 },
             { "text": "that", "start": 23.14, "end": 23.36 },
-            { "text": "stuff", "start": 23.36, "end": 23.5, "font_color": "#568203", "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
+            { "text": "stuff", "start": 23.36, "end": 23.5, "font_color": "#568203" },
             { "text": "again?", "start": 23.5, "end": 23.78 }
           ]
         }
@@ -195,7 +195,7 @@
           "speaker": "crowd",
           "words": [
             { "text": "He's", "start": 24.48, "end": 24.8 },
-            { "text": "right.", "start": 24.8, "end": 25.0, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "right.", "start": 24.8, "end": 25.0 }
           ]
         },
         {
@@ -266,7 +266,7 @@
           "speaker": "crowd",
           "words": [
             { "text": "It's", "start": 32.08, "end": 32.72 },
-            { "text": "bad.", "start": 32.72, "end": 33.04, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "bad.", "start": 32.72, "end": 33.04 }
           ]
         },
         { "type": "sfx", "text": "[HUH HUHH]", "start": 33.04, "end": 33.5 }
@@ -281,7 +281,7 @@
             { "text": "It's", "start": 33.72, "end": 34.28 },
             { "text": "rotting", "start": 34.28, "end": 34.74 },
             { "text": "our", "start": 34.74, "end": 34.92 },
-            { "text": "brains.", "start": 34.92, "end": 35.4, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "brains.", "start": 34.92, "end": 35.4 }
           ]
         },
         { "type": "sfx", "text": "[HUH HUHH]", "start": 35.4, "end": 36.0 }
@@ -292,24 +292,18 @@
         {
           "type": "dialogue",
           "speaker": "crowd",
-          "defaults": {
-            "animation_defaults": {
-              "bounce": { "amplitude_px": 12, "cycles": 1, "time_margin": 0 },
-              "scale": { "scale": 1.18 }
-            }
-          },
           "words": [
-            { "text": "ONE", "start": 36.25, "end": 36.75, "animation": [ { "type": "bounce" } ] },
-            { "text": "HUNDRED", "start": 36.75, "end": 37.25, "animation": [ { "type": "bounce" } ] },
-            { "text": "PERCENT", "start": 37.25, "end": 37.75, "animation": [ { "type": "bounce" } ] },
-            { "text": "AI!", "start": 37.75, "end": 39.1, "animation": [ { "type": "scale" }, { "type": "bounce" } ] }
+            { "text": "ONE", "start": 36.25, "end": 36.75 },
+            { "text": "HUNDRED", "start": 36.75, "end": 37.25 },
+            { "text": "PERCENT", "start": 37.25, "end": 37.75 },
+            { "text": "AI!", "start": 37.75, "end": 39.1 }
           ]
         },
         {
           "type": "dialogue",
           "speaker": "crowd",
           "words": [
-            { "text": "Yeah!", "start": 39.19, "end": 39.63, "animation": [ { "type": "pop", "scale": 1.22 } ] }
+            { "text": "Yeah!", "start": 39.19, "end": 39.63 }
           ]
         }
       ]
@@ -320,17 +314,11 @@
         {
           "type": "dialogue",
           "speaker": "crowd",
-          "defaults": {
-            "animation_defaults": {
-              "scale": { "scale": 1.16 },
-              "jiggle": { "angle_deg": 5, "cycles": 2 }
-            }
-          },
           "words": [
-            { "text": "THIS", "start": 42.0, "end": 42.5, "animation": [ { "type": "scale" } ] },
-            { "text": "IS", "start": 42.5, "end": 42.7, "animation": [ { "type": "scale" } ] },
-            { "text": "F******", "start": 42.7, "end": 43.7, "animation": [ { "type": "scale" }, { "type": "jiggle" } ] },
-            { "text": "B***S***!", "start": 43.7, "end": 44.7, "animation": [ { "type": "scale" }, { "type": "jiggle" } ] }
+            { "text": "THIS", "start": 42.0, "end": 42.5 },
+            { "text": "IS", "start": 42.5, "end": 42.7 },
+            { "text": "F******", "start": 42.7, "end": 43.7 },
+            { "text": "B***S***!", "start": 43.7, "end": 44.7 }
           ]
         }
       ]
@@ -341,7 +329,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "ENOUGH!", "start": 46.0, "end": 47.5, "animation": [ { "type": "scale", "scale": 1.22 }, { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] }
+            { "text": "ENOUGH!", "start": 46.0, "end": 47.5 }
           ]
         }
       ]
@@ -359,7 +347,7 @@
             { "text": "we", "start": 51.81, "end": 51.95 },
             { "text": "come", "start": 51.95, "end": 52.13 },
             { "text": "through,", "start": 52.13, "end": 52.31 },
-            { "text": "guys?", "start": 52.65, "end": 52.65, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "guys?", "start": 52.65, "end": 52.65 }
           ]
         }
       ]
@@ -375,7 +363,7 @@
             { "text": "can't", "start": 54.47, "end": 54.79 },
             { "text": "enjoy", "start": 54.79, "end": 55.13 },
             { "text": "the", "start": 55.13, "end": 55.31 },
-            { "text": "talent", "start": 55.31, "end": 55.71, "animation": [ { "type": "scale", "scale": 1.12 } ] },
+            { "text": "talent", "start": 55.31, "end": 55.71 },
             { "text": "of", "start": 55.71, "end": 55.97 },
             { "text": "a", "start": 55.97, "end": 56.07 },
             { "text": "young", "start": 56.07, "end": 56.23 },
@@ -390,7 +378,7 @@
             { "text": "of", "start": 57.13, "end": 57.37 },
             { "text": "all", "start": 57.37, "end": 57.43 },
             { "text": "the", "start": 57.43, "end": 57.59 },
-            { "text": "AI", "start": 57.59, "end": 57.89, "animation": [ { "type": "pop", "scale": 1.16 } ] },
+            { "text": "AI", "start": 57.59, "end": 57.89 },
             { "text": "videos", "start": 57.89, "end": 58.29 },
             { "text": "that", "start": 58.29, "end": 58.53 },
             { "text": "we", "start": 58.53, "end": 58.67 },
@@ -408,7 +396,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "Hm?", "start": 60.53, "end": 60.81, "animation": [ { "type": "pop", "scale": 1.16 } ] }
+            { "text": "Hm?", "start": 60.53, "end": 60.81 }
           ]
         }
       ]
@@ -418,15 +406,9 @@
         {
           "type": "dialogue",
           "speaker": "john",
-          "defaults": {
-            "animation_defaults": {
-              "scale": { "scale": 1.22 },
-              "bounce": { "amplitude_px": 12, "cycles": 1 }
-            }
-          },
           "words": [
-            { "text": "WAKE", "start": 62.05, "end": 62.39, "animation": [ { "type": "scale" }, { "type": "bounce" } ] },
-            { "text": "UP!", "start": 62.39, "end": 62.71, "animation": [ { "type": "scale" }, { "type": "bounce" } ] }
+            { "text": "WAKE", "start": 62.05, "end": 62.39 },
+            { "text": "UP!", "start": 62.39, "end": 62.71 }
           ]
         }
       ]
@@ -439,15 +421,15 @@
           "words": [
             { "text": "This", "start": 65.05, "end": 65.35 },
             { "text": "is", "start": 65.35, "end": 65.49 },
-            { "text": "real", "start": 65.49, "end": 65.77, "animation": [ { "type": "scale", "scale": 1.12 } ] },
+            { "text": "real", "start": 65.49, "end": 65.77 },
             { "text": "life.", "start": 65.77, "end": 66.15 },
             { "text": "That's", "start": 66.91, "end": 67.23 },
             { "text": "a", "start": 67.23, "end": 67.35 },
-            { "text": "real", "start": 67.35, "end": 67.55, "animation": [ { "type": "scale", "scale": 1.12 } ] },
+            { "text": "real", "start": 67.35, "end": 67.55 },
             { "text": "man", "start": 67.55, "end": 68.05 },
             { "text": "with", "start": 68.05, "end": 68.49 },
-            { "text": "real", "start": 68.49, "end": 68.77, "animation": [ { "type": "scale", "scale": 1.12 } ] },
-            { "text": "talent.", "start": 68.77, "end": 69.15, "animation": [ { "type": "scale", "scale": 1.14 } ] }
+            { "text": "real", "start": 68.49, "end": 68.77 },
+            { "text": "talent.", "start": 68.77, "end": 69.15 }
           ]
         }
       ]
@@ -459,7 +441,7 @@
           "speaker": "john",
           "words": [
             { "text": "Follow", "start": 71.88, "end": 72.28 },
-            { "text": "me!", "start": 72.28, "end": 72.54, "animation": [ { "type": "pop", "scale": 1.18 } ] }
+            { "text": "me!", "start": 72.28, "end": 72.54 }
           ]
         }
       ]
@@ -474,15 +456,10 @@
         {
           "type": "dialogue",
           "speaker": "john",
-          "defaults": {
-            "animation_defaults": {
-              "pop": { "scale": 1.16 }
-            }
-          },
           "words": [
             { "text": "Young", "start": 78.9, "end": 79.32 },
             { "text": "man,", "start": 79.32, "end": 79.5 },
-            { "text": "[laughs]", "start": 79.5, "end": 80.5, "animation": [ { "type": "pop" } ] },
+            { "text": "[laughs]", "start": 79.5, "end": 80.5 },
             { "text": "we", "start": 80.8, "end": 81.3 },
             { "text": "would", "start": 81.3, "end": 81.48 },
             { "text": "like", "start": 81.48, "end": 81.68 },
@@ -497,12 +474,12 @@
           "words": [
             { "text": "we", "start": 82.8, "end": 82.94 },
             { "text": "really", "start": 82.94, "end": 83.18 },
-            { "text": "appreciate", "start": 83.18, "end": 83.7, "animation": [ { "type": "scale", "scale": 1.12 } ] },
+            { "text": "appreciate", "start": 83.18, "end": 83.7 },
             { "text": "your", "start": 84.22, "end": 84.48 },
-            { "text": "flips", "start": 84.48, "end": 84.84, "animation": [ { "type": "bounce", "amplitude_px": 10, "cycles": 1 } ] },
+            { "text": "flips", "start": 84.48, "end": 84.84 },
             { "text": "and", "start": 84.84, "end": 85.5 },
             { "text": "your", "start": 85.5, "end": 85.62 },
-            { "text": "talent.", "start": 85.62, "end": 85.68, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "talent.", "start": 85.62, "end": 85.68 }
           ]
         }
       ]
@@ -513,22 +490,17 @@
           "type": "dialogue",
           "speaker": "crowd",
           "words": [
-            { "text": "LOOK!", "start": 85.68, "end": 85.94, "animation": [ { "type": "pop", "scale": 1.2 } ] }
+            { "text": "LOOK!", "start": 85.68, "end": 85.94 }
           ]
         },
         {
           "type": "dialogue",
           "speaker": "crowd",
-          "defaults": {
-            "animation_defaults": {
-              "bounce": { "amplitude_px": 10, "cycles": 1, "time_margin": 0 }
-            }
-          },
           "words": [
-            { "text": "IT'S", "start": 86.4, "end": 86.62, "animation": [ { "type": "bounce" } ] },
-            { "text": "GOT", "start": 86.62, "end": 86.76, "animation": [ { "type": "bounce" } ] },
-            { "text": "SIX", "start": 86.76, "end": 87.1, "animation": [ { "type": "bounce" } ] },
-            { "text": "FINGERS!", "start": 87.1, "end": 87.72, "animation": [ { "type": "scale", "scale": 1.16 }, { "type": "bounce" } ] }
+            { "text": "IT'S", "start": 86.4, "end": 86.62 },
+            { "text": "GOT", "start": 86.62, "end": 86.76 },
+            { "text": "SIX", "start": 86.76, "end": 87.1 },
+            { "text": "FINGERS!", "start": 87.1, "end": 87.72 }
           ]
         }
       ]
@@ -539,7 +511,7 @@
           "type": "dialogue",
           "speaker": "crowd",
           "words": [
-            { "text": "IT'S AI!", "start": 89.08, "end": 89.46, "animation": [ { "type": "scale", "scale": 1.18 }, { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] }
+            { "text": "IT'S AI!", "start": 89.08, "end": 89.46 }
           ]
         },
         { "type": "sfx", "text": "[BOO BOOO]", "start": 90.0, "end": 95.0 }
@@ -559,14 +531,9 @@
         {
           "type": "dialogue",
           "speaker": "zee",
-          "defaults": {
-            "animation_defaults": {
-              "pop": { "scale": 1.16 }
-            }
-          },
           "words": [
-            { "text": "A", "start": 96.65, "end": 97.17, "animation": [ { "type": "pop" } ] },
-            { "text": "I", "start": 98.0, "end": 98.52, "animation": [ { "type": "pop" } ] }
+            { "text": "A", "start": 96.65, "end": 97.17 },
+            { "text": "I", "start": 98.0, "end": 98.52 }
           ]
         }
       ]
@@ -580,8 +547,8 @@
           "words": [
             { "text": "He", "start": 101.2, "end": 101.4 },
             { "text": "got", "start": 101.4, "end": 101.6 },
-            { "text": "six", "start": 101.6, "end": 101.8, "animation": [ { "type": "pop", "scale": 1.14 } ] },
-            { "text": "fingers", "start": 101.8, "end": 102.0, "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
+            { "text": "six", "start": 101.6, "end": 101.8 },
+            { "text": "fingers", "start": 101.8, "end": 102.0 },
             { "text": "man", "start": 102.0, "end": 102.2 }
           ]
         }
@@ -598,12 +565,12 @@
             { "text": "never", "start": 103.58, "end": 103.72 },
             { "text": "seen", "start": 103.72, "end": 103.88 },
             { "text": "a", "start": 103.88, "end": 103.94 },
-            { "text": "s***", "start": 103.94, "end": 104.1, "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
+            { "text": "s***", "start": 103.94, "end": 104.1 },
             { "text": "like", "start": 104.1, "end": 104.28 },
             { "text": "that", "start": 104.28, "end": 104.44 },
             { "text": "in", "start": 104.44, "end": 104.56 },
             { "text": "my", "start": 104.56, "end": 104.64 },
-            { "text": "life.", "start": 104.64, "end": 104.92, "animation": [ { "type": "scale", "scale": 1.12 } ] }
+            { "text": "life.", "start": 104.64, "end": 104.92 }
           ]
         },
         {
@@ -613,7 +580,7 @@
             { "text": "I", "start": 105.2, "end": 105.26 },
             { "text": "told", "start": 105.26, "end": 105.34 },
             { "text": "you.", "start": 105.34, "end": 105.6 },
-            { "text": "AI,", "start": 106.1, "end": 106.62, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "AI,", "start": 106.1, "end": 106.62 },
             { "text": "man.", "start": 106.82, "end": 106.92 }
           ]
         }
