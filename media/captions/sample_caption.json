@@ -17,6 +17,8 @@
   },
   "groups": [
     {
+	  "start": 0.0,
+	  "end": 3.5,
       "sections": [
         {
           "type": "dialogue",
