@@ -1,807 +1,163 @@
 [
-  {
-    "text": "Oh,",
-    "start": 0.0,
-    "end": 0.38
-  },
-  {
-    "text": "good",
-    "start": 0.46,
-    "end": 0.62
-  },
-  {
-    "text": "to",
-    "start": 0.62,
-    "end": 0.7
-  },
-  {
-    "text": "get",
-    "start": 0.7,
-    "end": 0.88
-  },
-  {
-    "text": "in.",
-    "start": 0.88,
-    "end": 1.1
-  },
-  {
-    "text": "That's",
-    "start": 1.42,
-    "end": 1.9
-  },
-  {
-    "text": "AI,",
-    "start": 1.9,
-    "end": 2.06
-  },
-  {
-    "text": "man.",
-    "start": 2.38,
-    "end": 2.42
-  },
-  {
-    "text": "What?",
-    "start": 4.52,
-    "end": 4.88
-  },
-  {
-    "text": "Nah,",
-    "start": 6.1,
-    "end": 6.66
-  },
-  {
-    "text": "I'm",
-    "start": 7.2,
-    "end": 7.38
-  },
-  {
-    "text": "saying,",
-    "start": 7.38,
-    "end": 7.64
-  },
-  {
-    "text": "look",
-    "start": 8.18,
-    "end": 8.34
-  },
-  {
-    "text": "at",
-    "start": 8.34,
-    "end": 8.42
-  },
-  {
-    "text": "this",
-    "start": 8.42,
-    "end": 8.56
-  },
-  {
-    "text": "guy's",
-    "start": 8.56,
-    "end": 8.88
-  },
-  {
-    "text": "flips",
-    "start": 8.88,
-    "end": 9.08
-  },
-  {
-    "text": "and",
-    "start": 9.08,
-    "end": 9.46
-  },
-  {
-    "text": "he's",
-    "start": 9.46,
-    "end": 10.1
-  },
-  {
-    "text": "talented.",
-    "start": 10.1,
-    "end": 10.46
-  },
-  {
-    "text": "And",
-    "start": 10.92,
-    "end": 11.08
-  },
-  {
-    "text": "I",
-    "start": 11.08,
-    "end": 11.28
-  },
-  {
-    "text": "said,",
-    "start": 11.28,
-    "end": 11.8
-  },
-  {
-    "text": "that's",
-    "start": 12.26,
-    "end": 12.5
-  },
-  {
-    "text": "AI,",
-    "start": 12.5,
-    "end": 12.82
-  },
-  {
-    "text": "man.",
-    "start": 13.06,
-    "end": 13.14
-  },
-  {
-    "text": "I",
-    "start": 13.46,
-    "end": 13.56
-  },
-  {
-    "text": "see",
-    "start": 13.56,
-    "end": 13.9
-  },
-  {
-    "text": "that",
-    "start": 13.9,
-    "end": 14.04
-  },
-  {
-    "text": "on",
-    "start": 14.04,
-    "end": 14.22
-  },
-  {
-    "text": "the",
-    "start": 14.22,
-    "end": 14.32
-  },
-  {
-    "text": "Instagram",
-    "start": 14.32,
-    "end": 14.66
-  },
-  {
-    "text": "Reels,",
-    "start": 14.66,
-    "end": 15.06
-  },
-  {
-    "text": "artificial",
-    "start": 15.26,
-    "end": 15.54
-  },
-  {
-    "text": "intelligence.",
-    "start": 15.54,
-    "end": 16.46
-  },
-  {
-    "text": "That",
-    "start": 16.8,
-    "end": 16.94
-  },
-  {
-    "text": "ain't",
-    "start": 16.94,
-    "end": 17.04
-  },
-  {
-    "text": "real.",
-    "start": 17.04,
-    "end": 17.3
-  },
-  {
-    "text": "They're",
-    "start": 17.66,
-    "end": 17.82
-  },
-  {
-    "text": "trying",
-    "start": 17.82,
-    "end": 18.0
-  },
-  {
-    "text": "to",
-    "start": 18.0,
-    "end": 18.18
-  },
-  {
-    "text": "trick",
-    "start": 18.18,
-    "end": 18.4
-  },
-  {
-    "text": "us,",
-    "start": 18.4,
-    "end": 18.62
-  },
-  {
-    "text": "man.",
-    "start": 18.7,
-    "end": 18.88
-  },
-  {
-    "text": "Tricking",
-    "start": 19.34,
-    "end": 19.66
-  },
-  {
-    "text": "our",
-    "start": 19.66,
-    "end": 20.02
-  },
-  {
-    "text": "heads,",
-    "start": 20.02,
-    "end": 20.42
-  },
-  {
-    "text": "man.",
-    "start": 20.7,
-    "end": 20.9
-  },
-  {
-    "text": "Z,",
-    "start": 21.42,
-    "end": 21.64
-  },
-  {
-    "text": "you",
-    "start": 22.2,
-    "end": 22.76
-  },
-  {
-    "text": "been",
-    "start": 22.76,
-    "end": 22.88
-  },
-  {
-    "text": "smoking",
-    "start": 22.88,
-    "end": 23.14
-  },
-  {
-    "text": "that",
-    "start": 23.14,
-    "end": 23.36
-  },
-  {
-    "text": "stuff",
-    "start": 23.36,
-    "end": 23.5
-  },
-  {
-    "text": "again?",
-    "start": 23.5,
-    "end": 23.78
-  },
-  {
-    "text": "He's",
-    "start": 24.48,
-    "end": 24.8
-  },
-  {
-    "text": "right.",
-    "start": 24.8,
-    "end": 25.0
-  },
-  {
-    "text": "Jesus!",
-    "start": 25.42,
-    "end": 25.78
-  },
-  {
-    "text": "That",
-    "start": 26.24,
-    "end": 26.44
-  },
-  {
-    "text": "ain't",
-    "start": 26.44,
-    "end": 26.54
-  },
-  {
-    "text": "real.",
-    "start": 26.54,
-    "end": 26.82
-  },
-  {
-    "text": "That's",
-    "start": 27.38,
-    "end": 27.94
-  },
-  {
-    "text": "AI",
-    "start": 27.94,
-    "end": 28.32
-  },
-  {
-    "text": "generated.",
-    "start": 28.32,
-    "end": 28.86
-  },
-  {
-    "text": "It's",
-    "start": 28.86,
-    "end": 29.9
-  },
-  {
-    "text": "artificial",
-    "start": 29.9,
-    "end": 29.9
-  },
-  {
-    "text": "intelligence.",
-    "start": 29.9,
-    "end": 31.16
-  },
-  {
-    "text": "It's",
-    "start": 32.08,
-    "end": 32.72
-  },
-  {
-    "text": "bad.",
-    "start": 32.72,
-    "end": 33.04
-  },
-  {
-    "text": "It's",
-    "start": 33.72,
-    "end": 34.28
-  },
-  {
-    "text": "rotting",
-    "start": 34.28,
-    "end": 34.74
-  },
-  {
-    "text": "our",
-    "start": 34.74,
-    "end": 34.92
-  },
-  {
-    "text": "brains.",
-    "start": 34.92,
-    "end": 35.4
-  },
-  {
-    "text": "Yeah!",
-    "start": 39.19,
-    "end": 39.63
-  },
-  {
-    "text": "Is",
-    "start": 51.31,
-    "end": 51.47
-  },
-  {
-    "text": "this",
-    "start": 51.47,
-    "end": 51.61
-  },
-  {
-    "text": "what",
-    "start": 51.61,
-    "end": 51.81
-  },
-  {
-    "text": "we",
-    "start": 51.81,
-    "end": 51.95
-  },
-  {
-    "text": "come",
-    "start": 51.95,
-    "end": 52.13
-  },
-  {
-    "text": "through,",
-    "start": 52.13,
-    "end": 52.31
-  },
-  {
-    "text": "guys?",
-    "start": 52.65,
-    "end": 52.65
-  },
-  {
-    "text": "That",
-    "start": 53.99,
-    "end": 54.27
-  },
-  {
-    "text": "we",
-    "start": 54.27,
-    "end": 54.47
-  },
-  {
-    "text": "can't",
-    "start": 54.47,
-    "end": 54.79
-  },
-  {
-    "text": "enjoy",
-    "start": 54.79,
-    "end": 55.13
-  },
-  {
-    "text": "the",
-    "start": 55.13,
-    "end": 55.31
-  },
-  {
-    "text": "talent",
-    "start": 55.31,
-    "end": 55.71
-  },
-  {
-    "text": "of",
-    "start": 55.71,
-    "end": 55.97
-  },
-  {
-    "text": "a",
-    "start": 55.97,
-    "end": 56.07
-  },
-  {
-    "text": "young",
-    "start": 56.07,
-    "end": 56.23
-  },
-  {
-    "text": "man",
-    "start": 56.23,
-    "end": 56.57
-  },
-  {
-    "text": "because",
-    "start": 56.57,
-    "end": 57.13
-  },
-  {
-    "text": "of",
-    "start": 57.13,
-    "end": 57.37
-  },
-  {
-    "text": "all",
-    "start": 57.37,
-    "end": 57.43
-  },
-  {
-    "text": "the",
-    "start": 57.43,
-    "end": 57.59
-  },
-  {
-    "text": "AI",
-    "start": 57.59,
-    "end": 57.89
-  },
-  {
-    "text": "videos",
-    "start": 57.89,
-    "end": 58.29
-  },
-  {
-    "text": "that",
-    "start": 58.29,
-    "end": 58.53
-  },
-  {
-    "text": "we",
-    "start": 58.53,
-    "end": 58.67
-  },
-  {
-    "text": "see",
-    "start": 58.67,
-    "end": 58.83
-  },
-  {
-    "text": "on",
-    "start": 58.83,
-    "end": 58.97
-  },
-  {
-    "text": "our",
-    "start": 58.97,
-    "end": 59.09
-  },
-  {
-    "text": "phone.",
-    "start": 59.09,
-    "end": 59.41
-  },
-  {
-    "text": "Hm?",
-    "start": 60.53,
-    "end": 60.81
-  },
-  {
-    "text": "Wake",
-    "start": 62.05,
-    "end": 62.39
-  },
-  {
-    "text": "up!",
-    "start": 62.39,
-    "end": 62.71
-  },
-  {
-    "text": "This",
-    "start": 65.05,
-    "end": 65.35
-  },
-  {
-    "text": "is",
-    "start": 65.35,
-    "end": 65.49
-  },
-  {
-    "text": "real",
-    "start": 65.49,
-    "end": 65.77
-  },
-  {
-    "text": "life.",
-    "start": 65.77,
-    "end": 66.15
-  },
-  {
-    "text": "That's",
-    "start": 66.91,
-    "end": 67.23
-  },
-  {
-    "text": "a",
-    "start": 67.23,
-    "end": 67.35
-  },
-  {
-    "text": "real",
-    "start": 67.35,
-    "end": 67.55
-  },
-  {
-    "text": "man",
-    "start": 67.55,
-    "end": 68.05
-  },
-  {
-    "text": "with",
-    "start": 68.05,
-    "end": 68.49
-  },
-  {
-    "text": "real",
-    "start": 68.49,
-    "end": 68.77
-  },
-  {
-    "text": "talent.",
-    "start": 68.77,
-    "end": 69.15
-  },
-  {
-    "text": "Follow",
-    "start": 71.88,
-    "end": 72.28
-  },
-  {
-    "text": "me.",
-    "start": 72.28,
-    "end": 72.54
-  },
-  {
-    "text": "Young",
-    "start": 78.9,
-    "end": 79.42
-  },
-  {
-    "text": "man,",
-    "start": 79.42,
-    "end": 79.74
-  },
-  {
-    "text": "we",
-    "start": 80.0,
-    "end": 81.3
-  },
-  {
-    "text": "would",
-    "start": 81.3,
-    "end": 81.48
-  },
-  {
-    "text": "like",
-    "start": 81.48,
-    "end": 81.68
-  },
-  {
-    "text": "to",
-    "start": 81.68,
-    "end": 81.92
-  },
-  {
-    "text": "say",
-    "start": 81.92,
-    "end": 82.38
-  },
-  {
-    "text": "that",
-    "start": 82.38,
-    "end": 82.8
-  },
-  {
-    "text": "we",
-    "start": 82.8,
-    "end": 82.94
-  },
-  {
-    "text": "really",
-    "start": 82.94,
-    "end": 83.18
-  },
-  {
-    "text": "appreciate",
-    "start": 83.18,
-    "end": 83.7
-  },
-  {
-    "text": "your",
-    "start": 84.22,
-    "end": 84.48
-  },
-  {
-    "text": "flips",
-    "start": 84.48,
-    "end": 84.84
-  },
-  {
-    "text": "and",
-    "start": 84.84,
-    "end": 85.5
-  },
-  {
-    "text": "your",
-    "start": 85.5,
-    "end": 85.62
-  },
-  {
-    "text": "talent.",
-    "start": 85.62,
-    "end": 85.68
-  },
-  {
-    "text": "Look!",
-    "start": 85.68,
-    "end": 85.94
-  },
-  {
-    "text": "It's",
-    "start": 86.4,
-    "end": 86.62
-  },
-  {
-    "text": "got",
-    "start": 86.62,
-    "end": 86.76
-  },
-  {
-    "text": "six",
-    "start": 86.76,
-    "end": 87.1
-  },
-  {
-    "text": "fingers!",
-    "start": 87.1,
-    "end": 87.72
-  },
-  {
-    "text": "AI!",
-    "start": 89.08,
-    "end": 89.46
-  },
-  {
-    "text": "I",
-    "start": 95.55,
-    "end": 95.55
-  },
-  {
-    "text": "told",
-    "start": 95.55,
-    "end": 95.97
-  },
-  {
-    "text": "you.",
-    "start": 95.97,
-    "end": 96.45
-  },
-  {
-    "text": "A?",
-    "start": 96.65,
-    "end": 97.17
-  },
-  {
-    "text": "I",
-    "start": 103.26,
-    "end": 103.48
-  },
-  {
-    "text": "ain't",
-    "start": 103.48,
-    "end": 103.58
-  },
-  {
-    "text": "never",
-    "start": 103.58,
-    "end": 103.72
-  },
-  {
-    "text": "seen",
-    "start": 103.72,
-    "end": 103.88
-  },
-  {
-    "text": "a",
-    "start": 103.88,
-    "end": 103.94
-  },
-  {
-    "text": "shit",
-    "start": 103.94,
-    "end": 104.1
-  },
-  {
-    "text": "like",
-    "start": 104.1,
-    "end": 104.28
-  },
-  {
-    "text": "that",
-    "start": 104.28,
-    "end": 104.44
-  },
-  {
-    "text": "in",
-    "start": 104.44,
-    "end": 104.56
-  },
-  {
-    "text": "my",
-    "start": 104.56,
-    "end": 104.64
-  },
-  {
-    "text": "life.",
-    "start": 104.64,
-    "end": 104.92
-  },
-  {
-    "text": "I",
-    "start": 105.2,
-    "end": 105.26
-  },
-  {
-    "text": "told",
-    "start": 105.26,
-    "end": 105.34
-  },
-  {
-    "text": "you.",
-    "start": 105.34,
-    "end": 105.6
-  },
-  {
-    "text": "AI,",
-    "start": 106.1,
-    "end": 106.62
-  },
-  {
-    "text": "man.",
-    "start": 106.82,
-    "end": 106.92
-  }
+  { "text": "Oh,", "start": 0.0, "end": 0.38 },
+  { "text": "good", "start": 0.46, "end": 0.62 },
+  { "text": "to", "start": 0.62, "end": 0.7 },
+  { "text": "get", "start": 0.7, "end": 0.88 },
+  { "text": "in.", "start": 0.88, "end": 1.1 },
+  { "text": "That's", "start": 1.42, "end": 1.9 },
+  { "text": "AI,", "start": 1.9, "end": 2.06 },
+  { "text": "man.", "start": 2.38, "end": 2.42 },
+  { "text": "What?", "start": 4.52, "end": 4.88 },
+  { "text": "Nah,", "start": 6.1, "end": 6.66 },
+  { "text": "I'm", "start": 7.2, "end": 7.38 },
+  { "text": "saying,", "start": 7.38, "end": 7.64 },
+  { "text": "look", "start": 8.18, "end": 8.34 },
+  { "text": "at", "start": 8.34, "end": 8.42 },
+  { "text": "this", "start": 8.42, "end": 8.56 },
+  { "text": "guy's", "start": 8.56, "end": 8.88 },
+  { "text": "flips", "start": 8.88, "end": 9.08 },
+  { "text": "and", "start": 9.08, "end": 9.46 },
+  { "text": "he's", "start": 9.46, "end": 10.1 },
+  { "text": "talented.", "start": 10.1, "end": 10.46 },
+  { "text": "And", "start": 10.92, "end": 11.08 },
+  { "text": "I", "start": 11.08, "end": 11.28 },
+  { "text": "said,", "start": 11.28, "end": 11.8 },
+  { "text": "that's", "start": 12.26, "end": 12.5 },
+  { "text": "AI,", "start": 12.5, "end": 12.82 },
+  { "text": "man.", "start": 13.06, "end": 13.14 },
+  { "text": "I", "start": 13.46, "end": 13.56 },
+  { "text": "see", "start": 13.56, "end": 13.9 },
+  { "text": "that", "start": 13.9, "end": 14.04 },
+  { "text": "on", "start": 14.04, "end": 14.22 },
+  { "text": "the", "start": 14.22, "end": 14.32 },
+  { "text": "Instagram", "start": 14.32, "end": 14.66 },
+  { "text": "Reels,", "start": 14.66, "end": 15.06 },
+  { "text": "artificial", "start": 15.26, "end": 15.54 },
+  { "text": "intelligence.", "start": 15.54, "end": 16.46 },
+  { "text": "That", "start": 16.8, "end": 16.94 },
+  { "text": "ain't", "start": 16.94, "end": 17.04 },
+  { "text": "real.", "start": 17.04, "end": 17.3 },
+  { "text": "They're", "start": 17.66, "end": 17.82 },
+  { "text": "trying", "start": 17.82, "end": 18.0 },
+  { "text": "to", "start": 18.0, "end": 18.18 },
+  { "text": "trick", "start": 18.18, "end": 18.4 },
+  { "text": "us,", "start": 18.4, "end": 18.62 },
+  { "text": "man.", "start": 18.7, "end": 18.88 },
+  { "text": "Tricking", "start": 19.34, "end": 19.66 },
+  { "text": "our", "start": 19.66, "end": 20.02 },
+  { "text": "heads,", "start": 20.02, "end": 20.42 },
+  { "text": "man.", "start": 20.7, "end": 20.9 },
+  { "text": "Z,", "start": 21.42, "end": 21.64 },
+  { "text": "you", "start": 22.2, "end": 22.76 },
+  { "text": "been", "start": 22.76, "end": 22.88 },
+  { "text": "smoking", "start": 22.88, "end": 23.14 },
+  { "text": "that", "start": 23.14, "end": 23.36 },
+  { "text": "stuff", "start": 23.36, "end": 23.5 },
+  { "text": "again?", "start": 23.5, "end": 23.78 },
+  { "text": "He's", "start": 24.48, "end": 24.8 },
+  { "text": "right.", "start": 24.8, "end": 25.0 },
+  { "text": "Jesus!", "start": 25.42, "end": 25.78 },
+  { "text": "That", "start": 26.24, "end": 26.44 },
+  { "text": "ain't", "start": 26.44, "end": 26.54 },
+  { "text": "real.", "start": 26.54, "end": 26.82 },
+  { "text": "That's", "start": 27.38, "end": 27.94 },
+  { "text": "AI", "start": 27.94, "end": 28.32 },
+  { "text": "generated.", "start": 28.32, "end": 28.86 },
+  { "text": "It's", "start": 28.86, "end": 29.9 },
+  { "text": "artificial", "start": 29.9, "end": 29.9 },
+  { "text": "intelligence.", "start": 29.9, "end": 31.16 },
+  { "text": "It's", "start": 32.08, "end": 32.72 },
+  { "text": "bad.", "start": 32.72, "end": 33.04 },
+  { "text": "It's", "start": 33.72, "end": 34.28 },
+  { "text": "rotting", "start": 34.28, "end": 34.74 },
+  { "text": "our", "start": 34.74, "end": 34.92 },
+  { "text": "brains.", "start": 34.92, "end": 35.4 },
+  { "text": "Yeah!", "start": 39.19, "end": 39.63 },
+  { "text": "Is", "start": 51.31, "end": 51.47 },
+  { "text": "this", "start": 51.47, "end": 51.61 },
+  { "text": "what", "start": 51.61, "end": 51.81 },
+  { "text": "we", "start": 51.81, "end": 51.95 },
+  { "text": "come", "start": 51.95, "end": 52.13 },
+  { "text": "through,", "start": 52.13, "end": 52.31 },
+  { "text": "guys?", "start": 52.65, "end": 52.65 },
+  { "text": "That", "start": 53.99, "end": 54.27 },
+  { "text": "we", "start": 54.27, "end": 54.47 },
+  { "text": "can't", "start": 54.47, "end": 54.79 },
+  { "text": "enjoy", "start": 54.79, "end": 55.13 },
+  { "text": "the", "start": 55.13, "end": 55.31 },
+  { "text": "talent", "start": 55.31, "end": 55.71 },
+  { "text": "of", "start": 55.71, "end": 55.97 },
+  { "text": "a", "start": 55.97, "end": 56.07 },
+  { "text": "young", "start": 56.07, "end": 56.23 },
+  { "text": "man", "start": 56.23, "end": 56.57 },
+  { "text": "because", "start": 56.57, "end": 57.13 },
+  { "text": "of", "start": 57.13, "end": 57.37 },
+  { "text": "all", "start": 57.37, "end": 57.43 },
+  { "text": "the", "start": 57.43, "end": 57.59 },
+  { "text": "AI", "start": 57.59, "end": 57.89 },
+  { "text": "videos", "start": 57.89, "end": 58.29 },
+  { "text": "that", "start": 58.29, "end": 58.53 },
+  { "text": "we", "start": 58.53, "end": 58.67 },
+  { "text": "see", "start": 58.67, "end": 58.83 },
+  { "text": "on", "start": 58.83, "end": 58.97 },
+  { "text": "our", "start": 58.97, "end": 59.09 },
+  { "text": "phone.", "start": 59.09, "end": 59.41 },
+  { "text": "Hm?", "start": 60.53, "end": 60.81 },
+  { "text": "Wake", "start": 62.05, "end": 62.39 },
+  { "text": "up!", "start": 62.39, "end": 62.71 },
+  { "text": "This", "start": 65.05, "end": 65.35 },
+  { "text": "is", "start": 65.35, "end": 65.49 },
+  { "text": "real", "start": 65.49, "end": 65.77 },
+  { "text": "life.", "start": 65.77, "end": 66.15 },
+  { "text": "That's", "start": 66.91, "end": 67.23 },
+  { "text": "a", "start": 67.23, "end": 67.35 },
+  { "text": "real", "start": 67.35, "end": 67.55 },
+  { "text": "man", "start": 67.55, "end": 68.05 },
+  { "text": "with", "start": 68.05, "end": 68.49 },
+  { "text": "real", "start": 68.49, "end": 68.77 },
+  { "text": "talent.", "start": 68.77, "end": 69.15 },
+  { "text": "Follow", "start": 71.88, "end": 72.28 },
+  { "text": "me.", "start": 72.28, "end": 72.54 },
+  { "text": "Young", "start": 78.9, "end": 79.42 },
+  { "text": "man,", "start": 79.42, "end": 79.74 },
+  { "text": "we", "start": 80.0, "end": 81.3 },
+  { "text": "would", "start": 81.3, "end": 81.48 },
+  { "text": "like", "start": 81.48, "end": 81.68 },
+  { "text": "to", "start": 81.68, "end": 81.92 },
+  { "text": "say", "start": 81.92, "end": 82.38 },
+  { "text": "that", "start": 82.38, "end": 82.8 },
+  { "text": "we", "start": 82.8, "end": 82.94 },
+  { "text": "really", "start": 82.94, "end": 83.18 },
+  { "text": "appreciate", "start": 83.18, "end": 83.7 },
+  { "text": "your", "start": 84.22, "end": 84.48 },
+  { "text": "flips", "start": 84.48, "end": 84.84 },
+  { "text": "and", "start": 84.84, "end": 85.5 },
+  { "text": "your", "start": 85.5, "end": 85.62 },
+  { "text": "talent.", "start": 85.62, "end": 85.68 },
+  { "text": "Look!", "start": 85.68, "end": 85.94 },
+  { "text": "It's", "start": 86.4, "end": 86.62 },
+  { "text": "got", "start": 86.62, "end": 86.76 },
+  { "text": "six", "start": 86.76, "end": 87.1 },
+  { "text": "fingers!", "start": 87.1, "end": 87.72 },
+  { "text": "AI!", "start": 89.08, "end": 89.46 },
+  { "text": "I", "start": 95.55, "end": 95.55 },
+  { "text": "told", "start": 95.55, "end": 95.97 },
+  { "text": "you.", "start": 95.97, "end": 96.45 },
+  { "text": "A?", "start": 96.65, "end": 97.17 },
+  { "text": "I", "start": 103.26, "end": 103.48 },
+  { "text": "ain't", "start": 103.48, "end": 103.58 },
+  { "text": "never", "start": 103.58, "end": 103.72 },
+  { "text": "seen", "start": 103.72, "end": 103.88 },
+  { "text": "a", "start": 103.88, "end": 103.94 },
+  { "text": "shit", "start": 103.94, "end": 104.1 },
+  { "text": "like", "start": 104.1, "end": 104.28 },
+  { "text": "that", "start": 104.28, "end": 104.44 },
+  { "text": "in", "start": 104.44, "end": 104.56 },
+  { "text": "my", "start": 104.56, "end": 104.64 },
+  { "text": "life.", "start": 104.64, "end": 104.92 },
+  { "text": "I", "start": 105.2, "end": 105.26 },
+  { "text": "told", "start": 105.26, "end": 105.34 },
+  { "text": "you.", "start": 105.34, "end": 105.6 },
+  { "text": "AI,", "start": 106.1, "end": 106.62 },
+  { "text": "man.", "start": 106.82, "end": 106.92 }
 ]

@@ -3,7 +3,7 @@ from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QLinearGradient,
 from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
 
 
-SECTION_GAP = 14
+SECTION_GAP = 0
 PADDING_X = 18
 PADDING_Y = 10
 BOTTOM_MARGIN = 110
@@ -252,11 +252,12 @@ class CaptionRenderer:
 
         return word_items
 
-    def build_sfx_text_item(self, section: dict, defaults: dict):
+    def build_sfx_item(self, section: dict, time_seconds: float, defaults: dict):
         default_font = defaults.get("font", "Arial")
         default_font_size = int(defaults.get("font_size", 42))
         default_font_weight = int(defaults.get("font_weight", 400))
         default_font_color = defaults.get("font_color", "#ffffff")
+        default_dim_opacity = float(defaults.get("dim_opacity", 0.35))
 
         text = section.get("text", "")
         if not text:
@@ -267,16 +268,35 @@ class CaptionRenderer:
         font_weight = int(section.get("font_weight", default_font_weight))
         font_color = section.get("font_color", default_font_color)
 
-        item = QGraphicsTextItem()
-        item.setPlainText(text)
-
         font = QFont(font_name)
         font.setPointSize(font_size)
         font.setWeight(to_qfont_weight(font_weight))
 
-        item.setFont(font)
-        item.setDefaultTextColor(QColor(font_color))
+        dim_hex = dim_color(font_color, default_dim_opacity)
 
+        start = section.get("start")
+        end = section.get("end")
+
+        if start is not None and end is not None:
+            start = float(start)
+            end = float(end)
+
+            if time_seconds <= start:
+                progress = 0.0
+            elif time_seconds >= end:
+                progress = 1.0
+            else:
+                duration = max(0.001, end - start)
+                progress = (time_seconds - start) / duration
+        elif start is not None:
+            progress = 1.0 if time_seconds >= float(start) else 0.0
+        elif end is not None:
+            progress = 1.0 if time_seconds >= float(end) else 0.0
+        else:
+            progress = 0.0
+
+        item = WordGraphicsItem(text, font, dim_hex, font_color)
+        item.set_progress(progress)
         return item
 
     def render(self, time_seconds: float) -> None:
@@ -324,7 +344,7 @@ class CaptionRenderer:
                 })
 
             elif section_type == "sfx":
-                text_item = self.build_sfx_text_item(section, defaults)
+                text_item = self.build_sfx_item(section, time_seconds, defaults)
                 if text_item is None:
                     continue
 
