@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 
 
-GROUP_TIME_BEGIN_MARGIN = 0.50
-GROUP_TIME_END_MARGIN = 1.0
+GROUP_SHOW_TIME_MARGIN = 0.10
+GROUP_DISAPPEAR_TIME_MARGIN = 1.0
 
 
 class CaptionModel:
@@ -70,8 +70,8 @@ class CaptionModel:
         if natural_start is None or natural_end is None:
             return None, None
 
-        effective_start = natural_start - GROUP_TIME_BEGIN_MARGIN
-        effective_end = natural_end + GROUP_TIME_END_MARGIN
+        effective_start = natural_start - GROUP_SHOW_TIME_MARGIN
+        effective_end = natural_end + GROUP_DISAPPEAR_TIME_MARGIN
 
         return effective_start, effective_end
 

@@ -51,10 +51,8 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { 
-			  "text": "What?", "start": 4.52, "end": 4.88,
-			  "animation":[	{ "type": "pop", "scale": 1.3 } ]
-			}
+            { "text": "What?", "start": 4.52, "end": 4.88,
+			  "animation":[	{ "type": "pop", "scale": 1.3 } ] }
           ]
         }
       ]
@@ -88,9 +86,12 @@
           "type": "dialogue",
           "speaker": "zee",
           "words": [
-			  { "text": "And", "start": 10.92, "end": 11.08 },
-			  { "text": "I", "start": 11.08, "end": 11.28 },
-			  { "text": "said,", "start": 11.28, "end": 11.8 },
+			  { "text": "And", "start": 10.92, "end": 11.08,
+				"animation": [ { "type": "bounce", "amplitude_px": 15, "cycles": 1 } ] },
+			  { "text": "I", "start": 11.08, "end": 11.28,
+				"animation": [ { "type": "bounce", "amplitude_px": 15, "cycles": 1 } ] },
+			  { "text": "said,", "start": 11.28, "end": 11.8,
+				"animation": [ { "type": "bounce", "amplitude_px": 15, "cycles": 1 } ] },
 			  { "text": "that's", "start": 12.26, "end": 12.5 },
 			  { "text": "AI,", "start": 12.5, "end": 12.82 },
 			  { "text": "man.", "start": 13.06, "end": 13.14 }
@@ -123,26 +124,10 @@
           "type": "dialogue",
           "speaker": "zee",
           "words": [
-			{ "text": "I", "start": 13.46, "end": 13.56 },
-			{ "text": "see", "start": 13.56, "end": 13.9 },
-			{ "text": "that", "start": 13.9, "end": 14.04 },
-			{ "text": "on", "start": 14.04, "end": 14.22 },
-			{ "text": "the", "start": 14.22, "end": 14.32 },
-			{ "text": "Instagram", "start": 14.32, "end": 14.66 },
-			{ "text": "reels.", "start": 14.66, "end": 15.06 }
-          ]
-        }
-      ]
-    },
-	{
-      "sections":
-	  [
-        {
-          "type": "dialogue",
-          "speaker": "zee",
-          "words": [
-			{ "text": "Artificial", "start": 15.26, "end": 15.54 },
-			{ "text": "Intelligence!", "start": 15.54, "end": 16.46 }
+			{ "text": "Artificial", "start": 15.26, "end": 15.54,
+			  "animation": [ { "type": "bounce", "amplitude_px": 15, "cycles": 1 } ] },
+			{ "text": "Intelligence!", "start": 15.54, "end": 16.46,
+			  "animation": [ { "type": "bounce", "amplitude_px": 15, "cycles": 1 } ] }
           ]
         }
       ]
