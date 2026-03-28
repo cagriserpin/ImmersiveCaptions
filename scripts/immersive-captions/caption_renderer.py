@@ -211,49 +211,12 @@ class CaptionRenderer:
 
     def build_font(self, font_name: str, font_size: int, font_weight: int) -> QFont:
         font = QFont(font_name)
-        font.setPointSize(font_size)
-        font.setWeight(to_qfont_weight(font_weight))
+        font.setPointSize(int(font_size))
+        font.setWeight(to_qfont_weight(int(font_weight)))
         return font
 
     def normalize_animation_list(self, animation_value) -> list[dict]:
         return self.caption_model.normalize_animation_list(animation_value)
-
-    def resolve_dialogue_style(self, section: dict, word: dict, defaults: dict, speakers: dict) -> dict:
-        default_font = defaults.get("font", "Arial")
-        default_font_size = int(defaults.get("font_size", 42))
-        default_font_weight = int(defaults.get("font_weight", 400))
-        default_font_color = defaults.get("font_color", "#ffffff")
-
-        speaker_name = section.get("speaker")
-        speaker_defaults = speakers.get(speaker_name, {})
-
-        resolved_font = word.get(
-            "font",
-            section.get("font", speaker_defaults.get("font", default_font)),
-        )
-        resolved_font_size = int(
-            word.get(
-                "font_size",
-                section.get("font_size", speaker_defaults.get("font_size", default_font_size)),
-            )
-        )
-        resolved_font_weight = int(
-            word.get(
-                "font_weight",
-                section.get("font_weight", speaker_defaults.get("font_weight", default_font_weight)),
-            )
-        )
-        resolved_font_color = word.get(
-            "font_color",
-            section.get("font_color", speaker_defaults.get("font_color", default_font_color)),
-        )
-
-        return {
-            "font": resolved_font,
-            "font_size": resolved_font_size,
-            "font_weight": resolved_font_weight,
-            "font_color": resolved_font_color,
-        }
 
     def create_background_item(self) -> QGraphicsRectItem:
         background_item = QGraphicsRectItem()
@@ -269,16 +232,27 @@ class CaptionRenderer:
         self.scene.addItem(item)
         return item
 
-    def build_dialogue_word_item_meta(self, section: dict, word: dict, defaults: dict, speakers: dict) -> dict | None:
+    def build_dialogue_word_item_meta(self, group: dict, section: dict, word: dict, defaults: dict, speakers: dict) -> dict | None:
         word_text = word.get("text", "")
         if not word_text:
             return None
 
-        style = self.resolve_dialogue_style(section, word, defaults, speakers)
-        font = self.build_font(style["font"], style["font_size"], style["font_weight"])
+        style = self.caption_model.resolve_dialogue_style(group, section, word)
+        font = self.build_font(
+            style.get("font", defaults.get("font", "Arial")),
+            style.get("font_size", defaults.get("font_size", 42)),
+            style.get("font_weight", defaults.get("font_weight", 400)),
+        )
 
-        active_color = style["font_color"]
-        dim_hex = dim_color(active_color, self.get_default_dim_opacity(defaults))
+        active_color = style.get("font_color", defaults.get("font_color", "#ffffff"))
+        dim_hex = dim_color(active_color, self.get_default_dim_opacity(style | defaults))
+
+        resolved_animations = self.caption_model.get_resolved_animation_list(
+            word,
+            group=group,
+            section=section,
+            word=word,
+        )
 
         item = self.create_word_item(word_text, font, dim_hex, active_color)
         rect = item.boundingRect()
@@ -286,44 +260,50 @@ class CaptionRenderer:
         return {
             "item": item,
             "owner": word,
+            "resolved_animations": resolved_animations,
             "base_width": rect.width(),
             "base_height": rect.height(),
         }
 
-    def build_sfx_item_meta(self, section: dict, defaults: dict) -> dict | None:
+    def build_sfx_item_meta(self, group: dict, section: dict, defaults: dict) -> dict | None:
         text = section.get("text", "")
         if not text:
             return None
 
-        default_font = defaults.get("font", "Arial")
-        default_font_size = int(defaults.get("font_size", 42))
-        default_font_weight = int(defaults.get("font_weight", 400))
-        default_font_color = defaults.get("font_color", "#ffffff")
+        style = self.caption_model.resolve_sfx_style(group, section)
+        font = self.build_font(
+            style.get("font", defaults.get("font", "Arial")),
+            style.get("font_size", defaults.get("font_size", 42)),
+            style.get("font_weight", defaults.get("font_weight", 400)),
+        )
 
-        font_name = section.get("font", default_font)
-        font_size = int(section.get("font_size", default_font_size))
-        font_weight = int(section.get("font_weight", default_font_weight))
-        font_color = section.get("font_color", default_font_color)
+        active_color = style.get("font_color", defaults.get("font_color", "#ffffff"))
+        dim_hex = dim_color(active_color, self.get_default_dim_opacity(style | defaults))
 
-        dim_hex = dim_color(font_color, self.get_default_dim_opacity(defaults))
-        font = self.build_font(font_name, font_size, font_weight)
+        resolved_animations = self.caption_model.get_resolved_animation_list(
+            section,
+            group=group,
+            section=section,
+            word=None,
+        )
 
-        item = self.create_word_item(text, font, dim_hex, font_color)
+        item = self.create_word_item(text, font, dim_hex, active_color)
         rect = item.boundingRect()
 
         return {
             "item": item,
             "owner": section,
+            "resolved_animations": resolved_animations,
             "base_width": rect.width(),
             "base_height": rect.height(),
         }
 
-    def build_dialogue_section_entry(self, section: dict, defaults: dict, speakers: dict, background_item: QGraphicsRectItem) -> dict:
+    def build_dialogue_section_entry(self, group: dict, section: dict, defaults: dict, speakers: dict, background_item: QGraphicsRectItem) -> dict:
         items = []
         item_meta = []
 
         for word in section.get("words", []):
-            meta = self.build_dialogue_word_item_meta(section, word, defaults, speakers)
+            meta = self.build_dialogue_word_item_meta(group, section, word, defaults, speakers)
             if meta is None:
                 continue
 
@@ -332,18 +312,20 @@ class CaptionRenderer:
 
         return {
             "type": "dialogue",
+            "group": group,
             "section": section,
             "background_item": background_item,
             "items": items,
             "item_meta": item_meta,
         }
 
-    def build_sfx_section_entry(self, section: dict, defaults: dict, background_item: QGraphicsRectItem) -> dict:
-        meta = self.build_sfx_item_meta(section, defaults)
+    def build_sfx_section_entry(self, group: dict, section: dict, defaults: dict, background_item: QGraphicsRectItem) -> dict:
+        meta = self.build_sfx_item_meta(group, section, defaults)
 
         if meta is None:
             return {
                 "type": "sfx",
+                "group": group,
                 "section": section,
                 "background_item": background_item,
                 "items": [],
@@ -352,17 +334,17 @@ class CaptionRenderer:
 
         return {
             "type": "sfx",
+            "group": group,
             "section": section,
             "background_item": background_item,
             "items": [meta["item"]],
             "item_meta": [meta],
         }
 
-    def max_scale_for_owner(self, owner: dict) -> float:
-        animations = self.normalize_animation_list(owner.get("animation"))
+    def max_scale_for_resolved_animations(self, resolved_animations: list[dict]) -> float:
         max_scale = 1.0
 
-        for animation in animations:
+        for animation in resolved_animations:
             animation_type = animation.get("type")
             if animation_type in ("scale", "pop"):
                 target_scale = float(animation.get("scale", 1.25))
@@ -371,11 +353,10 @@ class CaptionRenderer:
 
         return max_scale
 
-    def max_vertical_amplitude_for_owner(self, owner: dict) -> float:
-        animations = self.normalize_animation_list(owner.get("animation"))
+    def max_vertical_amplitude_for_resolved_animations(self, resolved_animations: list[dict]) -> float:
         max_amplitude = 0.0
 
-        for animation in animations:
+        for animation in resolved_animations:
             animation_type = animation.get("type")
 
             if animation_type == "bounce":
@@ -386,7 +367,6 @@ class CaptionRenderer:
             elif animation_type == "jiggle":
                 angle_deg = float(animation.get("angle_deg", 5))
                 angle_deg = max(0.0, abs(angle_deg))
-                # simple extra padding estimate for rotation
                 estimated_extra = 6.0 + angle_deg
                 max_amplitude = max(max_amplitude, estimated_extra)
 
@@ -406,19 +386,20 @@ class CaptionRenderer:
         max_reserved_height = 0.0
 
         for index, meta in enumerate(item_meta):
-            owner = meta["owner"]
+            resolved_animations = meta["resolved_animations"]
             base_width = meta["base_width"]
             base_height = meta["base_height"]
 
-            max_scale = self.max_scale_for_owner(owner)
-            max_amplitude = self.max_vertical_amplitude_for_owner(owner)
+            max_scale = self.max_scale_for_resolved_animations(resolved_animations)
+            max_amplitude = self.max_vertical_amplitude_for_resolved_animations(resolved_animations)
 
             reserved_width = base_width * max_scale
             reserved_height = (base_height * max_scale) + (2.0 * max_amplitude)
 
             slot_layout.append({
                 "item": meta["item"],
-                "owner": owner,
+                "owner": meta["owner"],
+                "resolved_animations": resolved_animations,
                 "base_width": base_width,
                 "base_height": base_height,
                 "slot_x": current_x,
@@ -491,7 +472,7 @@ class CaptionRenderer:
         if self.caption_model is None:
             return
 
-        defaults = self.caption_model.get_defaults()
+        defaults = self.caption_model.get_root_defaults()
         speakers = self.caption_model.get_speakers()
 
         for section in group.get("sections", []):
@@ -499,12 +480,13 @@ class CaptionRenderer:
             background_item = self.create_background_item()
 
             if section_type == "dialogue":
-                entry = self.build_dialogue_section_entry(section, defaults, speakers, background_item)
+                entry = self.build_dialogue_section_entry(group, section, defaults, speakers, background_item)
             elif section_type == "sfx":
-                entry = self.build_sfx_section_entry(section, defaults, background_item)
+                entry = self.build_sfx_section_entry(group, section, defaults, background_item)
             else:
                 entry = {
                     "type": section_type,
+                    "group": group,
                     "section": section,
                     "background_item": background_item,
                     "items": [],
@@ -520,11 +502,10 @@ class CaptionRenderer:
 
         self.layout_group_static()
 
-    def resolve_scale_factor(self, animation_owner: dict, progress: float) -> float:
-        animations = self.normalize_animation_list(animation_owner.get("animation"))
+    def resolve_scale_factor(self, resolved_animations: list[dict], progress: float) -> float:
         scale_factor = 1.0
 
-        for animation in animations:
+        for animation in resolved_animations:
             animation_type = animation.get("type")
 
             if animation_type == "scale":
@@ -557,11 +538,10 @@ class CaptionRenderer:
 
         return scale_factor
 
-    def resolve_vertical_offset(self, animation_owner: dict, progress: float) -> float:
-        animations = self.normalize_animation_list(animation_owner.get("animation"))
+    def resolve_vertical_offset(self, resolved_animations: list[dict], progress: float) -> float:
         offset_y = 0.0
 
-        for animation in animations:
+        for animation in resolved_animations:
             if animation.get("type") == "bounce":
                 amplitude_px = float(animation.get("amplitude_px", 8))
                 cycles = float(animation.get("cycles", 2))
@@ -577,24 +557,20 @@ class CaptionRenderer:
                 eased_envelope = ease_in_out_cubic(pulse_t)
 
                 if direction == "up":
-                    # one upward arc per cycle
                     oscillation = -abs(math.sin(progress * cycles * math.pi))
                 elif direction == "down":
-                    # one downward arc per cycle
                     oscillation = abs(math.sin(progress * cycles * math.pi))
                 else:
-                    # one full up-down oscillation per cycle
                     oscillation = math.sin(progress * cycles * 2.0 * math.pi)
 
                 offset_y += amplitude_px * eased_envelope * oscillation
 
         return offset_y
 
-    def resolve_rotation_deg(self, animation_owner: dict, progress: float) -> float:
-        animations = self.normalize_animation_list(animation_owner.get("animation"))
+    def resolve_rotation_deg(self, resolved_animations: list[dict], progress: float) -> float:
         rotation_deg = 0.0
 
-        for animation in animations:
+        for animation in resolved_animations:
             if animation.get("type") == "jiggle":
                 angle_deg = float(animation.get("angle_deg", 5))
                 cycles = float(animation.get("cycles", 3))
@@ -613,11 +589,27 @@ class CaptionRenderer:
 
         return rotation_deg
 
-    def apply_item_animation_state(self, item: WordGraphicsItem, owner: dict, time_seconds: float) -> None:
-        progress = self.caption_model.compute_owner_effective_progress(owner, time_seconds)
-        scale_factor = self.resolve_scale_factor(owner, progress)
-        offset_y = self.resolve_vertical_offset(owner, progress)
-        rotation_deg = self.resolve_rotation_deg(owner, progress)
+    def apply_item_animation_state(
+        self,
+        item: WordGraphicsItem,
+        owner: dict,
+        resolved_animations: list[dict],
+        group: dict,
+        section: dict,
+        time_seconds: float,
+    ) -> None:
+        progress = self.caption_model.compute_owner_effective_progress(
+            owner,
+            time_seconds,
+            group=group,
+            section=section,
+            word=owner if owner in section.get("words", []) else None,
+            resolved_animations=resolved_animations,
+        )
+
+        scale_factor = self.resolve_scale_factor(resolved_animations, progress)
+        offset_y = self.resolve_vertical_offset(resolved_animations, progress)
+        rotation_deg = self.resolve_rotation_deg(resolved_animations, progress)
 
         item.set_reveal_progress(progress)
         item.set_scale_factor(scale_factor)
@@ -630,12 +622,22 @@ class CaptionRenderer:
 
         for entry in self.section_entries:
             background_rect = entry["background_item"].rect()
+            group = entry["group"]
+            section = entry["section"]
 
             for slot in entry["slot_layout"]:
                 item = slot["item"]
                 owner = slot["owner"]
+                resolved_animations = slot["resolved_animations"]
 
-                self.apply_item_animation_state(item, owner, time_seconds)
+                self.apply_item_animation_state(
+                    item,
+                    owner,
+                    resolved_animations,
+                    group,
+                    section,
+                    time_seconds,
+                )
 
                 static_x = (
                     background_rect.x()

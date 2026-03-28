@@ -1,3 +1,4 @@
+import copy
 import json
 from pathlib import Path
 
@@ -16,14 +17,71 @@ class CaptionModel:
         with open(json_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def get_defaults(self) -> dict:
-        return self.data.get("defaults", {})
+    def _deep_merge_dicts(self, base: dict, override: dict) -> dict:
+        result = copy.deepcopy(base)
+
+        for key, value in override.items():
+            if (
+                key in result
+                and isinstance(result[key], dict)
+                and isinstance(value, dict)
+            ):
+                result[key] = self._deep_merge_dicts(result[key], value)
+            else:
+                result[key] = copy.deepcopy(value)
+
+        return result
+
+    def _object_defaults(self, obj: dict | None) -> dict:
+        if not isinstance(obj, dict):
+            return {}
+        defaults = obj.get("defaults", {})
+        return defaults if isinstance(defaults, dict) else {}
+
+    def _strip_animation_defaults(self, defaults_dict: dict) -> dict:
+        return {
+            key: value
+            for key, value in defaults_dict.items()
+            if key != "animation_defaults"
+        }
+
+    def get_root_defaults(self) -> dict:
+        defaults = self.data.get("defaults", {})
+        return defaults if isinstance(defaults, dict) else {}
 
     def get_speakers(self) -> dict:
-        return self.data.get("speakers", {})
+        speakers = self.data.get("speakers", {})
+        return speakers if isinstance(speakers, dict) else {}
 
     def get_groups(self) -> list:
-        return self.data.get("groups", [])
+        groups = self.data.get("groups", [])
+        return groups if isinstance(groups, list) else []
+
+    def get_style_defaults_for_context(
+        self,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        speaker_name: str | None = None,
+        include_word_defaults: bool = True,
+    ) -> dict:
+        result = self._strip_animation_defaults(self.get_root_defaults())
+
+        if group is not None:
+            result = self._deep_merge_dicts(result, self._strip_animation_defaults(self._object_defaults(group)))
+
+        if speaker_name:
+            speaker_defaults = self.get_speakers().get(speaker_name, {})
+            if isinstance(speaker_defaults, dict):
+                result = self._deep_merge_dicts(result, speaker_defaults)
+
+        if section is not None:
+            result = self._deep_merge_dicts(result, self._strip_animation_defaults(self._object_defaults(section)))
+
+        if include_word_defaults and word is not None:
+            result = self._deep_merge_dicts(result, self._strip_animation_defaults(self._object_defaults(word)))
+
+        return result
 
     def normalize_animation_list(self, animation_value) -> list[dict]:
         if animation_value is None:
@@ -46,8 +104,93 @@ class CaptionModel:
 
         return []
 
-    def get_animation_time_margins(self, owner: dict) -> tuple[float, float]:
-        animations = self.normalize_animation_list(owner.get("animation"))
+    def _animation_defaults_from_defaults(self, defaults_dict: dict) -> dict:
+        animation_defaults = defaults_dict.get("animation_defaults", {})
+        return animation_defaults if isinstance(animation_defaults, dict) else {}
+
+    def _collect_animation_default_layers(
+        self,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+    ) -> list[dict]:
+        layers = []
+
+        root_defaults = self.get_root_defaults()
+        layers.append(self._animation_defaults_from_defaults(root_defaults))
+
+        if group is not None:
+            layers.append(self._animation_defaults_from_defaults(self._object_defaults(group)))
+
+        if section is not None:
+            layers.append(self._animation_defaults_from_defaults(self._object_defaults(section)))
+
+        if word is not None:
+            layers.append(self._animation_defaults_from_defaults(self._object_defaults(word)))
+
+        return layers
+
+    def resolve_animation_entry(
+        self,
+        animation_entry,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+    ) -> dict:
+        if isinstance(animation_entry, str):
+            explicit_entry = {"type": animation_entry}
+        elif isinstance(animation_entry, dict):
+            explicit_entry = dict(animation_entry)
+        else:
+            return {}
+
+        animation_type = explicit_entry.get("type")
+        if not animation_type:
+            return {}
+
+        resolved = {"type": animation_type}
+
+        for layer in self._collect_animation_default_layers(group, section, word):
+            shared_defaults = layer.get("shared", {})
+            if isinstance(shared_defaults, dict):
+                resolved = self._deep_merge_dicts(resolved, shared_defaults)
+
+            type_defaults = layer.get(animation_type, {})
+            if isinstance(type_defaults, dict):
+                resolved = self._deep_merge_dicts(resolved, type_defaults)
+
+        resolved = self._deep_merge_dicts(resolved, explicit_entry)
+        return resolved
+
+    def get_resolved_animation_list(
+        self,
+        owner: dict,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+    ) -> list[dict]:
+        animation_list = self.normalize_animation_list(owner.get("animation"))
+        return [
+            self.resolve_animation_entry(entry, group=group, section=section, word=word)
+            for entry in animation_list
+        ]
+
+    def get_animation_time_margins(
+        self,
+        owner: dict,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        resolved_animations: list[dict] | None = None,
+    ) -> tuple[float, float]:
+        animations = resolved_animations
+        if animations is None:
+            animations = self.get_resolved_animation_list(
+                owner,
+                group=group,
+                section=section,
+                word=word,
+            )
 
         if not animations:
             return 0.0, 0.0
@@ -72,7 +215,14 @@ class CaptionModel:
 
         return max_begin_margin, max_end_margin
 
-    def get_owner_effective_time_range(self, owner: dict) -> tuple[float | None, float | None]:
+    def get_owner_effective_time_range(
+        self,
+        owner: dict,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        resolved_animations: list[dict] | None = None,
+    ) -> tuple[float | None, float | None]:
         start = owner.get("start")
         end = owner.get("end")
 
@@ -82,15 +232,35 @@ class CaptionModel:
         start = float(start)
         end = float(end)
 
-        begin_margin, end_margin = self.get_animation_time_margins(owner)
+        begin_margin, end_margin = self.get_animation_time_margins(
+            owner,
+            group=group,
+            section=section,
+            word=word,
+            resolved_animations=resolved_animations,
+        )
 
         effective_start = start - begin_margin
         effective_end = end + end_margin
 
         return effective_start, effective_end
 
-    def compute_owner_effective_progress(self, owner: dict, time_seconds: float) -> float:
-        start, end = self.get_owner_effective_time_range(owner)
+    def compute_owner_effective_progress(
+        self,
+        owner: dict,
+        time_seconds: float,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        resolved_animations: list[dict] | None = None,
+    ) -> float:
+        start, end = self.get_owner_effective_time_range(
+            owner,
+            group=group,
+            section=section,
+            word=word,
+            resolved_animations=resolved_animations,
+        )
 
         if start is None and end is None:
             return 0.0
@@ -112,7 +282,44 @@ class CaptionModel:
 
         return 0.0
 
-    def get_dialogue_section_effective_time_range(self, section: dict) -> tuple[float | None, float | None]:
+    def resolve_dialogue_style(self, group: dict, section: dict, word: dict) -> dict:
+        speaker_name = section.get("speaker")
+
+        resolved = self.get_style_defaults_for_context(
+            group=group,
+            section=section,
+            word=word,
+            speaker_name=speaker_name,
+            include_word_defaults=True,
+        )
+
+        # Explicit section fields override defaults/speaker/group/root
+        for key in ("font", "font_size", "font_weight", "font_color"):
+            if key in section:
+                resolved[key] = section[key]
+
+        # Explicit word fields override everything below
+        for key in ("font", "font_size", "font_weight", "font_color"):
+            if key in word:
+                resolved[key] = word[key]
+
+        return resolved
+
+    def resolve_sfx_style(self, group: dict, section: dict) -> dict:
+        resolved = self.get_style_defaults_for_context(
+            group=group,
+            section=section,
+            speaker_name=None,
+            include_word_defaults=False,
+        )
+
+        for key in ("font", "font_size", "font_weight", "font_color"):
+            if key in section:
+                resolved[key] = section[key]
+
+        return resolved
+
+    def get_dialogue_section_effective_time_range(self, group: dict, section: dict) -> tuple[float | None, float | None]:
         words = section.get("words", [])
         if not words:
             return None, None
@@ -120,7 +327,19 @@ class CaptionModel:
         word_ranges = []
 
         for word in words:
-            start, end = self.get_owner_effective_time_range(word)
+            resolved_animations = self.get_resolved_animation_list(
+                word,
+                group=group,
+                section=section,
+                word=word,
+            )
+            start, end = self.get_owner_effective_time_range(
+                word,
+                group=group,
+                section=section,
+                word=word,
+                resolved_animations=resolved_animations,
+            )
             if start is not None and end is not None:
                 word_ranges.append((start, end))
 
@@ -130,23 +349,48 @@ class CaptionModel:
         effective_start = min(start for start, _ in word_ranges)
         effective_end = max(end for _, end in word_ranges)
 
-        section_begin_margin, section_end_margin = self.get_animation_time_margins(section)
+        section_resolved_animations = self.get_resolved_animation_list(
+            section,
+            group=group,
+            section=section,
+            word=None,
+        )
+        section_begin_margin, section_end_margin = self.get_animation_time_margins(
+            section,
+            group=group,
+            section=section,
+            word=None,
+            resolved_animations=section_resolved_animations,
+        )
+
         effective_start -= section_begin_margin
         effective_end += section_end_margin
 
         return effective_start, effective_end
 
-    def get_sfx_section_effective_time_range(self, section: dict) -> tuple[float | None, float | None]:
-        return self.get_owner_effective_time_range(section)
+    def get_sfx_section_effective_time_range(self, group: dict, section: dict) -> tuple[float | None, float | None]:
+        resolved_animations = self.get_resolved_animation_list(
+            section,
+            group=group,
+            section=section,
+            word=None,
+        )
+        return self.get_owner_effective_time_range(
+            section,
+            group=group,
+            section=section,
+            word=None,
+            resolved_animations=resolved_animations,
+        )
 
-    def get_section_time_range(self, section: dict) -> tuple[float | None, float | None]:
+    def get_section_time_range(self, group: dict, section: dict) -> tuple[float | None, float | None]:
         section_type = section.get("type")
 
         if section_type == "dialogue":
-            return self.get_dialogue_section_effective_time_range(section)
+            return self.get_dialogue_section_effective_time_range(group, section)
 
         if section_type == "sfx":
-            return self.get_sfx_section_effective_time_range(section)
+            return self.get_sfx_section_effective_time_range(group, section)
 
         return None, None
 
@@ -155,7 +399,7 @@ class CaptionModel:
         section_ranges = []
 
         for section in sections:
-            start, end = self.get_section_time_range(section)
+            start, end = self.get_section_time_range(group, section)
             if start is not None and end is not None:
                 section_ranges.append((start, end))
 
