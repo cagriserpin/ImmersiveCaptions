@@ -1,10 +1,12 @@
 from pathlib import Path
+import sys
 
-from PySide6.QtCore import QTimer, Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, QTimer
+from PySide6.QtGui import QAction, QKeySequence, QShortcut
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
-from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import (
+    QApplication,
     QFileDialog,
     QGraphicsScene,
     QGraphicsView,
@@ -12,6 +14,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QSizePolicy,
     QSlider,
     QVBoxLayout,
     QWidget,
@@ -21,173 +24,260 @@ from caption_model import CaptionModel
 from caption_renderer import CaptionRenderer
 
 
-def ms_to_time(ms: int) -> str:
-    total_seconds = max(0, ms // 1000)
-    hours = total_seconds // 3600
-    minutes = (total_seconds % 3600) // 60
-    seconds = total_seconds % 60
+class ClickableSlider(QSlider):
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            value = self.pixelPosToRangeValue(int(event.position().x()))
+            self.setValue(value)
+            self.sliderMoved.emit(value)
+            self.sliderReleased.emit()
+            event.accept()
+            return
+        super().mousePressEvent(event)
 
-    if hours > 0:
-        return f"{hours:02}:{minutes:02}:{seconds:02}"
-    return f"{minutes:02}:{seconds:02}"
+    def pixelPosToRangeValue(self, pos: int) -> int:
+        if self.orientation() == Qt.Orientation.Horizontal:
+            span = self.width()
+        else:
+            span = self.height()
+
+        if span <= 0:
+            return self.minimum()
+
+        ratio = max(0.0, min(1.0, pos / span))
+        return int(self.minimum() + ratio * (self.maximum() - self.minimum()))
 
 
-class PlayerWindow(QMainWindow):
-    def __init__(self, video_path: Path | None = None) -> None:
+class MainWindow(QMainWindow):
+    def __init__(self):
         super().__init__()
-        self.setWindowTitle("Immersive Captions - Stage 3")
 
-        self.video_path = video_path
-        self.is_seeking = False
+        self.setWindowTitle("Immersive Captions Player")
+        self.resize(1280, 820)
 
-        project_root = Path(__file__).resolve().parents[2]
-        caption_path = project_root / "media" / "captions" / "sample_caption.json"
+        self.video_path: Path | None = None
+        self.caption_path: Path | None = None
 
-        self.caption_model = None
-        if caption_path.exists():
-            self.caption_model = CaptionModel(caption_path)
+        self.caption_model: CaptionModel | None = None
+        self.caption_renderer: CaptionRenderer | None = None
+
+        self.is_user_scrubbing = False
+        self.duration_ms = 0
 
         self.player = QMediaPlayer(self)
         self.audio_output = QAudioOutput(self)
         self.player.setAudioOutput(self.audio_output)
-        self.audio_output.setVolume(0.7)
 
         self.scene = QGraphicsScene(self)
-
-        self.graphics_view = QGraphicsView(self)
-        self.graphics_view.setScene(self.scene)
-        self.graphics_view.setStyleSheet("background-color: black; border: none;")
-        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
         self.video_item = QGraphicsVideoItem()
         self.scene.addItem(self.video_item)
+
         self.player.setVideoOutput(self.video_item)
 
-        self.caption_renderer = CaptionRenderer(self.scene, self.caption_model)
+        self.view = QGraphicsView(self.scene)
+        self.view.setRenderHints(self.view.renderHints())
+        self.view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
-        self.open_button = QPushButton("Open Video")
-        self.play_button = QPushButton("Play")
-        self.pause_button = QPushButton("Pause")
-
-        self.position_slider = QSlider(Qt.Orientation.Horizontal)
-        self.position_slider.setRange(0, 0)
+        self.open_video_button = QPushButton("Open Video")
+        self.open_caption_button = QPushButton("Open Caption")
+        self.play_pause_button = QPushButton("Play")
 
         self.time_label = QLabel("00:00 / 00:00")
-        self.status_label = QLabel("No media loaded")
+
+        self.seek_slider = ClickableSlider(Qt.Orientation.Horizontal)
+        self.seek_slider.setRange(0, 0)
 
         controls_layout = QHBoxLayout()
-        controls_layout.addWidget(self.open_button)
-        controls_layout.addWidget(self.play_button)
-        controls_layout.addWidget(self.pause_button)
+        controls_layout.addWidget(self.open_video_button)
+        controls_layout.addWidget(self.open_caption_button)
+        controls_layout.addWidget(self.play_pause_button)
+        controls_layout.addWidget(self.time_label)
 
-        bottom_layout = QVBoxLayout()
-        bottom_layout.addLayout(controls_layout)
-        bottom_layout.addWidget(self.position_slider)
-        bottom_layout.addWidget(self.time_label)
-        bottom_layout.addWidget(self.status_label)
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.view, stretch=1)
+        main_layout.addWidget(self.seek_slider)
+        main_layout.addLayout(controls_layout)
 
-        central_layout = QVBoxLayout()
-        central_layout.addWidget(self.graphics_view, stretch=1)
-        central_layout.addLayout(bottom_layout)
+        container = QWidget()
+        container.setLayout(main_layout)
+        self.setCentralWidget(container)
 
-        central_widget = QWidget()
-        central_widget.setLayout(central_layout)
-        self.setCentralWidget(central_widget)
+        self.caption_renderer = CaptionRenderer(self.scene, None)
 
         self.ui_timer = QTimer(self)
-        self.ui_timer.setInterval(10)
-        self.ui_timer.timeout.connect(self.update_time_ui)
-        self.ui_timer.timeout.connect(self.update_caption_display)
-        self.ui_timer.start()
+        self.ui_timer.setInterval(16)
 
-        self.open_button.clicked.connect(self.open_video)
-        self.play_button.clicked.connect(self.player.play)
-        self.pause_button.clicked.connect(self.player.pause)
+        self.open_video_button.clicked.connect(self.open_video)
+        self.open_caption_button.clicked.connect(self.open_caption)
+        self.play_pause_button.clicked.connect(self.toggle_play_pause)
 
-        self.position_slider.sliderPressed.connect(self.on_slider_pressed)
-        self.position_slider.sliderReleased.connect(self.on_slider_released)
-        self.position_slider.sliderMoved.connect(self.on_slider_moved)
+        self.seek_slider.sliderPressed.connect(self.on_slider_pressed)
+        self.seek_slider.sliderReleased.connect(self.on_slider_released)
+        self.seek_slider.sliderMoved.connect(self.on_slider_moved)
 
         self.player.positionChanged.connect(self.on_position_changed)
         self.player.durationChanged.connect(self.on_duration_changed)
-        self.player.errorChanged.connect(self.on_error_changed)
-        self.player.mediaStatusChanged.connect(self.on_media_status_changed)
         self.player.playbackStateChanged.connect(self.on_playback_state_changed)
+        self.player.mediaStatusChanged.connect(self.on_media_status_changed)
+        self.player.errorOccurred.connect(self.on_player_error)
 
-        if self.video_path is not None and self.video_path.exists():
-            self.load_video(self.video_path)
+        self.ui_timer.timeout.connect(self.update_overlay)
 
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        self.update_video_layout()
-        self.update_caption_display()
+        self.space_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Space), self)
+        self.space_shortcut.activated.connect(self.toggle_play_pause)
 
-    def update_video_layout(self) -> None:
-        viewport = self.graphics_view.viewport()
-        view_width = max(1, viewport.width())
-        view_height = max(1, viewport.height())
+    def format_time(self, ms: int) -> str:
+        total_seconds = max(0, ms // 1000)
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes:02d}:{seconds:02d}"
 
-        self.scene.setSceneRect(0, 0, view_width, view_height)
-        self.video_item.setPos(0, 0)
+    def reset_player_state(self):
+        self.player.pause()
+        self.player.setSource(QUrl())
+
+        self.duration_ms = 0
+        self.seek_slider.setRange(0, 0)
+        self.seek_slider.setValue(0)
+        self.time_label.setText("00:00 / 00:00")
+        self.play_pause_button.setText("Play")
+
+        self.is_user_scrubbing = False
+
+        if self.caption_renderer is not None:
+            self.caption_renderer.clear()
+
+        self.scene.setSceneRect(0, 0, 1280, 720)
         self.video_item.setSize(self.scene.sceneRect().size())
 
-    def update_caption_display(self) -> None:
-        time_seconds = self.player.position() / 1000.0
-        self.caption_renderer.render(time_seconds)
+    def load_video(self, file_path: str):
+        self.video_path = Path(file_path)
+        self.reset_player_state()
 
-    def open_video(self) -> None:
-        file_name, _ = QFileDialog.getOpenFileName(
+        self.player.setSource(QUrl.fromLocalFile(str(self.video_path)))
+        self.player.pause()
+
+        self.update_window_title()
+        self.ui_timer.start()
+
+    def load_caption(self, file_path: str):
+        self.caption_path = Path(file_path)
+
+        self.caption_model = CaptionModel(self.caption_path)
+
+        if self.caption_renderer is None:
+            self.caption_renderer = CaptionRenderer(self.scene, self.caption_model)
+        else:
+            self.caption_renderer.clear()
+            self.caption_renderer.caption_model = self.caption_model
+
+        self.update_overlay()
+        self.update_window_title()
+
+    def open_video(self):
+        file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Video",
             "",
-            "Video Files (*.mp4 *.mkv *.avi *.mov *.webm);;All Files (*)",
+            "Video Files (*.mp4 *.mov *.mkv *.avi *.webm);;All Files (*)",
         )
-        if file_name:
-            self.load_video(Path(file_name))
+        if not file_path:
+            return
 
-    def load_video(self, path: Path) -> None:
-        self.video_path = path
-        self.player.setSource(QUrl.fromLocalFile(str(path.resolve())))
-        self.status_label.setText(f"Loaded: {path.name}")
-        self.update_video_layout()
+        self.load_video(file_path)
 
-    def on_slider_pressed(self) -> None:
-        self.is_seeking = True
+    def open_caption(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Caption JSON",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if not file_path:
+            return
 
-    def on_slider_moved(self, value: int) -> None:
-        duration = self.player.duration()
-        self.time_label.setText(f"{ms_to_time(value)} / {ms_to_time(duration)}")
+        self.load_caption(file_path)
 
-    def on_slider_released(self) -> None:
-        value = self.position_slider.value()
-        self.player.setPosition(value)
-        self.is_seeking = False
-        self.update_caption_display()
+    def toggle_play_pause(self):
+        if self.player.source().isEmpty():
+            return
 
-    def on_position_changed(self, position: int) -> None:
-        if not self.is_seeking:
-            self.position_slider.setValue(position)
+        if self.player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            self.player.pause()
+        else:
+            self.player.play()
 
-    def on_duration_changed(self, duration: int) -> None:
-        self.position_slider.setRange(0, duration)
-        self.update_time_ui()
+    def on_slider_pressed(self):
+        self.is_user_scrubbing = True
 
-    def on_error_changed(self) -> None:
-        if self.player.error():
-            self.status_label.setText(f"Error: {self.player.errorString()}")
+    def on_slider_moved(self, value: int):
+        self.time_label.setText(f"{self.format_time(value)} / {self.format_time(self.duration_ms)}")
 
-    def on_media_status_changed(self, status) -> None:
-        self.status_label.setText(f"Media status: {status}")
+    def on_slider_released(self):
+        self.is_user_scrubbing = False
+        self.player.setPosition(self.seek_slider.value())
+        self.update_overlay()
 
-    def on_playback_state_changed(self, state) -> None:
-        self.status_label.setText(f"Playback state: {state}")
+    def on_position_changed(self, position: int):
+        if not self.is_user_scrubbing:
+            self.seek_slider.setValue(position)
 
-    def update_time_ui(self) -> None:
-        position = self.player.position()
-        duration = self.player.duration()
-        self.time_label.setText(f"{ms_to_time(position)} / {ms_to_time(duration)}")
+        self.time_label.setText(f"{self.format_time(position)} / {self.format_time(self.duration_ms)}")
 
-    def showEvent(self, event) -> None:
-        super().showEvent(event)
-        QTimer.singleShot(0, self.update_video_layout)
+    def on_duration_changed(self, duration: int):
+        self.duration_ms = duration
+        self.seek_slider.setRange(0, duration)
+        self.time_label.setText(f"{self.format_time(self.player.position())} / {self.format_time(duration)}")
+
+    def on_playback_state_changed(self, state: QMediaPlayer.PlaybackState):
+        if state == QMediaPlayer.PlaybackState.PlayingState:
+            self.play_pause_button.setText("Pause")
+            if not self.ui_timer.isActive():
+                self.ui_timer.start()
+        else:
+            self.play_pause_button.setText("Play")
+
+    def on_media_status_changed(self, status: QMediaPlayer.MediaStatus):
+        if status in (
+            QMediaPlayer.MediaStatus.LoadedMedia,
+            QMediaPlayer.MediaStatus.BufferedMedia,
+        ):
+            video_size = self.video_item.nativeSize()
+            if video_size.width() > 0 and video_size.height() > 0:
+                self.scene.setSceneRect(0, 0, video_size.width(), video_size.height())
+                self.video_item.setSize(video_size)
+                self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def on_player_error(self, error, error_string: str):
+        if error_string:
+            print("Player error:", error_string)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if not self.scene.sceneRect().isEmpty():
+            self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+
+    def update_overlay(self):
+        if self.caption_renderer is None:
+            return
+
+        time_seconds = self.player.position() / 1000.0
+        self.caption_renderer.render(time_seconds)
+
+    def update_window_title(self):
+        video_name = self.video_path.name if self.video_path else "No Video"
+        caption_name = self.caption_path.name if self.caption_path else "No Caption"
+        self.setWindowTitle(f"Immersive Captions Player — {video_name} — {caption_name}")
+
+
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

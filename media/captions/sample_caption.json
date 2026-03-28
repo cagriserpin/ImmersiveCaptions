@@ -1,7 +1,7 @@
 {
   "defaults": {
 	"font": "Calibri",
-	"font_size": 30,
+	"font_size": 25,
 	"font_weight": 400,
 	"font_color": "#ffffff",
 	"dim_opacity": 0.35,
@@ -12,7 +12,7 @@
 	"section_gap": 0,
 	"section_to_bg_padding_x": 18,
 	"section_to_bg_padding_y": 10,
-	"section_video_bottom_margin": 110,
+	"section_video_bottom_margin": 80,
 	"word_gap": 10,
 	"reveal_feather_px": 12
   },
@@ -302,7 +302,7 @@
             { "text": "ONE", "start": 36.25, "end": 36.75, "animation": [ { "type": "bounce" } ] },
             { "text": "HUNDRED", "start": 36.75, "end": 37.25, "animation": [ { "type": "bounce" } ] },
             { "text": "PERCENT", "start": 37.25, "end": 37.75, "animation": [ { "type": "bounce" } ] },
-            { "text": "AI!", "start": 37.75, "end": 39.1, "animation": [ { "type": "scale" }, { "type": "bounce" } ] }
+            { "text": "AI!", "start": 37.75, "end": 39.1, "animation": [ { "type": "scale" }, { "type": "bounce", "cycles": 2 } ] }
           ]
         },
         {
