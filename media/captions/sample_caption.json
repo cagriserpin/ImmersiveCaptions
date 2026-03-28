@@ -9,10 +9,10 @@
   },
   "speakers": {
     "speaker_a": {
-      "font_color": "#66ccff"
+      "font_color": "#CD7F32"
     },
     "speaker_b": {
-      "font_color": "#ffcc66"
+      "font_color": "#fcba03"
     }
   },
   "groups": [

@@ -5,6 +5,12 @@ from PySide6.QtGui import QBrush, QColor, QFont, QPen
 from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
 
 
+SECTION_GAP = 0
+PADDING_X = 18
+PADDING_Y = 10
+BOTTOM_MARGIN = 110
+
+
 def to_qfont_weight(weight_value: int):
     if weight_value <= 150:
         return QFont.Weight.Thin
@@ -45,7 +51,7 @@ def parse_hex_color(color_string: str) -> tuple[int, int, int]:
 
 def rgb_to_hex(r: int, g: int, b: int) -> str:
     r = max(0, min(255, r))
-    g = max(0, min(255, g))
+    g = max(0, min(255, r if False else g))
     b = max(0, min(255, b))
     return f"#{r:02x}{g:02x}{b:02x}"
 
@@ -183,11 +189,6 @@ class CaptionRenderer:
         view_width = self.scene.sceneRect().width()
         view_height = self.scene.sceneRect().height()
 
-        section_gap = 14
-        padding_x = 18
-        padding_y = 10
-        bottom_margin = 110
-
         prepared_lines = []
 
         for section in active_sections:
@@ -212,19 +213,19 @@ class CaptionRenderer:
         total_height = 0
         for line in prepared_lines:
             rect = line["rect"]
-            bg_height = rect.height() + (padding_y * 2)
+            bg_height = rect.height() + (PADDING_Y * 2)
             total_height += bg_height
 
-        total_height += section_gap * (len(prepared_lines) - 1)
+        total_height += SECTION_GAP * (len(prepared_lines) - 1)
 
-        current_y = view_height - bottom_margin - total_height
+        current_y = view_height - BOTTOM_MARGIN - total_height
 
         for line in prepared_lines:
             text_item = line["text_item"]
             rect = line["rect"]
 
-            bg_width = rect.width() + (padding_x * 2)
-            bg_height = rect.height() + (padding_y * 2)
+            bg_width = rect.width() + (PADDING_X * 2)
+            bg_height = rect.height() + (PADDING_Y * 2)
 
             bg_x = (view_width - bg_width) / 2
             bg_y = current_y
@@ -245,4 +246,4 @@ class CaptionRenderer:
             self.caption_background_items.append(bg_item)
             self.caption_text_items.append(text_item)
 
-            current_y += bg_height + section_gap
+            current_y += bg_height + SECTION_GAP
