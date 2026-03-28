@@ -3,6 +3,7 @@ from pathlib import Path
 from PySide6.QtCore import QTimer, Qt, QUrl
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
+from PySide6.QtOpenGLWidgets import QOpenGLWidget
 from PySide6.QtWidgets import (
     QFileDialog,
     QGraphicsScene,

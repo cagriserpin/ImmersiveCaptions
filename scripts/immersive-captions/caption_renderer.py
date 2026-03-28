@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt, QRectF
 from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QLinearGradient, QPainter, QPen
-from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
 
 SECTION_GAP = 0
@@ -74,6 +74,11 @@ def ease_in_out_cubic(t: float) -> float:
         return 4.0 * t * t * t
 
     return 1.0 - ((-2.0 * t + 2.0) ** 3) / 2.0
+
+
+def ease_out_cubic(t: float) -> float:
+    t = max(0.0, min(1.0, float(t)))
+    return 1.0 - ((1.0 - t) ** 3)
 
 
 class WordGraphicsItem(QGraphicsItem):
@@ -176,17 +181,22 @@ class CaptionRenderer:
     def __init__(self, scene, caption_model) -> None:
         self.scene = scene
         self.caption_model = caption_model
-        self.caption_background_items = []
-        self.caption_text_items = []
+
+        self.current_group = None
+        self.current_scene_size = None
+        self.section_entries = []
 
     def clear(self) -> None:
-        for item in self.caption_background_items:
-            self.scene.removeItem(item)
-        for item in self.caption_text_items:
-            self.scene.removeItem(item)
+        for entry in self.section_entries:
+            bg_item = entry["background_item"]
+            self.scene.removeItem(bg_item)
 
-        self.caption_background_items.clear()
-        self.caption_text_items.clear()
+            for item in entry["items"]:
+                self.scene.removeItem(item)
+
+        self.section_entries.clear()
+        self.current_group = None
+        self.current_scene_size = None
 
     def resolve_dialogue_style(self, section: dict, word: dict, defaults: dict, speakers: dict) -> dict:
         default_font = defaults.get("font", "Arial")
@@ -225,27 +235,24 @@ class CaptionRenderer:
             "font_color": resolved_font_color,
         }
 
-    def compute_word_progress(self, word: dict, time_seconds: float) -> float:
-        word_start = word.get("start")
-        word_end = word.get("end")
+    def compute_progress_from_range(self, start, end, time_seconds: float) -> float:
+        if start is not None and end is not None:
+            start = float(start)
+            end = float(end)
 
-        if word_start is not None and word_end is not None:
-            word_start = float(word_start)
-            word_end = float(word_end)
-
-            if time_seconds <= word_start:
+            if time_seconds <= start:
                 return 0.0
-            if time_seconds >= word_end:
+            if time_seconds >= end:
                 return 1.0
 
-            duration = max(0.001, word_end - word_start)
-            return (time_seconds - word_start) / duration
+            duration = max(0.001, end - start)
+            return (time_seconds - start) / duration
 
-        if word_start is not None:
-            return 1.0 if time_seconds >= float(word_start) else 0.0
+        if start is not None:
+            return 1.0 if time_seconds >= float(start) else 0.0
 
-        if word_end is not None:
-            return 1.0 if time_seconds >= float(word_end) else 0.0
+        if end is not None:
+            return 1.0 if time_seconds >= float(end) else 0.0
 
         return 0.0
 
@@ -270,114 +277,187 @@ class CaptionRenderer:
 
         return []
 
-    def resolve_word_scale_factor(self, word: dict, word_progress: float) -> float:
-        animations = self.normalize_animation_list(word.get("animation"))
+    def resolve_scale_factor(self, animation_owner: dict, progress: float) -> float:
+        animations = self.normalize_animation_list(animation_owner.get("animation"))
         scale_factor = 1.0
 
         for animation in animations:
-            if animation.get("type") == "scale":
-                target_scale = float(animation.get("scale", 1.2))
+            animation_type = animation.get("type")
+
+            if animation_type == "scale":
+                target_scale = float(animation.get("scale", 1.25))
                 target_scale = max(0.01, target_scale)
 
-                # Pulse shape:
-                # progress 0.0 -> 0
-                # progress 0.5 -> 1
-                # progress 1.0 -> 0
-                pulse_t = 1.0 - abs((word_progress * 2.0) - 1.0)
+                pulse_t = 1.0 - abs((progress * 2.0) - 1.0)
                 eased_pulse = ease_in_out_cubic(pulse_t)
 
                 animated_scale = 1.0 + ((target_scale - 1.0) * eased_pulse)
                 scale_factor *= animated_scale
 
+            elif animation_type == "pop":
+                peak_scale = float(animation.get("scale", 1.25))
+                peak_scale = max(0.01, peak_scale)
+
+                attack_portion = 0.18
+
+                if progress <= 0.0 or progress >= 1.0:
+                    pop_amount = 0.0
+                elif progress < attack_portion:
+                    attack_t = progress / attack_portion
+                    pop_amount = ease_out_cubic(attack_t)
+                else:
+                    decay_t = (progress - attack_portion) / max(0.001, 1.0 - attack_portion)
+                    pop_amount = 1.0 - ease_in_out_cubic(decay_t)
+
+                animated_scale = 1.0 + ((peak_scale - 1.0) * pop_amount)
+                scale_factor *= animated_scale
+
         return scale_factor
 
-    def build_dialogue_section_items(self, section: dict, time_seconds: float, defaults: dict, speakers: dict):
-        default_dim_opacity = float(defaults.get("dim_opacity", 0.35))
+    def get_default_dim_opacity(self, defaults: dict) -> float:
+        return float(defaults.get("dim_opacity", 0.35))
 
-        words = section.get("words", [])
-        word_items = []
+    def create_word_item(self, text: str, font: QFont, dim_hex: str, active_color: str) -> WordGraphicsItem:
+        item = WordGraphicsItem(text, font, dim_hex, active_color)
+        item.setZValue(11)
+        self.scene.addItem(item)
+        return item
 
-        for word in words:
-            word_text = word.get("text", "")
-            if not word_text:
-                continue
+    def build_font(self, font_name: str, font_size: int, font_weight: int) -> QFont:
+        font = QFont(font_name)
+        font.setPointSize(font_size)
+        font.setWeight(to_qfont_weight(font_weight))
+        return font
 
-            style = self.resolve_dialogue_style(section, word, defaults, speakers)
+    def build_dialogue_word_item_meta(self, section: dict, word: dict, defaults: dict, speakers: dict) -> dict | None:
+        word_text = word.get("text", "")
+        if not word_text:
+            return None
 
-            font = QFont(style["font"])
-            font.setPointSize(style["font_size"])
-            font.setWeight(to_qfont_weight(style["font_weight"]))
+        style = self.resolve_dialogue_style(section, word, defaults, speakers)
+        font = self.build_font(style["font"], style["font_size"], style["font_weight"])
 
-            active_color = style["font_color"]
-            dim_hex = dim_color(active_color, default_dim_opacity)
-            progress = self.compute_word_progress(word, time_seconds)
-            scale_factor = self.resolve_word_scale_factor(word, progress)
+        active_color = style["font_color"]
+        dim_hex = dim_color(active_color, self.get_default_dim_opacity(defaults))
 
-            item = WordGraphicsItem(word_text, font, dim_hex, active_color)
-            item.set_reveal_progress(progress)
-            item.set_scale_factor(scale_factor)
+        item = self.create_word_item(word_text, font, dim_hex, active_color)
+        rect = item.boundingRect()
 
-            word_items.append(item)
+        return {
+            "item": item,
+            "owner": word,
+            "base_width": rect.width(),
+            "base_height": rect.height(),
+        }
 
-        return word_items
+    def build_sfx_item_meta(self, section: dict, defaults: dict) -> dict | None:
+        text = section.get("text", "")
+        if not text:
+            return None
 
-    def build_sfx_item(self, section: dict, time_seconds: float, defaults: dict):
         default_font = defaults.get("font", "Arial")
         default_font_size = int(defaults.get("font_size", 42))
         default_font_weight = int(defaults.get("font_weight", 400))
         default_font_color = defaults.get("font_color", "#ffffff")
-        default_dim_opacity = float(defaults.get("dim_opacity", 0.35))
-
-        text = section.get("text", "")
-        if not text:
-            return None
 
         font_name = section.get("font", default_font)
         font_size = int(section.get("font_size", default_font_size))
         font_weight = int(section.get("font_weight", default_font_weight))
         font_color = section.get("font_color", default_font_color)
 
-        font = QFont(font_name)
-        font.setPointSize(font_size)
-        font.setWeight(to_qfont_weight(font_weight))
+        dim_hex = dim_color(font_color, self.get_default_dim_opacity(defaults))
+        font = self.build_font(font_name, font_size, font_weight)
 
-        dim_hex = dim_color(font_color, default_dim_opacity)
+        item = self.create_word_item(text, font, dim_hex, font_color)
+        rect = item.boundingRect()
 
-        start = section.get("start")
-        end = section.get("end")
+        return {
+            "item": item,
+            "owner": section,
+            "base_width": rect.width(),
+            "base_height": rect.height(),
+        }
 
-        if start is not None and end is not None:
-            start = float(start)
-            end = float(end)
+    def build_dialogue_section_entry(self, section: dict, defaults: dict, speakers: dict, background_item: QGraphicsRectItem) -> dict:
+        items = []
+        item_meta = []
 
-            if time_seconds <= start:
-                progress = 0.0
-            elif time_seconds >= end:
-                progress = 1.0
+        for word in section.get("words", []):
+            meta = self.build_dialogue_word_item_meta(section, word, defaults, speakers)
+            if meta is None:
+                continue
+
+            items.append(meta["item"])
+            item_meta.append(meta)
+
+        return {
+            "type": "dialogue",
+            "section": section,
+            "background_item": background_item,
+            "items": items,
+            "item_meta": item_meta,
+        }
+
+    def build_sfx_section_entry(self, section: dict, defaults: dict, background_item: QGraphicsRectItem) -> dict:
+        meta = self.build_sfx_item_meta(section, defaults)
+
+        if meta is None:
+            return {
+                "type": "sfx",
+                "section": section,
+                "background_item": background_item,
+                "items": [],
+                "item_meta": [],
+            }
+
+        return {
+            "type": "sfx",
+            "section": section,
+            "background_item": background_item,
+            "items": [meta["item"]],
+            "item_meta": [meta],
+        }
+
+    def create_background_item(self) -> QGraphicsRectItem:
+        background_item = QGraphicsRectItem()
+        background_item.setBrush(QBrush(QColor(0, 0, 0, 160)))
+        background_item.setPen(QPen(Qt.PenStyle.NoPen))
+        background_item.setZValue(10)
+        self.scene.addItem(background_item)
+        return background_item
+
+    def build_group(self, group: dict) -> None:
+        self.clear()
+        self.current_group = group
+        scene_rect = self.scene.sceneRect()
+        self.current_scene_size = (scene_rect.width(), scene_rect.height())
+
+        if self.caption_model is None:
+            return
+
+        defaults = self.caption_model.get_defaults()
+        speakers = self.caption_model.get_speakers()
+
+        for section in group.get("sections", []):
+            section_type = section.get("type")
+            background_item = self.create_background_item()
+
+            if section_type == "dialogue":
+                entry = self.build_dialogue_section_entry(section, defaults, speakers, background_item)
+            elif section_type == "sfx":
+                entry = self.build_sfx_section_entry(section, defaults, background_item)
             else:
-                duration = max(0.001, end - start)
-                progress = (time_seconds - start) / duration
-        elif start is not None:
-            progress = 1.0 if time_seconds >= float(start) else 0.0
-        elif end is not None:
-            progress = 1.0 if time_seconds >= float(end) else 0.0
-        else:
-            progress = 0.0
+                entry = {
+                    "type": section_type,
+                    "section": section,
+                    "background_item": background_item,
+                    "items": [],
+                    "item_meta": [],
+                }
 
-        scale_factor = self.resolve_word_scale_factor(section, progress)
+            self.section_entries.append(entry)
 
-        item = WordGraphicsItem(text, font, dim_hex, font_color)
-        item.set_reveal_progress(progress)
-        item.set_scale_factor(scale_factor)
-        return item
-
-    def compute_dialogue_section_bounds(self, word_items: list[WordGraphicsItem]) -> tuple[float, float, list[dict]]:
-        """
-        Returns:
-        - content_width
-        - content_height
-        - layout_data for each word item
-        """
+    def compute_section_bounds(self, entry: dict) -> tuple[float, float, list[dict]]:
         layout_data = []
 
         base_x = 0.0
@@ -387,11 +467,12 @@ class CaptionRenderer:
         union_bottom = 0.0
         first = True
 
-        for index, item in enumerate(word_items):
-            rect = item.boundingRect()
+        item_meta = entry["item_meta"]
 
-            base_width = rect.width()
-            base_height = rect.height()
+        for index, meta in enumerate(item_meta):
+            item = meta["item"]
+            base_width = meta["base_width"]
+            base_height = meta["base_height"]
 
             center_x = base_x + (base_width / 2.0)
             center_y = base_height / 2.0
@@ -424,7 +505,7 @@ class CaptionRenderer:
             })
 
             base_x += base_width
-            if index < len(word_items) - 1:
+            if index < len(item_meta) - 1:
                 base_x += WORD_GAP
 
         content_width = union_right - union_left
@@ -436,117 +517,102 @@ class CaptionRenderer:
 
         return content_width, content_height, layout_data
 
-    def render(self, time_seconds: float) -> None:
-        self.clear()
+    def apply_item_animation_state(self, item: WordGraphicsItem, owner: dict, time_seconds: float) -> None:
+        progress = self.compute_progress_from_range(owner.get("start"), owner.get("end"), time_seconds)
+        scale_factor = self.resolve_scale_factor(owner, progress)
 
-        if self.caption_model is None:
+        item.set_reveal_progress(progress)
+        item.set_scale_factor(scale_factor)
+
+    def update_entry_animation_state(self, entry: dict, time_seconds: float) -> None:
+        for meta in entry["item_meta"]:
+            item = meta["item"]
+            owner = meta["owner"]
+            self.apply_item_animation_state(item, owner, time_seconds)
+
+    def prepare_section_layout_data(self, entry: dict) -> dict:
+        content_width, content_height, layout_data = self.compute_section_bounds(entry)
+
+        return {
+            "entry": entry,
+            "content_width": content_width,
+            "content_height": content_height,
+            "layout_data": layout_data,
+        }
+
+    def layout_section(self, section_data: dict, current_y: float, view_width: float) -> float:
+        entry = section_data["entry"]
+        background_item = entry["background_item"]
+
+        content_width = section_data["content_width"]
+        content_height = section_data["content_height"]
+        layout_data = section_data["layout_data"]
+
+        bg_width = content_width + (PADDING_X * 2)
+        bg_height = content_height + (PADDING_Y * 2)
+
+        bg_x = (view_width - bg_width) / 2.0
+        bg_y = current_y
+
+        background_item.setRect(QRectF(bg_x, bg_y, bg_width, bg_height))
+
+        content_x = bg_x + PADDING_X
+        content_y = bg_y + PADDING_Y
+
+        for data in layout_data:
+            item = data["item"]
+            base_x = data["base_x"]
+            union_left = data["union_left"]
+            union_top = data["union_top"]
+
+            item_x = content_x + (base_x - union_left)
+            item_y = content_y + (0.0 - union_top)
+
+            item.setPos(item_x, item_y)
+
+        return current_y + bg_height + SECTION_GAP
+
+    def update_group_items(self, time_seconds: float) -> None:
+        if self.caption_model is None or self.current_group is None:
             return
-
-        active_sections = self.caption_model.get_active_sections(time_seconds)
-        if not active_sections:
-            return
-
-        defaults = self.caption_model.get_defaults()
-        speakers = self.caption_model.get_speakers()
 
         view_width = self.scene.sceneRect().width()
         view_height = self.scene.sceneRect().height()
 
         prepared_sections = []
 
-        for section in active_sections:
-            section_type = section.get("type")
-
-            if section_type == "dialogue":
-                word_items = self.build_dialogue_section_items(section, time_seconds, defaults, speakers)
-                if not word_items:
-                    continue
-
-                content_width, content_height, layout_data = self.compute_dialogue_section_bounds(word_items)
-
-                prepared_sections.append({
-                    "type": "dialogue",
-                    "word_items": word_items,
-                    "layout_data": layout_data,
-                    "content_width": content_width,
-                    "content_height": content_height,
-                })
-
-            elif section_type == "sfx":
-                text_item = self.build_sfx_item(section, time_seconds, defaults)
-                if text_item is None:
-                    continue
-
-                content_width, content_height, layout_data = self.compute_dialogue_section_bounds([text_item])
-
-                prepared_sections.append({
-                    "type": "sfx",
-                    "text_item": text_item,
-                    "layout_data": layout_data,
-                    "content_width": content_width,
-                    "content_height": content_height,
-                })
+        for entry in self.section_entries:
+            self.update_entry_animation_state(entry, time_seconds)
+            prepared_sections.append(self.prepare_section_layout_data(entry))
 
         if not prepared_sections:
             return
 
         total_height = 0.0
         for section_data in prepared_sections:
-            bg_height = section_data["content_height"] + (PADDING_Y * 2)
-            total_height += bg_height
+            total_height += section_data["content_height"] + (PADDING_Y * 2)
 
         total_height += SECTION_GAP * (len(prepared_sections) - 1)
 
         current_y = view_height - BOTTOM_MARGIN - total_height
 
         for section_data in prepared_sections:
-            content_width = section_data["content_width"]
-            content_height = section_data["content_height"]
+            current_y = self.layout_section(section_data, current_y, view_width)
 
-            bg_width = content_width + (PADDING_X * 2)
-            bg_height = content_height + (PADDING_Y * 2)
+    def render(self, time_seconds: float) -> None:
+        if self.caption_model is None:
+            return
 
-            bg_x = (view_width - bg_width) / 2
-            bg_y = current_y
+        active_group = self.caption_model.get_active_group(time_seconds)
+        scene_rect = self.scene.sceneRect()
+        scene_size = (scene_rect.width(), scene_rect.height())
 
-            bg_item = QGraphicsRectItem(QRectF(bg_x, bg_y, bg_width, bg_height))
-            bg_item.setBrush(QBrush(QColor(0, 0, 0, 160)))
-            bg_item.setPen(QPen(Qt.PenStyle.NoPen))
-            bg_item.setZValue(10)
-            self.scene.addItem(bg_item)
-            self.caption_background_items.append(bg_item)
+        if active_group is None:
+            if self.current_group is not None:
+                self.clear()
+            return
 
-            content_x = bg_x + PADDING_X
-            content_y = bg_y + PADDING_Y
+        if self.current_group is not active_group or self.current_scene_size != scene_size:
+            self.build_group(active_group)
 
-            if section_data["type"] == "dialogue":
-                for data in section_data["layout_data"]:
-                    item = data["item"]
-                    base_x = data["base_x"]
-                    union_left = data["union_left"]
-                    union_top = data["union_top"]
-
-                    item_x = content_x + (base_x - union_left)
-                    item_y = content_y + (0.0 - union_top)
-
-                    item.setPos(item_x, item_y)
-                    item.setZValue(11)
-                    self.scene.addItem(item)
-                    self.caption_text_items.append(item)
-
-            elif section_data["type"] == "sfx":
-                for data in section_data["layout_data"]:
-                    item = data["item"]
-                    base_x = data["base_x"]
-                    union_left = data["union_left"]
-                    union_top = data["union_top"]
-
-                    item_x = content_x + (base_x - union_left)
-                    item_y = content_y + (0.0 - union_top)
-
-                    item.setPos(item_x, item_y)
-                    item.setZValue(11)
-                    self.scene.addItem(item)
-                    self.caption_text_items.append(item)
-
-            current_y += bg_height + SECTION_GAP
+        self.update_group_items(time_seconds)

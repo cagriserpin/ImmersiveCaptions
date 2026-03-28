@@ -2,7 +2,8 @@ import json
 from pathlib import Path
 
 
-GROUP_TIME_MARGIN = 1.0
+GROUP_TIME_BEGIN_MARGIN = 0.50
+GROUP_TIME_END_MARGIN = 1.0
 
 
 class CaptionModel:
@@ -69,7 +70,10 @@ class CaptionModel:
         if natural_start is None or natural_end is None:
             return None, None
 
-        return natural_start, natural_end + GROUP_TIME_MARGIN
+        effective_start = natural_start - GROUP_TIME_BEGIN_MARGIN
+        effective_end = natural_end + GROUP_TIME_END_MARGIN
+
+        return effective_start, effective_end
 
     def is_group_active(self, group: dict, time_seconds: float) -> bool:
         start, end = self.get_group_effective_time_range(group)

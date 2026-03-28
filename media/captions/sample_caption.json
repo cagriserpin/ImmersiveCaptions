@@ -39,7 +39,7 @@
           "words": [
             { "text": "That's", "start": 1.42, "end": 1.9 },
             { "text": "AI,", "start": 1.9, "end": 2.06 },
-            { "text": "man.", "start": 2.38, "end": 2.8 }
+            { "text": "man.", "start": 2.38, "end": 2.55 }
           ]
         }
       ]
@@ -53,7 +53,7 @@
           "words": [
             { 
 			  "text": "What?", "start": 4.52, "end": 4.88,
-			  "animation":[	{ "type": "scale", "scale": 1.25 } ]
+			  "animation":[	{ "type": "pop", "scale": 1.3 } ]
 			}
           ]
         }
