@@ -1,0 +1,43 @@
+{
+  "defaults": {
+    "font": "Arial",
+    "font_size": 42,
+    "font_weight": 400,
+    "font_color": "#ffffff",
+    "animation": "none",
+    "dim_opacity": 0.35
+  },
+  "speakers": {
+    "speaker_a": {
+      "font_color": "#66ccff"
+    },
+    "speaker_b": {
+      "font_color": "#ffcc66"
+    }
+  },
+  "groups": [
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "speaker_a",
+          "words": [
+            { "text": "Ohh,", "start": 0.0, "end": 0.38 },
+            { "text": "look", "start": 0.46, "end": 0.62 },
+            { "text": "at", "start": 0.62, "end": 0.7 },
+            { "text": "him", "start": 0.7, "end": 1.1 }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "speaker_b",
+          "words": [
+            { "text": "That's", "start": 1.42, "end": 1.9 },
+            { "text": "AI,", "start": 1.9, "end": 2.06 },
+            { "text": "man.", "start": 2.38, "end": 2.42 }
+          ]
+        }
+      ]
+    }
+  ]
+}
