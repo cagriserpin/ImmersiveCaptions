@@ -1,14 +1,14 @@
-from html import escape
-
 from PySide6.QtCore import Qt, QRectF
-from PySide6.QtGui import QBrush, QColor, QFont, QPen
-from PySide6.QtWidgets import QGraphicsRectItem, QGraphicsTextItem
+from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QLinearGradient, QPainter, QPen
+from PySide6.QtWidgets import QGraphicsItem, QGraphicsRectItem, QGraphicsTextItem
 
 
-SECTION_GAP = 0
+SECTION_GAP = 14
 PADDING_X = 18
 PADDING_Y = 10
 BOTTOM_MARGIN = 110
+WORD_GAP = 10
+REVEAL_FEATHER_PX = 12
 
 
 def to_qfont_weight(weight_value: int):
@@ -51,7 +51,7 @@ def parse_hex_color(color_string: str) -> tuple[int, int, int]:
 
 def rgb_to_hex(r: int, g: int, b: int) -> str:
     r = max(0, min(255, r))
-    g = max(0, min(255, r if False else g))
+    g = max(0, min(255, g))
     b = max(0, min(255, b))
     return f"#{r:02x}{g:02x}{b:02x}"
 
@@ -65,6 +65,86 @@ def dim_color(color_string: str, dim_opacity: float) -> str:
     dim_b = int(b * factor)
 
     return rgb_to_hex(dim_r, dim_g, dim_b)
+
+
+class WordGraphicsItem(QGraphicsItem):
+    def __init__(self, text: str, font: QFont, dim_color_hex: str, active_color_hex: str) -> None:
+        super().__init__()
+
+        self.text = text
+        self.font = font
+        self.dim_color = QColor(dim_color_hex)
+        self.active_color = QColor(active_color_hex)
+        self.progress = 0.0
+
+        self.metrics = QFontMetricsF(self.font)
+        self.text_width = self.metrics.horizontalAdvance(self.text)
+        self.text_height = self.metrics.height()
+        self.ascent = self.metrics.ascent()
+
+        self.bounds = QRectF(0, 0, self.text_width, self.text_height)
+
+    def boundingRect(self) -> QRectF:
+        return self.bounds
+
+    def set_progress(self, progress: float) -> None:
+        clamped = max(0.0, min(1.0, float(progress)))
+        if abs(clamped - self.progress) > 1e-6:
+            self.progress = clamped
+            self.update()
+
+    def paint(self, painter: QPainter, option, widget=None) -> None:
+        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
+        painter.setFont(self.font)
+
+        baseline_y = self.ascent
+
+        # 1. Draw dim base text
+        painter.setPen(self.dim_color)
+        painter.drawText(0, baseline_y, self.text)
+
+        reveal_width = self.text_width * self.progress
+        if reveal_width <= 0:
+            return
+
+        if self.progress >= 1.0:
+            painter.setPen(self.active_color)
+            painter.drawText(0, baseline_y, self.text)
+            return
+
+        feather_width = min(REVEAL_FEATHER_PX, self.text_width)
+
+        # 2. Draw fully active left side
+        solid_width = max(0.0, reveal_width - feather_width)
+
+        if solid_width > 0:
+            painter.save()
+            painter.setClipRect(QRectF(0, 0, solid_width, self.text_height))
+            painter.setPen(self.active_color)
+            painter.drawText(0, baseline_y, self.text)
+            painter.restore()
+
+        # 3. Draw soft gradient edge
+        feather_start = max(0.0, solid_width)
+        feather_end = min(self.text_width, reveal_width)
+
+        if feather_end > feather_start:
+            painter.save()
+            painter.setClipRect(QRectF(feather_start, 0, feather_end - feather_start, self.text_height))
+
+            start_color = QColor(self.active_color)
+            start_color.setAlpha(255)
+
+            end_color = QColor(self.active_color)
+            end_color.setAlpha(0)
+
+            gradient = QLinearGradient(feather_start, 0, feather_end, 0)
+            gradient.setColorAt(0.0, start_color)
+            gradient.setColorAt(1.0, end_color)
+
+            painter.setPen(QPen(QBrush(gradient), 0))
+            painter.drawText(0, baseline_y, self.text)
+            painter.restore()
 
 
 class CaptionRenderer:
@@ -83,95 +163,121 @@ class CaptionRenderer:
         self.caption_background_items.clear()
         self.caption_text_items.clear()
 
-    def build_dialogue_html(
-        self,
-        section: dict,
-        time_seconds: float,
-        defaults: dict,
-        speakers: dict,
-    ) -> str:
+    def resolve_dialogue_style(self, section: dict, word: dict, defaults: dict, speakers: dict) -> dict:
         default_font = defaults.get("font", "Arial")
         default_font_size = int(defaults.get("font_size", 42))
         default_font_weight = int(defaults.get("font_weight", 400))
         default_font_color = defaults.get("font_color", "#ffffff")
-        default_dim_opacity = float(defaults.get("dim_opacity", 0.35))
 
         speaker_name = section.get("speaker")
         speaker_defaults = speakers.get(speaker_name, {})
 
-        base_font = section.get("font", speaker_defaults.get("font", default_font))
-        base_font_size = int(section.get("font_size", speaker_defaults.get("font_size", default_font_size)))
-        base_font_weight = int(section.get("font_weight", speaker_defaults.get("font_weight", default_font_weight)))
-        base_font_color = section.get("font_color", speaker_defaults.get("font_color", default_font_color))
+        resolved_font = word.get(
+            "font",
+            section.get("font", speaker_defaults.get("font", default_font)),
+        )
+        resolved_font_size = int(
+            word.get(
+                "font_size",
+                section.get("font_size", speaker_defaults.get("font_size", default_font_size)),
+            )
+        )
+        resolved_font_weight = int(
+            word.get(
+                "font_weight",
+                section.get("font_weight", speaker_defaults.get("font_weight", default_font_weight)),
+            )
+        )
+        resolved_font_color = word.get(
+            "font_color",
+            section.get("font_color", speaker_defaults.get("font_color", default_font_color)),
+        )
+
+        return {
+            "font": resolved_font,
+            "font_size": resolved_font_size,
+            "font_weight": resolved_font_weight,
+            "font_color": resolved_font_color,
+        }
+
+    def compute_word_progress(self, word: dict, time_seconds: float) -> float:
+        word_start = word.get("start")
+        word_end = word.get("end")
+
+        if word_start is not None and word_end is not None:
+            word_start = float(word_start)
+            word_end = float(word_end)
+
+            if time_seconds <= word_start:
+                return 0.0
+            if time_seconds >= word_end:
+                return 1.0
+
+            duration = max(0.001, word_end - word_start)
+            return (time_seconds - word_start) / duration
+
+        if word_start is not None:
+            return 1.0 if time_seconds >= float(word_start) else 0.0
+
+        if word_end is not None:
+            return 1.0 if time_seconds >= float(word_end) else 0.0
+
+        return 0.0
+
+    def build_dialogue_section_items(self, section: dict, time_seconds: float, defaults: dict, speakers: dict):
+        default_dim_opacity = float(defaults.get("dim_opacity", 0.35))
 
         words = section.get("words", [])
-        spans = []
+        word_items = []
 
         for word in words:
             word_text = word.get("text", "")
             if not word_text:
                 continue
 
-            word_start = word.get("start")
-            word_end = word.get("end")
+            style = self.resolve_dialogue_style(section, word, defaults, speakers)
 
-            word_font = word.get("font", base_font)
-            word_font_size = int(word.get("font_size", base_font_size))
-            word_font_weight = int(word.get("font_weight", base_font_weight))
-            word_font_color = word.get("font_color", base_font_color)
+            font = QFont(style["font"])
+            font.setPointSize(style["font_size"])
+            font.setWeight(to_qfont_weight(style["font_weight"]))
 
-            is_spoken = False
-            if word_end is not None:
-                is_spoken = time_seconds >= float(word_end)
-            elif word_start is not None:
-                is_spoken = time_seconds >= float(word_start)
+            active_color = style["font_color"]
+            dim_hex = dim_color(active_color, default_dim_opacity)
+            progress = self.compute_word_progress(word, time_seconds)
 
-            render_color = word_font_color if is_spoken else dim_color(word_font_color, default_dim_opacity)
+            item = WordGraphicsItem(word_text, font, dim_hex, active_color)
+            item.set_progress(progress)
 
-            span = (
-                f'<span style="'
-                f'font-family:\'{escape(str(word_font))}\'; '
-                f'font-size:{word_font_size}pt; '
-                f'font-weight:{word_font_weight}; '
-                f'color:{render_color};'
-                f'">{escape(word_text)}</span>'
-            )
-            spans.append(span)
+            word_items.append(item)
 
-        return " ".join(spans)
+        return word_items
 
-    def build_sfx_html(self, section: dict, defaults: dict) -> str:
+    def build_sfx_text_item(self, section: dict, defaults: dict):
         default_font = defaults.get("font", "Arial")
         default_font_size = int(defaults.get("font_size", 42))
         default_font_weight = int(defaults.get("font_weight", 400))
         default_font_color = defaults.get("font_color", "#ffffff")
 
-        text = escape(section.get("text", ""))
+        text = section.get("text", "")
+        if not text:
+            return None
 
-        font = section.get("font", default_font)
+        font_name = section.get("font", default_font)
         font_size = int(section.get("font_size", default_font_size))
         font_weight = int(section.get("font_weight", default_font_weight))
         font_color = section.get("font_color", default_font_color)
 
-        return (
-            f'<span style="'
-            f'font-family:\'{escape(str(font))}\'; '
-            f'font-size:{font_size}pt; '
-            f'font-weight:{font_weight}; '
-            f'color:{font_color};'
-            f'">{text}</span>'
-        )
+        item = QGraphicsTextItem()
+        item.setPlainText(text)
 
-    def build_section_html(self, section: dict, time_seconds: float, defaults: dict, speakers: dict) -> str:
-        section_type = section.get("type")
+        font = QFont(font_name)
+        font.setPointSize(font_size)
+        font.setWeight(to_qfont_weight(font_weight))
 
-        if section_type == "dialogue":
-            return self.build_dialogue_html(section, time_seconds, defaults, speakers)
+        item.setFont(font)
+        item.setDefaultTextColor(QColor(font_color))
 
-        if section_type == "sfx":
-            return self.build_sfx_html(section, defaults)
-
-        return ""
+        return item
 
     def render(self, time_seconds: float) -> None:
         self.clear()
@@ -189,43 +295,66 @@ class CaptionRenderer:
         view_width = self.scene.sceneRect().width()
         view_height = self.scene.sceneRect().height()
 
-        prepared_lines = []
+        prepared_sections = []
 
         for section in active_sections:
-            html = self.build_section_html(section, time_seconds, defaults, speakers)
-            if not html:
-                continue
+            section_type = section.get("type")
 
-            text_item = QGraphicsTextItem()
-            text_item.setHtml(html)
-            text_item.setTextWidth(-1)
+            if section_type == "dialogue":
+                word_items = self.build_dialogue_section_items(section, time_seconds, defaults, speakers)
+                if not word_items:
+                    continue
 
-            rect = text_item.boundingRect()
+                content_width = 0.0
+                content_height = 0.0
 
-            prepared_lines.append({
-                "text_item": text_item,
-                "rect": rect,
-            })
+                for index, item in enumerate(word_items):
+                    rect = item.boundingRect()
+                    content_width += rect.width()
+                    content_height = max(content_height, rect.height())
 
-        if not prepared_lines:
+                    if index < len(word_items) - 1:
+                        content_width += WORD_GAP
+
+                prepared_sections.append({
+                    "type": "dialogue",
+                    "word_items": word_items,
+                    "content_width": content_width,
+                    "content_height": content_height,
+                })
+
+            elif section_type == "sfx":
+                text_item = self.build_sfx_text_item(section, defaults)
+                if text_item is None:
+                    continue
+
+                rect = text_item.boundingRect()
+
+                prepared_sections.append({
+                    "type": "sfx",
+                    "text_item": text_item,
+                    "content_width": rect.width(),
+                    "content_height": rect.height(),
+                })
+
+        if not prepared_sections:
             return
 
-        total_height = 0
-        for line in prepared_lines:
-            rect = line["rect"]
-            bg_height = rect.height() + (PADDING_Y * 2)
+        total_height = 0.0
+        for section_data in prepared_sections:
+            bg_height = section_data["content_height"] + (PADDING_Y * 2)
             total_height += bg_height
 
-        total_height += SECTION_GAP * (len(prepared_lines) - 1)
+        total_height += SECTION_GAP * (len(prepared_sections) - 1)
 
         current_y = view_height - BOTTOM_MARGIN - total_height
 
-        for line in prepared_lines:
-            text_item = line["text_item"]
-            rect = line["rect"]
+        for section_data in prepared_sections:
+            content_width = section_data["content_width"]
+            content_height = section_data["content_height"]
 
-            bg_width = rect.width() + (PADDING_X * 2)
-            bg_height = rect.height() + (PADDING_Y * 2)
+            bg_width = content_width + (PADDING_X * 2)
+            bg_height = content_height + (PADDING_Y * 2)
 
             bg_x = (view_width - bg_width) / 2
             bg_y = current_y
@@ -235,15 +364,30 @@ class CaptionRenderer:
             bg_item.setPen(QPen(Qt.PenStyle.NoPen))
             bg_item.setZValue(10)
             self.scene.addItem(bg_item)
-
-            text_x = bg_x + (bg_width - rect.width()) / 2
-            text_y = bg_y + (bg_height - rect.height()) / 2
-
-            text_item.setPos(text_x, text_y)
-            text_item.setZValue(11)
-            self.scene.addItem(text_item)
-
             self.caption_background_items.append(bg_item)
-            self.caption_text_items.append(text_item)
+
+            content_x = bg_x + (bg_width - content_width) / 2
+            content_y = bg_y + (bg_height - content_height) / 2
+
+            if section_data["type"] == "dialogue":
+                word_x = content_x
+
+                for item in section_data["word_items"]:
+                    rect = item.boundingRect()
+                    word_y = content_y + (content_height - rect.height()) / 2
+
+                    item.setPos(word_x, word_y)
+                    item.setZValue(11)
+                    self.scene.addItem(item)
+                    self.caption_text_items.append(item)
+
+                    word_x += rect.width() + WORD_GAP
+
+            elif section_data["type"] == "sfx":
+                text_item = section_data["text_item"]
+                text_item.setPos(content_x, content_y)
+                text_item.setZValue(11)
+                self.scene.addItem(text_item)
+                self.caption_text_items.append(text_item)
 
             current_y += bg_height + SECTION_GAP

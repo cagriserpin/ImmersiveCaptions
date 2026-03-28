@@ -36,7 +36,7 @@
           "words": [
             { "text": "That's", "start": 1.42, "end": 1.9 },
             { "text": "AI,", "start": 1.9, "end": 2.06 },
-            { "text": "man.", "start": 2.38, "end": 2.42 }
+            { "text": "man.", "start": 2.38, "end": 3.0 }
           ]
         }
       ]
