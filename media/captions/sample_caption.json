@@ -40,7 +40,7 @@
           "speaker": "zee",
           "words": [
             { "text": "That's", "start": 1.42, "end": 1.9 },
-            { "text": "AI,", "start": 1.9, "end": 2.06, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "AI,", "start": 1.9, "end": 2.06, "animation": [ { "type": "pop", "scale": 1.18, "cycles": 2 } ] },
             { "text": "man.", "start": 2.38, "end": 2.55 }
           ]
         }
@@ -392,7 +392,7 @@
             { "text": "of", "start": 57.13, "end": 57.37 },
             { "text": "all", "start": 57.37, "end": 57.43 },
             { "text": "the", "start": 57.43, "end": 57.59 },
-            { "text": "AI", "start": 57.59, "end": 57.89, "animation": [ { "type": "pop", "scale": 1.16 } ] },
+            { "text": "AI", "start": 57.59, "end": 57.89, "animation": [ { "type": "pop", "scale": 1.16, "cycles": 2 } ] },
             { "text": "videos", "start": 57.89, "end": 58.29 },
             { "text": "that", "start": 58.29, "end": 58.53 },
             { "text": "we", "start": 58.53, "end": 58.67 },
@@ -469,7 +469,7 @@
     },
     {
       "sections": [
-        { "type": "sfx", "text": "[Group Marching]", "start": 73.0, "end": 77.0 }
+        { "type": "sfx", "text": "[Group Marching]", "start": 73.0, "end": 77.0, "animation": [ { "type": "pop", "cycles": 9 } ]}
       ]
     },
     {
@@ -543,7 +543,7 @@
           "type": "dialogue",
           "speaker": "crowd",
           "words": [
-            { "text": "IT'S AI!", "start": 89.08, "end": 89.46, "animation": [ { "type": "scale", "scale": 1.18 }, { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] }
+            { "text": "IT'S AI!", "start": 89.08, "end": 89.46, "animation": [ { "type": "scale", "scale": 1.18, "cycles": 2 }, { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] }
           ]
         },
         { "type": "sfx", "text": "[BOO BOOO]", "start": 90.0, "end": 95.0 }
@@ -601,7 +601,7 @@
             { "text": "ain't", "start": 103.48, "end": 103.58 },
             { "text": "never", "start": 103.58, "end": 103.72 },
             { "text": "seen", "start": 103.72, "end": 103.88 },
-            { "text": "a", "start": 103.88, "end": 103.94 },
+            { "text": "no", "start": 103.88, "end": 103.94 },
             { "text": "s***", "start": 103.94, "end": 104.1, "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
             { "text": "like", "start": 104.1, "end": 104.28 },
             { "text": "that", "start": 104.28, "end": 104.44 },
@@ -617,7 +617,7 @@
             { "text": "I", "start": 105.2, "end": 105.26 },
             { "text": "told", "start": 105.26, "end": 105.34 },
             { "text": "you.", "start": 105.34, "end": 105.6 },
-            { "text": "AI,", "start": 106.1, "end": 106.62, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "AI,", "start": 106.1, "end": 106.62, "animation": [ { "type": "pop", "scale": 1.18, "cycles": 2 } ] },
             { "text": "man.", "start": 106.82, "end": 106.92 }
           ]
         }
