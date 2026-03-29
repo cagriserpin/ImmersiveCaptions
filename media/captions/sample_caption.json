@@ -4,8 +4,9 @@
 	"font_size": 25,
 	"font_weight": 400,
 	"font_color": "#ffffff",
+	"font_style": "normal",
 	"dim_opacity": 0.35,
-	"group_show_time_margin": 0.2,
+	"group_show_time_margin": 0.3,
 	"group_disappear_time_margin": 1.0,
 	"default_animation_time_margin": 0.1,
 	"group_gap": 8,
@@ -28,7 +29,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "Ohh,", "start": 0.0, "end": 0.38, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "Ohh,", "start": 0.0, "end": 0.38, "font_style": "italic", "animation": [ { "type": "pop", "scale": 1.18 } ] },
             { "text": "look", "start": 0.46, "end": 0.62 },
             { "text": "at", "start": 0.62, "end": 0.7 },
             { "text": "him", "start": 0.7, "end": 1.1 }
@@ -62,7 +63,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "Nah,", "start": 6.1, "end": 6.66, "animation": [ { "type": "scale" }, { "type": "jiggle", "cycles": 2, "angle_deg": 5 } ] },
+            { "text": "Nah,", "start": 6.1, "end": 6.66, "font_style": "italic", "animation": [ { "type": "scale" }, { "type": "jiggle", "cycles": 2, "angle_deg": 5 } ] },
             { "text": "I'm", "start": 7.2, "end": 7.38 },
             { "text": "saying,", "start": 7.38, "end": 7.64 },
             { "text": "look", "start": 8.18, "end": 8.34 },
@@ -182,7 +183,7 @@
             { "text": "been", "start": 22.76, "end": 22.88 },
             { "text": "smoking", "start": 22.88, "end": 23.14 },
             { "text": "that", "start": 23.14, "end": 23.36 },
-            { "text": "stuff", "start": 23.36, "end": 23.5, "font_color": "#568203", "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
+            { "text": "stuff", "start": 23.36, "end": 23.5, "font_color": "#568203", "font_style": "italic", "animation": [ { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] },
             { "text": "again?", "start": 23.5, "end": 23.78 }
           ]
         }
@@ -293,6 +294,7 @@
           "type": "dialogue",
           "speaker": "crowd",
           "defaults": {
+			"font_weight": 700,
             "animation_defaults": {
               "bounce": { "amplitude_px": 12, "cycles": 1, "time_margin": 0 },
               "scale": { "scale": 1.18 }
@@ -341,14 +343,14 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "ENOUGH!", "start": 46.0, "end": 47.5, "animation": [ { "type": "scale", "scale": 2.0 }, { "type": "jiggle", "angle_deg": 10, "cycles": 10 } ] }
+            { "text": "ENOUGH!", "start": 46.0, "end": 47.5, "font_weight": 700, "animation": [ { "type": "scale", "scale": 2.0 }, { "type": "jiggle", "angle_deg": 10, "cycles": 10 } ] }
           ]
         }
       ]
     },
     {
       "sections": [
-        { "type": "sfx", "text": "[♪ Playing American National Anthem On Trumpet ♪]", "font_color": "#FFBF00", "start": 50.1, "end": 52.65 },
+        { "type": "sfx", "text": "[♪ Playing American National Anthem On Trumpet ♪]", "font_color": "#FFBF00", "font_style": "italic", "start": 50.1, "end": 52.65 },
         {
           "type": "dialogue",
           "speaker": "john",
@@ -419,8 +421,9 @@
           "type": "dialogue",
           "speaker": "john",
           "defaults": {
+			"font_weight": 700,
             "animation_defaults": {
-              "scale": { "scale": 1.22 },
+              "scale": { "scale": 2.0 },
               "bounce": { "amplitude_px": 12, "cycles": 1 }
             }
           },
@@ -482,7 +485,7 @@
           "words": [
             { "text": "Young", "start": 78.9, "end": 79.32 },
             { "text": "man,", "start": 79.32, "end": 79.5 },
-            { "text": "[laughs]", "start": 79.5, "end": 80.5, "animation": [ { "type": "pop" } ] },
+            { "text": "[laughs]", "start": 79.5, "end": 80.5, "font_style": "italic", "animation": [ { "type": "pop" } ] },
             { "text": "we", "start": 80.8, "end": 81.3 },
             { "text": "would", "start": 81.3, "end": 81.48 },
             { "text": "like", "start": 81.48, "end": 81.68 },
@@ -507,32 +510,33 @@
         }
       ]
     },
-    {
-      "sections": [
-        {
-          "type": "dialogue",
-          "speaker": "crowd",
-          "words": [
-            { "text": "LOOK!", "start": 85.68, "end": 85.94, "animation": [ { "type": "pop", "scale": 1.2 } ] }
-          ]
-        },
-        {
-          "type": "dialogue",
-          "speaker": "crowd",
-          "defaults": {
-            "animation_defaults": {
-              "bounce": { "amplitude_px": 10, "cycles": 1, "time_margin": 0 }
-            }
-          },
-          "words": [
-            { "text": "IT'S", "start": 86.4, "end": 86.62, "animation": [ { "type": "bounce" } ] },
-            { "text": "GOT", "start": 86.62, "end": 86.76, "animation": [ { "type": "bounce" } ] },
-            { "text": "SIX", "start": 86.76, "end": 87.1, "animation": [ { "type": "bounce" } ] },
-            { "text": "FINGERS!", "start": 87.1, "end": 87.72, "animation": [ { "type": "scale", "scale": 1.16 }, { "type": "bounce" } ] }
-          ]
-        }
-      ]
-    },
+	{
+	  "defaults": {
+		"font_weight": 700,
+		"animation_defaults": {
+		  "bounce": { "amplitude_px": 15, "cycles": 1, "time_margin": 0 }
+		}
+	  },
+	  "sections": [
+		{
+		  "type": "dialogue",
+		  "speaker": "crowd",
+		  "words": [
+			{ "text": "LOOK!", "start": 85.68, "end": 85.94, "animation": [ { "type": "pop", "scale": 1.2 } ] }
+		  ]
+		},
+		{
+		  "type": "dialogue",
+		  "speaker": "crowd",
+		  "words": [
+			{ "text": "IT'S", "start": 86.4, "end": 86.62, "animation": [ { "type": "bounce" } ] },
+			{ "text": "GOT", "start": 86.62, "end": 86.76, "animation": [ { "type": "bounce" } ] },
+			{ "text": "SIX", "start": 86.76, "end": 87.1, "animation": [ { "type": "scale", "scale": 1.5 }, { "type": "bounce" } ] },
+			{ "text": "FINGERS!", "start": 87.1, "end": 87.72, "animation": [ { "type": "scale", "scale": 1.5 }, { "type": "bounce" } ] }
+		  ]
+		}
+	  ]
+	},
     {
       "sections": [
         {
@@ -573,7 +577,7 @@
     },
     {
       "sections": [
-        { "type": "sfx", "text": "[♪ Funky Music Starts ♪]", "start": 99.52, "end": 102.2 },
+        { "type": "sfx", "text": "[♪ Funky Music Starts ♪]", "font_style": "italic", "start": 99.52, "end": 102.2 },
         {
           "type": "dialogue",
           "speaker": "zee",

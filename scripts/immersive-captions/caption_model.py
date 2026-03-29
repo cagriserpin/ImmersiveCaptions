@@ -304,11 +304,11 @@ class CaptionModel:
             include_word_defaults=True,
         )
 
-        for key in ("font", "font_size", "font_weight", "font_color"):
+        for key in ("font", "font_size", "font_weight", "font_color", "font_style"):
             if key in section:
                 resolved[key] = section[key]
 
-        for key in ("font", "font_size", "font_weight", "font_color"):
+        for key in ("font", "font_size", "font_weight", "font_color", "font_style"):
             if key in word:
                 resolved[key] = word[key]
 
@@ -322,7 +322,7 @@ class CaptionModel:
             include_word_defaults=False,
         )
 
-        for key in ("font", "font_size", "font_weight", "font_color"):
+        for key in ("font", "font_size", "font_weight", "font_color", "font_style"):
             if key in section:
                 resolved[key] = section[key]
 

@@ -28,6 +28,7 @@ The format is designed to support:
 * animation default inheritance
 * animation timing margins
 * JSON-driven renderer and layout defaults
+* restrained typography variation
 
 The format is intentionally hand-editable for rapid prototyping.
 
@@ -70,6 +71,7 @@ This means defaults can be inherited and refined as content becomes more specifi
 * `font`
 * `font_size`
 * `font_weight`
+* `font_style`
 * `font_color`
 * `dim_opacity`
 * `group_show_time_margin`
@@ -91,6 +93,7 @@ Example:
   "font": "Calibri",
   "font_size": 30,
   "font_weight": 400,
+  "font_style": "normal",
   "font_color": "#ffffff",
   "dim_opacity": 0.35,
   "group_show_time_margin": 0.0,
@@ -113,7 +116,12 @@ Example:
       "direction": "up"
     },
     "pop": {
-      "scale": 1.25
+      "scale": 1.25,
+      "cycles": 1
+    },
+    "scale": {
+      "scale": 1.25,
+      "cycles": 1
     }
   }
 }
@@ -143,7 +151,7 @@ Example:
   "zee": {
     "font_color": "#FCBA03"
   },
-  "stranger": {
+  "crowd": {
     "font_color": "#FFFFFF"
   }
 }
@@ -184,6 +192,36 @@ Example:
 
 * `defaults`
 * `sections`
+
+### Important structure rule
+
+At group level, `defaults` and `sections` are sibling fields.
+
+Valid:
+
+```json
+{
+  "defaults": { ... },
+  "sections": [
+    { ... },
+    { ... }
+  ]
+}
+```
+
+Invalid:
+
+```json
+{
+  "sections": [
+    "defaults": { ... },
+    { ... }
+  ]
+}
+```
+
+`sections` must be an array of section objects only.
+`defaults` must not appear inside the `sections` array.
 
 ### Notes
 
@@ -260,7 +298,7 @@ Example:
       "start": 12.61,
       "end": 12.92,
       "animation": [
-        { "type": "pop", "scale": 1.25 }
+        { "type": "pop", "scale": 1.25, "cycles": 1 }
       ]
     }
   ]
@@ -280,6 +318,7 @@ A dialogue section may optionally contain explicit style fields such as:
 * `font`
 * `font_size`
 * `font_weight`
+* `font_style`
 * `font_color`
 
 These are direct section-level overrides.
@@ -326,8 +365,9 @@ Example:
   "end": 32.0,
   "font_color": "#bbbbbb",
   "font_weight": 500,
+  "font_style": "italic",
   "animation": [
-    { "type": "scale", "scale": 1.2 }
+    { "type": "scale", "scale": 1.2, "cycles": 1 }
   ]
 }
 ```
@@ -346,6 +386,7 @@ An SFX section may contain explicit style override fields:
 * `font`
 * `font_size`
 * `font_weight`
+* `font_style`
 * `font_color`
 
 ### Optional defaults field
@@ -377,8 +418,9 @@ Example:
   "start": 89.08,
   "end": 89.46,
   "font_weight": 700,
+  "font_style": "italic",
   "animation": [
-    { "type": "pop", "scale": 1.25 }
+    { "type": "pop", "scale": 1.25, "cycles": 1 }
   ]
 }
 ```
@@ -394,6 +436,7 @@ Example:
 * `font`
 * `font_size`
 * `font_weight`
+* `font_style`
 * `font_color`
 
 ### Optional defaults field
@@ -412,7 +455,7 @@ Example:
 
 ```json
 "animation": [
-  { "type": "scale", "scale": 1.2 },
+  { "type": "scale", "scale": 1.2, "cycles": 1 },
   { "type": "bounce", "amplitude_px": 8, "cycles": 2, "direction": "up" }
 ]
 ```
@@ -438,6 +481,7 @@ This applies to:
 * `font`
 * `font_size`
 * `font_weight`
+* `font_style`
 * `font_color`
 * `dim_opacity`
 
@@ -451,6 +495,32 @@ For SFX sections, styling should be resolved in this order:
 4. values from root `defaults`
 
 SFX does not use speaker-based styling.
+
+---
+
+## Font Style
+
+`font_style` controls whether text is rendered normally or italicized.
+
+Currently supported values:
+
+* `normal`
+* `italic`
+
+If omitted, it inherits from `defaults`.
+If not specified anywhere, it behaves as `normal`.
+
+This may be used at:
+
+* root `defaults`
+* group `defaults`
+* section `defaults`
+* word `defaults`
+* explicit section field
+* explicit word field
+
+Use it sparingly for emphasis, quoted-feeling words, reactions, music/SFX labels, or stylistic moments.
+Too much variation reduces readability.
 
 ---
 
@@ -510,6 +580,19 @@ Current supported or planned animation names:
 * `weight`
 * `jiggle`
 
+### General `cycles` rule
+
+All current animation types may define `cycles`.
+
+If omitted, `cycles` defaults to `1`.
+
+Meaning depends on animation type:
+
+* `bounce`: repeated bounce arcs or oscillations depending on direction
+* `jiggle`: repeated rotational oscillations
+* `scale`: repeated scale pulses
+* `pop`: repeated pop bursts
+
 ---
 
 ## Animation Defaults
@@ -541,7 +624,12 @@ Example:
       "direction": "up"
     },
     "pop": {
-      "scale": 1.25
+      "scale": 1.25,
+      "cycles": 1
+    },
+    "scale": {
+      "scale": 1.25,
+      "cycles": 1
     },
     "jiggle": {
       "angle_deg": 6,
@@ -652,13 +740,17 @@ Purpose:
 Parameters:
 
 * `scale`
+* `cycles`
 * optional timing margin fields
 
 Example:
 
 ```json
-{ "type": "pop", "scale": 1.25 }
+{ "type": "pop", "scale": 1.25, "cycles": 1 }
 ```
+
+`cycles` controls how many pop bursts occur during the animation window.
+Default: `1`
 
 ---
 
@@ -710,13 +802,17 @@ Purpose:
 Parameters:
 
 * `scale`
+* `cycles`
 * optional timing margin fields
 
 Example:
 
 ```json
-{ "type": "scale", "scale": 1.25 }
+{ "type": "scale", "scale": 1.25, "cycles": 1 }
 ```
+
+`cycles` controls how many grow-and-return pulses occur during the animation window.
+Default: `1`
 
 ---
 
@@ -866,6 +962,7 @@ Current preferred rendering behavior:
     "font": "Calibri",
     "font_size": 30,
     "font_weight": 400,
+    "font_style": "normal",
     "font_color": "#ffffff",
     "dim_opacity": 0.35,
     "group_show_time_margin": 0.0,
@@ -888,7 +985,12 @@ Current preferred rendering behavior:
         "direction": "up"
       },
       "pop": {
-        "scale": 1.25
+        "scale": 1.25,
+        "cycles": 1
+      },
+      "scale": {
+        "scale": 1.25,
+        "cycles": 1
       },
       "jiggle": {
         "angle_deg": 6,
@@ -903,57 +1005,36 @@ Current preferred rendering behavior:
     "zee": {
       "font_color": "#FCBA03"
     },
-    "stranger": {
+    "crowd": {
       "font_color": "#FFFFFF"
     }
   },
   "groups": [
     {
+      "defaults": {
+        "font_weight": 700,
+        "animation_defaults": {
+          "bounce": { "amplitude_px": 10, "cycles": 1, "time_margin": 0 }
+        }
+      },
       "sections": [
         {
           "type": "dialogue",
-          "speaker": "stranger",
+          "speaker": "crowd",
           "words": [
-            { "text": "That", "start": 26.24, "end": 26.44 },
-            { "text": "ain't", "start": 26.44, "end": 26.54 },
-            { "text": "real.", "start": 26.54, "end": 26.82 }
+            { "text": "LOOK!", "start": 85.68, "end": 85.94, "animation": [ { "type": "pop", "scale": 1.2, "cycles": 1 } ] }
           ]
         },
         {
           "type": "dialogue",
-          "speaker": "stranger",
-          "overlap_next": true,
-          "defaults": {
-            "animation_defaults": {
-              "bounce": { "amplitude_px": 15, "cycles": 1, "time_margin": 0 }
-            }
-          },
+          "speaker": "crowd",
           "words": [
-            { "text": "That's", "start": 27.38, "end": 27.94, "animation": [ { "type": "bounce" } ] },
-            { "text": "AI", "start": 27.94, "end": 28.32, "animation": [ { "type": "bounce" } ] },
-            { "text": "generated!", "start": 28.32, "end": 28.86, "animation": [ { "type": "bounce" } ] }
+            { "text": "IT'S", "start": 86.4, "end": 86.62, "animation": [ { "type": "bounce" } ] },
+            { "text": "GOT", "start": 86.62, "end": 86.76, "animation": [ { "type": "bounce" } ] },
+            { "text": "SIX", "start": 86.76, "end": 87.1, "animation": [ { "type": "bounce" } ] },
+            { "text": "FINGERS!", "start": 87.1, "end": 87.72, "font_style": "italic", "animation": [ { "type": "scale", "scale": 1.16, "cycles": 1 }, { "type": "bounce" } ] }
           ]
         }
-      ]
-    },
-    {
-      "sections": [
-        {
-          "type": "dialogue",
-          "speaker": "zee",
-          "overlap_previous": true,
-          "defaults": {
-            "animation_defaults": {
-              "bounce": { "amplitude_px": 15, "cycles": 1, "time_margin": 0 }
-            }
-          },
-          "words": [
-            { "text": "It's", "start": 29.0, "end": 29.5, "animation": [ { "type": "bounce" } ] },
-            { "text": "artificial", "start": 29.5, "end": 30.15, "animation": [ { "type": "bounce" } ] },
-            { "text": "intelligence.", "start": 30.15, "end": 31.0, "animation": [ { "type": "bounce" } ] }
-          ]
-        },
-        { "type": "sfx", "text": "[HUH HUHH]", "start": 31.0, "end": 31.8 }
       ]
     }
   ]
@@ -980,6 +1061,6 @@ Possible future additions:
 
 ## Current Version
 
-Version: `v4`
+Version: `v5`
 
-This specification reflects the current agreed JSON structure, inheritance rules, overlap rules, animation defaults model, JSON-driven layout defaults, and timing behavior for the prototype.
+This specification reflects the current agreed JSON structure, inheritance rules, overlap rules, animation defaults model, typography fields, JSON-driven layout defaults, and timing behavior for the prototype.

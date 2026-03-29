@@ -232,10 +232,18 @@ class CaptionRenderer:
     def get_default_dim_opacity(self, style_dict: dict) -> float:
         return float(style_dict.get("dim_opacity", 0.35))
 
-    def build_font(self, font_name: str, font_size: int, font_weight: int) -> QFont:
+    def build_font(self, font_name: str, font_size: int, font_weight: int, font_style: str = "normal") -> QFont:
         font = QFont(font_name)
         font.setPointSize(int(font_size))
         font.setWeight(to_qfont_weight(int(font_weight)))
+
+        style_value = str(font_style).strip().lower()
+
+        if style_value == "italic":
+            font.setItalic(True)
+        else:
+            font.setItalic(False)
+
         return font
 
     def create_background_item(self) -> QGraphicsRectItem:
@@ -264,6 +272,7 @@ class CaptionRenderer:
             merged_style.get("font", "Arial"),
             merged_style.get("font_size", 42),
             merged_style.get("font_weight", 400),
+            merged_style.get("font_style", "normal"),
         )
 
         active_color = merged_style.get("font_color", "#ffffff")
@@ -301,6 +310,7 @@ class CaptionRenderer:
             merged_style.get("font", "Arial"),
             merged_style.get("font_size", 42),
             merged_style.get("font_weight", 400),
+            merged_style.get("font_style", "normal"),
         )
 
         active_color = merged_style.get("font_color", "#ffffff")
