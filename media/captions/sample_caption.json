@@ -62,7 +62,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "Nah,", "start": 6.1, "end": 6.66 },
+            { "text": "Nah,", "start": 6.1, "end": 6.66, "animation": [ { "type": "scale" }, { "type": "jiggle", "cycles": 2, "angle_deg": 5 } ] },
             { "text": "I'm", "start": 7.2, "end": 7.38 },
             { "text": "saying,", "start": 7.38, "end": 7.64 },
             { "text": "look", "start": 8.18, "end": 8.34 },
@@ -92,7 +92,7 @@
             { "text": "I", "start": 11.08, "end": 11.28, "animation": [ { "type": "bounce" } ] },
             { "text": "said,", "start": 11.28, "end": 11.8, "animation": [ { "type": "bounce" } ] },
             { "text": "that's", "start": 12.26, "end": 12.5 },
-            { "text": "AI,", "start": 12.5, "end": 12.82, "animation": [ { "type": "pop", "scale": 1.18 } ] },
+            { "text": "AI,", "start": 12.5, "end": 12.82, "animation": [ { "type": "pop", "scale": 1.18, "cycles": 2 } ] },
             { "text": "man.", "start": 13.06, "end": 13.14 }
           ]
         }
@@ -234,7 +234,7 @@
           },
           "words": [
             { "text": "That's", "start": 27.38, "end": 27.94, "animation": [ { "type": "bounce" } ] },
-            { "text": "AI", "start": 27.94, "end": 28.32, "animation": [ { "type": "bounce" } ] },
+            { "text": "AI", "start": 27.94, "end": 28.32, "animation": [ { "type": "bounce", "cycles": 2, "time_margin": 0.1} ] },
             { "text": "generated!", "start": 28.32, "end": 28.86, "animation": [ { "type": "bounce" } ] }
           ]
         }
@@ -256,7 +256,7 @@
             { "text": "intelligence.", "start": 30.15, "end": 31.0, "animation": [ { "type": "bounce" } ] }
           ]
         },
-        { "type": "sfx", "text": "[HUH HUHH]", "start": 31.0, "end": 31.8 }
+        { "type": "sfx", "text": "[HUH HUHH]", "start": 31.0, "end": 31.8, "animation": [ { "type": "bounce", "cycles": 2 } ] }
       ]
     },
     {
@@ -269,7 +269,7 @@
             { "text": "bad.", "start": 32.72, "end": 33.04, "animation": [ { "type": "scale", "scale": 1.12 } ] }
           ]
         },
-        { "type": "sfx", "text": "[HUH HUHH]", "start": 33.04, "end": 33.5 }
+        { "type": "sfx", "text": "[HUH HUHH]", "start": 33.04, "end": 33.5, "animation": [ { "type": "bounce", "cycles": 2 } ] }
       ]
     },
     {
@@ -284,7 +284,7 @@
             { "text": "brains.", "start": 34.92, "end": 35.4, "animation": [ { "type": "scale", "scale": 1.12 } ] }
           ]
         },
-        { "type": "sfx", "text": "[HUH HUHH]", "start": 35.4, "end": 36.0 }
+        { "type": "sfx", "text": "[HUH HUHH]", "start": 35.4, "end": 36.0, "animation": [ { "type": "bounce", "cycles": 2 } ] }
       ]
     },
     {
@@ -341,7 +341,7 @@
           "type": "dialogue",
           "speaker": "john",
           "words": [
-            { "text": "ENOUGH!", "start": 46.0, "end": 47.5, "animation": [ { "type": "scale", "scale": 1.22 }, { "type": "jiggle", "angle_deg": 4, "cycles": 2 } ] }
+            { "text": "ENOUGH!", "start": 46.0, "end": 47.5, "animation": [ { "type": "scale", "scale": 2.0 }, { "type": "jiggle", "angle_deg": 10, "cycles": 10 } ] }
           ]
         }
       ]

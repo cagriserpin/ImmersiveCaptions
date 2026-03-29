@@ -574,20 +574,27 @@ class CaptionRenderer:
 
             if animation_type == "scale":
                 target_scale = max(0.01, float(animation.get("scale", 1.25)))
-                pulse_t = 1.0 - abs((progress * 2.0) - 1.0)
+                cycles = max(1.0, float(animation.get("cycles", 1)))
+
+                cycle_progress = (progress * cycles) % 1.0
+                pulse_t = 1.0 - abs((cycle_progress * 2.0) - 1.0)
                 eased_pulse = ease_in_out_cubic(pulse_t)
+
                 scale_factor *= 1.0 + ((target_scale - 1.0) * eased_pulse)
 
             elif animation_type == "pop":
                 target_scale = max(0.01, float(animation.get("scale", 1.25)))
+                cycles = max(1.0, float(animation.get("cycles", 1)))
                 attack_portion = 0.18
+
+                cycle_progress = (progress * cycles) % 1.0
 
                 if progress <= 0.0 or progress >= 1.0:
                     pop_amount = 0.0
-                elif progress < attack_portion:
-                    pop_amount = ease_in_out_cubic(progress / attack_portion)
+                elif cycle_progress < attack_portion:
+                    pop_amount = ease_in_out_cubic(cycle_progress / attack_portion)
                 else:
-                    decay_t = (progress - attack_portion) / max(0.001, 1.0 - attack_portion)
+                    decay_t = (cycle_progress - attack_portion) / max(0.001, 1.0 - attack_portion)
                     pop_amount = 1.0 - ease_in_out_cubic(decay_t)
 
                 scale_factor *= 1.0 + ((target_scale - 1.0) * pop_amount)
