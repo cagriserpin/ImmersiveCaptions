@@ -2,7 +2,7 @@
 
 Immersive Captions, klasik altyazıların sınırlarını aşmayı hedefleyen etkileşimli bir altyazı üretim ve oynatma sistemidir.
 
-Bugünkü standart altyazılar onlarca yıldır aynı temel mantıkla çalışıyor: ekranda konuşulanlar metin olarak gösteriliyor. Bu yaklaşım erişilebilirlik açısından çok değerli olsa da, konuşanın kim olduğu, kelimelerin tam olarak ne zaman söylendiği ve cümlenin hangi duygu ya da tonla aktarıldığı çoğu zaman yeterince iyi yansıtılamıyor. “Caption with Intention” yaklaşımı da tam olarak bu üç temel soruna dikkat çekiyor: **konuşan kişinin net biçimde ayırt edilememesi**, **altyazının konuşmayla yeterince hassas senkronize olmaması** ve **intonasyonun kaybolması**. :contentReference[oaicite:1]{index=1}
+Bugünkü standart altyazılar onlarca yıldır aynı temel mantıkla çalışıyor: ekranda konuşulanlar metin olarak gösteriliyor. Bu yaklaşım erişilebilirlik açısından çok değerli olsa da, konuşanın kim olduğu, kelimelerin tam olarak ne zaman söylendiği ve cümlenin hangi duygu ya da tonla aktarıldığı çoğu zaman yeterince iyi yansıtılamıyor. “Caption with Intention” yaklaşımı da tam olarak bu üç temel soruna dikkat çekiyor: **konuşan kişinin net biçimde ayırt edilememesi**, **altyazının konuşmayla yeterince hassas senkronize olmaması** ve **tonlamanın kaybolması**.
 
 Immersive Captions bu fikirden ilham alır ve altyazıyı yalnızca bir metin katmanı olmaktan çıkarıp, sahnenin ritmine ve niyetine eşlik eden görsel bir anlatım aracına dönüştürmeyi amaçlar.
 
