@@ -1,0 +1,1530 @@
+{
+  "defaults": {
+    "font": "Calibri",
+    "font_size": 35,
+    "dim_opacity": 1.0,
+    "group_show_time_margin": 0.45,
+    "group_disappear_time_margin": 1.35,
+    "default_animation_time_margin": 0.0,
+    "group_gap": 8,
+    "section_gap": 0,
+    "section_to_bg_padding_x": 18,
+    "section_to_bg_padding_y": 10,
+    "section_video_bottom_margin": 80,
+    "word_gap": 10,
+    "reveal_feather_px": 0,
+    "show_highlight": 0,
+    "auto_group_overlap_threshold": 0.9
+  },
+  "speakers": {
+    "Figen": {},
+    "Ferruh": {},
+    "Refik": {},
+    "hizmetli": {},
+    "Seyda": {},
+    "ahmet": {}
+  },
+  "groups": [
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Figen",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 2.99,
+              "end": 3.31
+            },
+            {
+              "text": "işe",
+              "start": 3.31,
+              "end": 3.55
+            },
+            {
+              "text": "başvurmaktaki",
+              "start": 3.55,
+              "end": 4.19
+            },
+            {
+              "text": "ana",
+              "start": 4.19,
+              "end": 4.37
+            },
+            {
+              "text": "motivasyonuz",
+              "start": 4.37,
+              "end": 5.09
+            },
+            {
+              "text": "nedir?",
+              "start": 5.09,
+              "end": 5.45
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Paraya",
+              "start": 6.27,
+              "end": 6.73
+            },
+            {
+              "text": "ihtiyacınız",
+              "start": 6.73,
+              "end": 7.33
+            },
+            {
+              "text": "var",
+              "start": 7.33,
+              "end": 7.59
+            },
+            {
+              "text": "diye",
+              "start": 7.59,
+              "end": 7.77
+            },
+            {
+              "text": "anlıyorum",
+              "start": 7.77,
+              "end": 8.21
+            },
+            {
+              "text": "ben.",
+              "start": 8.21,
+              "end": 8.43
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Direkt",
+              "start": 8.75,
+              "end": 9.05
+            },
+            {
+              "text": "para",
+              "start": 9.05,
+              "end": 9.27
+            },
+            {
+              "text": "demeyelim",
+              "start": 9.27,
+              "end": 9.75
+            },
+            {
+              "text": "de.",
+              "start": 9.75,
+              "end": 9.95
+            },
+            {
+              "text": "Bu",
+              "start": 10.25,
+              "end": 10.49
+            },
+            {
+              "text": "hasta",
+              "start": 10.49,
+              "end": 10.73
+            },
+            {
+              "text": "bakıcılığı",
+              "start": 10.73,
+              "end": 11.37
+            },
+            {
+              "text": "işi,",
+              "start": 11.37,
+              "end": 11.67
+            },
+            {
+              "text": "ücretsiz",
+              "start": 12.01,
+              "end": 12.67
+            },
+            {
+              "text": "olsaydı",
+              "start": 12.67,
+              "end": 13.21
+            },
+            {
+              "text": "başvurmazdım",
+              "start": 13.21,
+              "end": 14.31
+            },
+            {
+              "text": "diyelim.",
+              "start": 14.31,
+              "end": 14.77
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Çok",
+              "start": 15.05,
+              "end": 15.21
+            },
+            {
+              "text": "memnun",
+              "start": 15.21,
+              "end": 15.47
+            },
+            {
+              "text": "oldum.",
+              "start": 15.47,
+              "end": 15.71
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "sfx",
+          "text": "[Tekerlekli sandalye ilerler]",
+          "start": 16.0,
+          "end": 20.9
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Abi",
+              "start": 21.0,
+              "end": 21.2
+            },
+            {
+              "text": "sen",
+              "start": 21.2,
+              "end": 21.4
+            },
+            {
+              "text": "tamamen",
+              "start": 21.4,
+              "end": 21.86
+            },
+            {
+              "text": "sakatsın",
+              "start": 21.86,
+              "end": 22.4
+            },
+            {
+              "text": "ya.",
+              "start": 22.4,
+              "end": 22.62
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Kendinizden",
+              "start": 23.78,
+              "end": 24.42
+            },
+            {
+              "text": "bahsedilir",
+              "start": 24.42,
+              "end": 25.02
+            },
+            {
+              "text": "misiniz",
+              "start": 25.02,
+              "end": 25.38
+            },
+            {
+              "text": "biraz?",
+              "start": 25.38,
+              "end": 25.64
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Dans,",
+              "start": 25.94,
+              "end": 26.2
+            },
+            {
+              "text": "eğlence,",
+              "start": 26.6,
+              "end": 27.0
+            },
+            {
+              "text": "kakaka",
+              "start": 27.4,
+              "end": 27.76
+            },
+            {
+              "text": "kikiki",
+              "start": 27.76,
+              "end": 27.96
+            },
+            {
+              "text": "dostlarla",
+              "start": 27.96,
+              "end": 28.74
+            },
+            {
+              "text": "makara",
+              "start": 28.74,
+              "end": 29.06
+            },
+            {
+              "text": "gülelim,",
+              "start": 29.06,
+              "end": 29.52
+            },
+            {
+              "text": "eğlenelim.",
+              "start": 29.64,
+              "end": 30.08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "hizmetli",
+          "words": [
+            {
+              "text": "Buyurun.",
+              "start": 30.2,
+              "end": 30.48
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Ne",
+              "start": 30.9,
+              "end": 31.04
+            },
+            {
+              "text": "bu",
+              "start": 31.04,
+              "end": 31.16
+            },
+            {
+              "text": "acele",
+              "start": 31.16,
+              "end": 31.56
+            },
+            {
+              "text": "ya?",
+              "start": 31.56,
+              "end": 31.82
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Kaçmıyor",
+              "start": 32.22,
+              "end": 32.58
+            },
+            {
+              "text": "adam",
+              "start": 32.58,
+              "end": 32.8
+            },
+            {
+              "text": "bir",
+              "start": 32.8,
+              "end": 32.92
+            },
+            {
+              "text": "yere.",
+              "start": 32.92,
+              "end": 33.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Ama",
+              "start": 33.52,
+              "end": 33.68
+            },
+            {
+              "text": "bunu",
+              "start": 33.68,
+              "end": 33.84
+            },
+            {
+              "text": "benim",
+              "start": 33.84,
+              "end": 33.96
+            },
+            {
+              "text": "yapmam",
+              "start": 33.96,
+              "end": 34.44
+            },
+            {
+              "text": "lazım.",
+              "start": 34.44,
+              "end": 34.7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Ferruh!",
+              "start": 34.9,
+              "end": 35.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Tamam,",
+              "start": 35.86,
+              "end": 36.22
+            },
+            {
+              "text": "sonra",
+              "start": 36.42,
+              "end": 36.58
+            },
+            {
+              "text": "ben",
+              "start": 36.58,
+              "end": 36.9
+            },
+            {
+              "text": "senin",
+              "start": 36.9,
+              "end": 37.1
+            },
+            {
+              "text": "gönlünü",
+              "start": 37.1,
+              "end": 37.42
+            },
+            {
+              "text": "alacağım.",
+              "start": 37.42,
+              "end": 37.78
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Tamam,",
+              "start": 38.14,
+              "end": 38.32
+            },
+            {
+              "text": "ne",
+              "start": 38.66,
+              "end": 38.76
+            },
+            {
+              "text": "olur",
+              "start": 38.76,
+              "end": 38.88
+            },
+            {
+              "text": "kusuruma",
+              "start": 38.88,
+              "end": 39.36
+            },
+            {
+              "text": "bakma.",
+              "start": 39.36,
+              "end": 39.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Ferruh,",
+              "start": 39.52,
+              "end": 39.96
+            },
+            {
+              "text": "çok",
+              "start": 40.26,
+              "end": 40.7
+            },
+            {
+              "text": "ayıp",
+              "start": 40.7,
+              "end": 41.02
+            },
+            {
+              "text": "oluyor",
+              "start": 41.02,
+              "end": 41.14
+            },
+            {
+              "text": "insan...",
+              "start": 41.14,
+              "end": 41.48
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Abi",
+              "start": 42.22,
+              "end": 42.84
+            },
+            {
+              "text": "güzel",
+              "start": 42.84,
+              "end": 43.14
+            },
+            {
+              "text": "bir",
+              "start": 43.14,
+              "end": 43.32
+            },
+            {
+              "text": "gün,",
+              "start": 43.32,
+              "end": 43.46
+            },
+            {
+              "text": "ortam",
+              "start": 43.82,
+              "end": 44.26
+            },
+            {
+              "text": "güzel.",
+              "start": 44.26,
+              "end": 44.5
+            },
+            {
+              "text": "Biz",
+              "start": 44.94,
+              "end": 45.08
+            },
+            {
+              "text": "güzeliz.",
+              "start": 45.08,
+              "end": 45.54
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Hahaha",
+              "start": 45.6,
+              "end": 46.5
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Hahaha",
+              "start": 45.9,
+              "end": 47.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Figen",
+          "words": [
+            {
+              "text": "Afiyet",
+              "start": 47.6,
+              "end": 48.22
+            },
+            {
+              "text": "olsun.",
+              "start": 48.22,
+              "end": 48.56
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Ferruh,",
+              "start": 49.5,
+              "end": 50.12
+            },
+            {
+              "text": "ağzım",
+              "start": 50.12,
+              "end": 50.62
+            },
+            {
+              "text": "burada!",
+              "start": 50.62,
+              "end": 50.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Nereye",
+              "start": 52.06,
+              "end": 52.4
+            },
+            {
+              "text": "bakıyorsun?",
+              "start": 52.4,
+              "end": 52.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Pardon",
+              "start": 53.0,
+              "end": 53.3
+            },
+            {
+              "text": "abi.",
+              "start": 53.3,
+              "end": 53.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Hadi",
+              "start": 54.54,
+              "end": 54.84
+            },
+            {
+              "text": "biraz",
+              "start": 54.84,
+              "end": 55.14
+            },
+            {
+              "text": "tempo",
+              "start": 55.14,
+              "end": 55.44
+            },
+            {
+              "text": "ya,",
+              "start": 55.44,
+              "end": 55.68
+            },
+            {
+              "text": "mıymıymıy",
+              "start": 55.84,
+              "end": 56.18
+            },
+            {
+              "text": "gidiyorsun",
+              "start": 56.18,
+              "end": 56.72
+            },
+            {
+              "text": "ya!",
+              "start": 56.72,
+              "end": 57.06
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Bas",
+              "start": 57.22,
+              "end": 57.42
+            },
+            {
+              "text": "şuna",
+              "start": 57.42,
+              "end": 57.62
+            },
+            {
+              "text": "ya,",
+              "start": 57.62,
+              "end": 57.86
+            },
+            {
+              "text": "bas",
+              "start": 57.96,
+              "end": 58.1
+            },
+            {
+              "text": "şuna.",
+              "start": 58.1,
+              "end": 58.4
+            },
+            {
+              "text": "Bu",
+              "start": 58.52,
+              "end": 58.74
+            },
+            {
+              "text": "aletin",
+              "start": 58.74,
+              "end": 58.96
+            },
+            {
+              "text": "dahası",
+              "start": 58.96,
+              "end": 59.3
+            },
+            {
+              "text": "var.",
+              "start": 59.3,
+              "end": 59.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Miyan'ı",
+              "start": 59.74,
+              "end": 60.34
+            },
+            {
+              "text": "aşikân'da",
+              "start": 60.34,
+              "end": 61.28
+            },
+            {
+              "text": "iştiharım",
+              "start": 61.28,
+              "end": 62.3
+            },
+            {
+              "text": "varsa...",
+              "start": 62.3,
+              "end": 62.98
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Azıcık",
+              "start": 62.98,
+              "end": 63.22
+            },
+            {
+              "text": "kısa",
+              "start": 63.22,
+              "end": 63.46
+            },
+            {
+              "text": "konuş",
+              "start": 63.46,
+              "end": 63.92
+            },
+            {
+              "text": "ya,",
+              "start": 63.92,
+              "end": 64.18
+            },
+            {
+              "text": "kısık",
+              "start": 64.54,
+              "end": 64.86
+            },
+            {
+              "text": "cümleler",
+              "start": 64.86,
+              "end": 65.26
+            },
+            {
+              "text": "ya!",
+              "start": 65.26,
+              "end": 65.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Ferruh",
+              "start": 65.62,
+              "end": 65.84
+            },
+            {
+              "text": "ne",
+              "start": 65.84,
+              "end": 66.0
+            },
+            {
+              "text": "kadar",
+              "start": 66.0,
+              "end": 66.2
+            },
+            {
+              "text": "zarif",
+              "start": 66.2,
+              "end": 66.54
+            },
+            {
+              "text": "bir",
+              "start": 66.54,
+              "end": 66.7
+            },
+            {
+              "text": "çocuk",
+              "start": 66.7,
+              "end": 66.82
+            },
+            {
+              "text": "değil",
+              "start": 66.82,
+              "end": 67.1
+            },
+            {
+              "text": "mi?",
+              "start": 67.1,
+              "end": 67.24
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Ben",
+              "start": 67.7,
+              "end": 67.92
+            },
+            {
+              "text": "sana",
+              "start": 67.92,
+              "end": 68.16
+            },
+            {
+              "text": "bir",
+              "start": 68.16,
+              "end": 68.3
+            },
+            {
+              "text": "hareket",
+              "start": 68.3,
+              "end": 68.62
+            },
+            {
+              "text": "katacağım.",
+              "start": 68.62,
+              "end": 69.08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Hey",
+              "start": 69.5,
+              "end": 69.72
+            },
+            {
+              "text": "maşallah",
+              "start": 69.72,
+              "end": 70.28
+            },
+            {
+              "text": "şu",
+              "start": 70.28,
+              "end": 70.6
+            },
+            {
+              "text": "hale",
+              "start": 70.6,
+              "end": 70.86
+            },
+            {
+              "text": "bak.",
+              "start": 70.86,
+              "end": 71.02
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Seyda",
+          "words": [
+            {
+              "text": "Çok",
+              "start": 70.28,
+              "end": 70.5
+            },
+            {
+              "text": "güzel.",
+              "start": 70.5,
+              "end": 70.75
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Yangın",
+              "start": 72.06,
+              "end": 72.52
+            },
+            {
+              "text": "çıktı,",
+              "start": 72.52,
+              "end": 72.82
+            },
+            {
+              "text": "cam",
+              "start": 72.98,
+              "end": 73.18
+            },
+            {
+              "text": "çerçeveydi,",
+              "start": 73.18,
+              "end": 73.78
+            },
+            {
+              "text": "komşulaaaar.",
+              "start": 73.8,
+              "end": 74.66
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Nereye",
+              "start": 75.8,
+              "end": 76.12
+            },
+            {
+              "text": "gideceğimizi",
+              "start": 76.12,
+              "end": 76.64
+            },
+            {
+              "text": "söylemeyecek",
+              "start": 76.64,
+              "end": 77.24
+            },
+            {
+              "text": "misin",
+              "start": 77.24,
+              "end": 77.38
+            },
+            {
+              "text": "abi?",
+              "start": 77.38,
+              "end": 77.68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Bir",
+              "start": 78.22,
+              "end": 78.42
+            },
+            {
+              "text": "sakin",
+              "start": 78.42,
+              "end": 78.72
+            },
+            {
+              "text": "olup",
+              "start": 78.72,
+              "end": 79.08
+            },
+            {
+              "text": "nereye",
+              "start": 79.08,
+              "end": 79.32
+            },
+            {
+              "text": "gittiğini",
+              "start": 79.32,
+              "end": 79.8
+            },
+            {
+              "text": "bilmemenin",
+              "start": 79.8,
+              "end": 80.42
+            },
+            {
+              "text": "özgürlüğünü",
+              "start": 80.42,
+              "end": 81.0
+            },
+            {
+              "text": "hisseder",
+              "start": 81.0,
+              "end": 81.32
+            },
+            {
+              "text": "misin",
+              "start": 81.32,
+              "end": 81.58
+            },
+            {
+              "text": "ya?",
+              "start": 81.58,
+              "end": 82.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "ahmet",
+          "words": [
+            {
+              "text": "Adam",
+              "start": 82.68,
+              "end": 83.02
+            },
+            {
+              "text": "sana",
+              "start": 83.02,
+              "end": 83.3
+            },
+            {
+              "text": "iş",
+              "start": 83.3,
+              "end": 83.6
+            },
+            {
+              "text": "başvurusu",
+              "start": 83.6,
+              "end": 84.02
+            },
+            {
+              "text": "yapmadan",
+              "start": 84.02,
+              "end": 84.48
+            },
+            {
+              "text": "iki",
+              "start": 84.48,
+              "end": 84.84
+            },
+            {
+              "text": "ay",
+              "start": 84.84,
+              "end": 84.96
+            },
+            {
+              "text": "önce",
+              "start": 84.96,
+              "end": 85.16
+            },
+            {
+              "text": "hapisten",
+              "start": 85.16,
+              "end": 85.52
+            },
+            {
+              "text": "çıkmış.",
+              "start": 85.52,
+              "end": 85.96
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "ahmet",
+          "words": [
+            {
+              "text": "Böyle",
+              "start": 86.48,
+              "end": 86.7
+            },
+            {
+              "text": "insanlarda",
+              "start": 86.7,
+              "end": 87.34
+            },
+            {
+              "text": "merhametin",
+              "start": 87.34,
+              "end": 87.84
+            },
+            {
+              "text": "kırıntısı",
+              "start": 87.84,
+              "end": 88.32
+            },
+            {
+              "text": "olmaz",
+              "start": 88.32,
+              "end": 88.66
+            },
+            {
+              "text": "Refik.",
+              "start": 88.66,
+              "end": 89.06
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Ben",
+              "start": 89.58,
+              "end": 89.96
+            },
+            {
+              "text": "bana",
+              "start": 89.96,
+              "end": 90.28
+            },
+            {
+              "text": "birisinin",
+              "start": 90.28,
+              "end": 90.88
+            },
+            {
+              "text": "dürüst",
+              "start": 90.88,
+              "end": 91.38
+            },
+            {
+              "text": "davranmasının",
+              "start": 91.38,
+              "end": 92.22
+            },
+            {
+              "text": "nasıl",
+              "start": 92.22,
+              "end": 92.6
+            },
+            {
+              "text": "bir",
+              "start": 92.6,
+              "end": 92.88
+            },
+            {
+              "text": "şey",
+              "start": 92.88,
+              "end": 93.06
+            },
+            {
+              "text": "olduğunu",
+              "start": 93.06,
+              "end": 93.38
+            },
+            {
+              "text": "unutmuşum",
+              "start": 93.38,
+              "end": 94.14
+            },
+            {
+              "text": "Ahmet.",
+              "start": 94.14,
+              "end": 94.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Teslimden",
+              "start": 94.48,
+              "end": 95.16
+            },
+            {
+              "text": "giriyoruz,",
+              "start": 95.16,
+              "end": 95.54
+            },
+            {
+              "text": "attın",
+              "start": 95.78,
+              "end": 96.14
+            },
+            {
+              "text": "kendinizi.",
+              "start": 96.14,
+              "end": 96.68
+            },
+            {
+              "text": "Diskodayız,",
+              "start": 96.84,
+              "end": 97.56
+            },
+            {
+              "text": "tamam",
+              "start": 97.68,
+              "end": 97.76
+            },
+            {
+              "text": "mı?",
+              "start": 97.76,
+              "end": 97.94
+            },
+            {
+              "text": "Yanacaz!",
+              "start": 98.0,
+              "end": 98.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Birisi",
+              "start": 98.82,
+              "end": 99.5
+            },
+            {
+              "text": "çıkar",
+              "start": 99.5,
+              "end": 100.18
+            },
+            {
+              "text": "ve",
+              "start": 100.75,
+              "end": 101.02
+            },
+            {
+              "text": "herrrkesi",
+              "start": 101.02,
+              "end": 102.12
+            },
+            {
+              "text": "geçer!",
+              "start": 102.12,
+              "end": 102.94
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 106.39,
+              "end": 106.71
+            },
+            {
+              "text": "ev",
+              "start": 106.71,
+              "end": 106.87
+            },
+            {
+              "text": "yıllardır",
+              "start": 106.87,
+              "end": 107.77
+            },
+            {
+              "text": "böyle",
+              "start": 107.83,
+              "end": 108.03
+            },
+            {
+              "text": "bir",
+              "start": 108.03,
+              "end": 108.21
+            },
+            {
+              "text": "eğlence",
+              "start": 108.21,
+              "end": 108.81
+            },
+            {
+              "text": "görmedi.",
+              "start": 108.81,
+              "end": 109.19
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Ferruh",
+          "words": [
+            {
+              "text": "Bana",
+              "start": 110.25,
+              "end": 110.5
+            },
+            {
+              "text": "bak!",
+              "start": 110.5,
+              "end": 110.75
+            },
+            {
+              "text": "Bir",
+              "start": 111.0,
+              "end": 111.6
+            },
+            {
+              "text": "yaramazlık",
+              "start": 111.6,
+              "end": 112.2
+            },
+            {
+              "text": "yapayım",
+              "start": 112.2,
+              "end": 112.8
+            },
+            {
+              "text": "deme",
+              "start": 112.8,
+              "end": 113.2
+            },
+            {
+              "text": "haa",
+              "start": 113.2,
+              "end": 114.0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "Refik",
+          "words": [
+            {
+              "text": "Hahaha,",
+              "start": 114.3,
+              "end": 114.8
+            },
+            {
+              "text": "Piç!",
+              "start": 114.81,
+              "end": 115.45
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

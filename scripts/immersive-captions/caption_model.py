@@ -170,6 +170,31 @@ class CaptionModel:
         )
         return float(resolved_defaults.get("default_animation_time_margin", 0.0))
 
+    def get_auto_group_overlap_threshold(self, group: dict | None = None) -> float:
+        resolved_defaults = self.get_style_defaults_for_context(
+            group=group,
+            section=None,
+            word=None,
+            speaker_name=None,
+            include_word_defaults=False,
+        )
+        return float(resolved_defaults.get("auto_group_overlap_threshold", 0.55))
+
+    def _owner_duration(self, owner: dict) -> float | None:
+        start = owner.get("start")
+        end = owner.get("end")
+        if start is None or end is None:
+            return None
+        return max(0.0, float(end) - float(start))
+
+    def _cap_margin_for_duration(self, margin: float, duration: float | None) -> float:
+        if duration is None:
+            return max(0.0, float(margin))
+
+        duration = max(0.0, float(duration))
+        dynamic_cap = max(0.03, min(0.12, duration * 0.25))
+        return max(0.0, min(float(margin), dynamic_cap))
+
     def get_group_show_time_margin(self, group: dict | None = None) -> float:
         resolved_defaults = self.get_style_defaults_for_context(
             group=group,
@@ -229,7 +254,97 @@ class CaptionModel:
             max_begin_margin = max(max_begin_margin, begin_margin)
             max_end_margin = max(max_end_margin, end_margin)
 
+        duration = self._owner_duration(owner)
+        max_begin_margin = self._cap_margin_for_duration(max_begin_margin, duration)
+        max_end_margin = self._cap_margin_for_duration(max_end_margin, duration)
+
         return max_begin_margin, max_end_margin
+
+    def get_highlight_time_margins(
+        self,
+        owner: dict,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        resolved_animations: list[dict] | None = None,
+    ) -> tuple[float, float]:
+        begin_margin, end_margin = self.get_animation_time_margins(
+            owner,
+            group=group,
+            section=section,
+            word=word,
+            resolved_animations=resolved_animations,
+        )
+
+        duration = self._owner_duration(owner)
+        if duration is None:
+            return 0.0, 0.0
+
+        # Keep highlights sequential even when animations have extra breathing room.
+        highlight_cap = max(0.0, min(0.05, duration * 0.12))
+        return min(begin_margin, highlight_cap), min(end_margin, highlight_cap)
+
+    def get_owner_highlight_time_range(
+        self,
+        owner: dict,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        resolved_animations: list[dict] | None = None,
+    ) -> tuple[float | None, float | None]:
+        start = owner.get("start")
+        end = owner.get("end")
+
+        if start is None or end is None:
+            return None, None
+
+        start = float(start)
+        end = float(end)
+
+        begin_margin, end_margin = self.get_highlight_time_margins(
+            owner,
+            group=group,
+            section=section,
+            word=word,
+            resolved_animations=resolved_animations,
+        )
+
+        return start - begin_margin, end + end_margin
+
+    def compute_owner_highlight_progress(
+        self,
+        owner: dict,
+        time_seconds: float,
+        group: dict | None = None,
+        section: dict | None = None,
+        word: dict | None = None,
+        resolved_animations: list[dict] | None = None,
+    ) -> float:
+        start, end = self.get_owner_highlight_time_range(
+            owner,
+            group=group,
+            section=section,
+            word=word,
+            resolved_animations=resolved_animations,
+        )
+
+        if start is None and end is None:
+            return 0.0
+
+        if start is not None and end is not None:
+            if time_seconds <= start:
+                return 0.0
+            if time_seconds >= end:
+                return 1.0
+            duration = max(0.001, end - start)
+            return (time_seconds - start) / duration
+
+        if start is not None:
+            return 1.0 if time_seconds >= start else 0.0
+        if end is not None:
+            return 1.0 if time_seconds >= end else 0.0
+
+        return 0.0
 
     def get_owner_effective_time_range(
         self,
@@ -426,7 +541,20 @@ class CaptionModel:
         return False
 
     def groups_should_overlap(self, older_group: dict, newer_group: dict) -> bool:
-        return self.group_requests_overlap_next(older_group) or self.group_requests_overlap_previous(newer_group)
+        if self.group_requests_overlap_next(older_group) or self.group_requests_overlap_previous(newer_group):
+            return True
+
+        older_natural = self.get_group_natural_time_range(older_group)
+        newer_natural = self.get_group_natural_time_range(newer_group)
+        if older_natural[1] is None or newer_natural[0] is None:
+            return False
+
+        gap = float(newer_natural[0]) - float(older_natural[1])
+        overlap_threshold = max(
+            self.get_auto_group_overlap_threshold(older_group),
+            self.get_auto_group_overlap_threshold(newer_group),
+        )
+        return gap <= overlap_threshold
 
     def get_active_groups(self, time_seconds: float) -> list[dict]:
         active = []

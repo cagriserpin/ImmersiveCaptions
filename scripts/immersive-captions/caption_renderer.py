@@ -60,7 +60,7 @@ def ease_in_out_cubic(t: float) -> float:
 
 
 class WordGraphicsItem(QGraphicsItem):
-    def __init__(self, text: str, font: QFont, dim_color_hex: str, active_color_hex: str, reveal_feather_px: float) -> None:
+    def __init__(self, text: str, font: QFont, dim_color_hex: str, active_color_hex: str, reveal_feather_px: float, show_highlight: bool = True) -> None:
         super().__init__()
 
         self.text = text
@@ -68,6 +68,7 @@ class WordGraphicsItem(QGraphicsItem):
         self.dim_color = QColor(dim_color_hex)
         self.active_color = QColor(active_color_hex)
         self.reveal_feather_px = max(0.0, float(reveal_feather_px))
+        self.show_highlight = bool(show_highlight)
 
         self.reveal_progress = 0.0
         self.scale_factor = 1.0
@@ -122,6 +123,10 @@ class WordGraphicsItem(QGraphicsItem):
 
         painter.setPen(self.dim_color)
         painter.drawText(0, baseline_y, self.text)
+
+        if not self.show_highlight:
+            painter.restore()
+            return
 
         reveal_width = self.text_width * self.reveal_progress
         if reveal_width <= 0:
@@ -254,8 +259,8 @@ class CaptionRenderer:
         self.scene.addItem(background_item)
         return background_item
 
-    def create_word_item(self, text: str, font: QFont, dim_hex: str, active_color: str, reveal_feather_px: float) -> WordGraphicsItem:
-        item = WordGraphicsItem(text, font, dim_hex, active_color, reveal_feather_px)
+    def create_word_item(self, text: str, font: QFont, dim_hex: str, active_color: str, reveal_feather_px: float, show_highlight: bool = True) -> WordGraphicsItem:
+        item = WordGraphicsItem(text, font, dim_hex, active_color, reveal_feather_px, show_highlight)
         item.setZValue(11)
         self.scene.addItem(item)
         return item
@@ -278,6 +283,7 @@ class CaptionRenderer:
         active_color = merged_style.get("font_color", "#ffffff")
         dim_hex = dim_color(active_color, self.get_default_dim_opacity(merged_style))
         reveal_feather_px = self.get_reveal_feather_px(group=group, section=section, word=word)
+        show_highlight = bool(merged_style.get("show_highlight", 1))
 
         resolved_animations = self.caption_model.get_resolved_animation_list(
             word,
@@ -286,7 +292,7 @@ class CaptionRenderer:
             word=word,
         )
 
-        item = self.create_word_item(word_text, font, dim_hex, active_color, reveal_feather_px)
+        item = self.create_word_item(word_text, font, dim_hex, active_color, reveal_feather_px, show_highlight)
         rect = item.boundingRect()
 
         return {
@@ -316,6 +322,7 @@ class CaptionRenderer:
         active_color = merged_style.get("font_color", "#ffffff")
         dim_hex = dim_color(active_color, self.get_default_dim_opacity(merged_style))
         reveal_feather_px = self.get_reveal_feather_px(group=group, section=section)
+        show_highlight = bool(merged_style.get("show_highlight", 1))
 
         resolved_animations = self.caption_model.get_resolved_animation_list(
             section,
@@ -324,7 +331,7 @@ class CaptionRenderer:
             word=None,
         )
 
-        item = self.create_word_item(text, font, dim_hex, active_color, reveal_feather_px)
+        item = self.create_word_item(text, font, dim_hex, active_color, reveal_feather_px, show_highlight)
         rect = item.boundingRect()
 
         return {
@@ -666,7 +673,8 @@ class CaptionRenderer:
         time_seconds: float,
     ) -> None:
         is_word = owner in section.get("words", [])
-        progress = self.caption_model.compute_owner_effective_progress(
+
+        animation_progress = self.caption_model.compute_owner_effective_progress(
             owner,
             time_seconds,
             group=group,
@@ -675,10 +683,19 @@ class CaptionRenderer:
             resolved_animations=resolved_animations,
         )
 
-        item.set_reveal_progress(progress)
-        item.set_scale_factor(self.resolve_scale_factor(resolved_animations, progress))
-        item.set_offset_y(self.resolve_vertical_offset(resolved_animations, progress))
-        item.set_rotation_deg(self.resolve_rotation_deg(resolved_animations, progress))
+        highlight_progress = self.caption_model.compute_owner_highlight_progress(
+            owner,
+            time_seconds,
+            group=group,
+            section=section,
+            word=owner if is_word else None,
+            resolved_animations=resolved_animations,
+        )
+
+        item.set_reveal_progress(highlight_progress)
+        item.set_scale_factor(self.resolve_scale_factor(resolved_animations, animation_progress))
+        item.set_offset_y(self.resolve_vertical_offset(resolved_animations, animation_progress))
+        item.set_rotation_deg(self.resolve_rotation_deg(resolved_animations, animation_progress))
 
     def update_group_items(self, time_seconds: float) -> None:
         if self.caption_model is None or not self.group_entries:

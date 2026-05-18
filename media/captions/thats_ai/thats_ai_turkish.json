@@ -1,0 +1,1666 @@
+{
+  "defaults": {
+    "font": "Calibri",
+    "font_size": 25,
+    "font_weight": 400,
+    "font_color": "#ffffff",
+    "font_style": "normal",
+    "dim_opacity": 0.35,
+    "group_show_time_margin": 0.3,
+    "group_disappear_time_margin": 1.0,
+    "default_animation_time_margin": 0.1,
+    "group_gap": 8,
+    "section_gap": 0,
+    "section_to_bg_padding_x": 18,
+    "section_to_bg_padding_y": 10,
+    "section_video_bottom_margin": 80,
+    "word_gap": 10,
+    "reveal_feather_px": 12
+  },
+  "speakers": {
+    "john": {
+      "font_color": "#CD7F32"
+    },
+    "zee": {
+      "font_color": "#FCBA03"
+    },
+    "crowd": {
+      "font_color": "#FFFFFF"
+    }
+  },
+  "groups": [
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Hah,",
+              "start": 0.0,
+              "end": 0.24,
+              "font_style": "italic",
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18
+                }
+              ]
+            },
+            {
+              "text": "şu",
+              "start": 0.24,
+              "end": 0.42
+            },
+            {
+              "text": "adama",
+              "start": 0.42,
+              "end": 0.83
+            },
+            {
+              "text": "bak.",
+              "start": 0.83,
+              "end": 1.1
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 1.42,
+              "end": 1.6
+            },
+            {
+              "text": "YZ,",
+              "start": 1.6,
+              "end": 1.78,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "adamım.",
+              "start": 1.78,
+              "end": 2.55
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Ne?",
+              "start": 4.52,
+              "end": 4.88,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Yok",
+              "start": 6.1,
+              "end": 6.3,
+              "font_style": "italic",
+              "animation": [
+                {
+                  "type": "scale"
+                },
+                {
+                  "type": "jiggle",
+                  "cycles": 2,
+                  "angle_deg": 5
+                }
+              ]
+            },
+            {
+              "text": "ya,",
+              "start": 6.3,
+              "end": 6.48
+            },
+            {
+              "text": "diyorum",
+              "start": 6.48,
+              "end": 6.98
+            },
+            {
+              "text": "ki,",
+              "start": 6.98,
+              "end": 7.16
+            },
+            {
+              "text": "şu",
+              "start": 7.16,
+              "end": 7.34
+            },
+            {
+              "text": "adamın",
+              "start": 7.34,
+              "end": 7.79
+            },
+            {
+              "text": "taklalarına",
+              "start": 7.79,
+              "end": 8.59
+            },
+            {
+              "text": "bak.",
+              "start": 8.59,
+              "end": 8.85,
+              "animation": [
+                {
+                  "type": "bounce",
+                  "amplitude_px": 10,
+                  "cycles": 1
+                }
+              ]
+            },
+            {
+              "text": "Adam",
+              "start": 8.85,
+              "end": 9.15
+            },
+            {
+              "text": "gerçekten",
+              "start": 9.15,
+              "end": 9.75
+            },
+            {
+              "text": "yetenekli.",
+              "start": 9.75,
+              "end": 10.46,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "defaults": {
+            "animation_defaults": {
+              "bounce": {
+                "amplitude_px": 15,
+                "cycles": 1
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Ben",
+              "start": 10.92,
+              "end": 11.08,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "de",
+              "start": 11.08,
+              "end": 11.22,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "dedim",
+              "start": 11.22,
+              "end": 11.76,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "ki,",
+              "start": 11.76,
+              "end": 12.18
+            },
+            {
+              "text": "YZ,",
+              "start": 12.18,
+              "end": 12.58,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "adamım.",
+              "start": 12.58,
+              "end": 13.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Bunu",
+              "start": 13.46,
+              "end": 13.71
+            },
+            {
+              "text": "reelslerde",
+              "start": 13.71,
+              "end": 14.29
+            },
+            {
+              "text": "hep",
+              "start": 14.29,
+              "end": 14.47
+            },
+            {
+              "text": "görüyorum.",
+              "start": 14.47,
+              "end": 15.06
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "defaults": {
+            "animation_defaults": {
+              "bounce": {
+                "amplitude_px": 15,
+                "cycles": 1
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Yapay",
+              "start": 15.26,
+              "end": 15.85,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "zeka!",
+              "start": 15.85,
+              "end": 16.46,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 16.8,
+              "end": 16.98
+            },
+            {
+              "text": "gerçek",
+              "start": 16.98,
+              "end": 17.22
+            },
+            {
+              "text": "değil.",
+              "start": 17.22,
+              "end": 17.47,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "Bizi",
+              "start": 17.47,
+              "end": 17.66
+            },
+            {
+              "text": "kandırmaya",
+              "start": 17.66,
+              "end": 18.07,
+              "animation": [
+                {
+                  "type": "jiggle",
+                  "angle_deg": 4,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "çalışıyorlar,",
+              "start": 18.07,
+              "end": 18.58
+            },
+            {
+              "text": "adamım!",
+              "start": 18.58,
+              "end": 18.88,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "defaults": {
+            "animation_defaults": {
+              "scale": {
+                "scale": 1.25
+              },
+              "jiggle": {
+                "angle_deg": 6,
+                "cycles": 3
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Kafamızı",
+              "start": 19.34,
+              "end": 19.77,
+              "animation": [
+                {
+                  "type": "jiggle",
+                  "angle_deg": 4,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "karıştırıyorlar,",
+              "start": 19.77,
+              "end": 20.54,
+              "animation": [
+                {
+                  "type": "scale"
+                },
+                {
+                  "type": "jiggle"
+                }
+              ]
+            },
+            {
+              "text": "adamım.",
+              "start": 20.54,
+              "end": 20.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Zee,",
+              "start": 21.42,
+              "end": 21.79
+            },
+            {
+              "text": "sen",
+              "start": 21.79,
+              "end": 22.06
+            },
+            {
+              "text": "yine",
+              "start": 22.06,
+              "end": 22.46
+            },
+            {
+              "text": "o",
+              "start": 22.46,
+              "end": 22.64
+            },
+            {
+              "text": "şeyi",
+              "start": 22.64,
+              "end": 23.04,
+              "font_style": "italic",
+              "animation": [
+                {
+                  "type": "jiggle",
+                  "angle_deg": 4,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "mi",
+              "start": 23.04,
+              "end": 23.22
+            },
+            {
+              "text": "içtin?",
+              "start": 23.22,
+              "end": 23.78
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "Haklı.",
+              "start": 24.48,
+              "end": 25.0,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "defaults": {
+            "animation_defaults": {
+              "bounce": {
+                "amplitude_px": 15,
+                "cycles": 2
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Tanrım!",
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ],
+              "start": 25.42,
+              "end": 25.78
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 26.24,
+              "end": 26.38
+            },
+            {
+              "text": "gerçek",
+              "start": 26.38,
+              "end": 26.6
+            },
+            {
+              "text": "değil.",
+              "start": 26.6,
+              "end": 26.82
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "overlap_next": true,
+          "defaults": {
+            "animation_defaults": {
+              "bounce": {
+                "amplitude_px": 15,
+                "cycles": 1,
+                "time_margin": 0
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Bu",
+              "start": 27.20,
+              "end": 27.58,
+              "animation": [
+                {
+                  "type": "bounce",
+                  "time_margin": 0.3
+                }
+              ]
+            },
+            {
+              "text": "YZ",
+              "start": 27.50,
+              "end": 27.80,
+              "animation": [
+                {
+                  "type": "bounce",
+                  "cycles": 2,
+                  "time_margin": 0.5
+                }
+              ]
+            },
+            {
+              "text": "üretimi!",
+              "start": 27.76,
+              "end": 28.86,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "defaults": {
+            "animation_defaults": {
+              "bounce": {
+                "amplitude_px": 15,
+                "cycles": 1,
+                "time_margin": 0
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Bu",
+              "start": 29.0,
+              "end": 29.27,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "yapay",
+              "start": 29.27,
+              "end": 30.12,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "zeka.",
+              "start": 30.12,
+              "end": 31.0,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "sfx",
+          "text": "[HUH HUHH]",
+          "start": 31.0,
+          "end": 31.8,
+          "animation": [
+            {
+              "type": "bounce",
+              "cycles": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 32.08,
+              "end": 32.31
+            },
+            {
+              "text": "kötü.",
+              "start": 32.31,
+              "end": 33.04,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "sfx",
+          "text": "[HUH HUHH]",
+          "start": 33.04,
+          "end": 33.5,
+          "animation": [
+            {
+              "type": "bounce",
+              "cycles": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Beynimizi",
+              "start": 33.72,
+              "end": 34.21,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "çürütüyor.",
+              "start": 34.21,
+              "end": 34.74
+            }
+          ]
+        },
+        {
+          "type": "sfx",
+          "text": "[HUH HUHH]",
+          "start": 35.4,
+          "end": 36.0,
+          "animation": [
+            {
+              "type": "bounce",
+              "cycles": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "defaults": {
+            "font_weight": 700,
+            "animation_defaults": {
+              "bounce": {
+                "amplitude_px": 12,
+                "cycles": 1,
+                "time_margin": 0
+              },
+              "scale": {
+                "scale": 1.18
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "YÜZDE",
+              "start": 36.25,
+              "end": 37.66,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "YÜZ",
+              "start": 37.66,
+              "end": 38.46,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "YZ!",
+              "start": 38.46,
+              "end": 39.1,
+              "animation": [
+                {
+                  "type": "scale"
+                },
+                {
+                  "type": "bounce",
+                  "cycles": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "Evet!",
+              "start": 39.19,
+              "end": 39.63,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.22
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "sfx",
+          "text": "[gevezelik]",
+          "start": 39.19,
+          "end": 45.0
+        },
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "defaults": {
+            "animation_defaults": {
+              "scale": {
+                "scale": 1.16
+              },
+              "jiggle": {
+                "angle_deg": 5,
+                "cycles": 2
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "BU",
+              "start": 42.0,
+              "end": 42.5,
+              "animation": [
+                {
+                  "type": "scale"
+                }
+              ]
+            },
+            {
+              "text": "RESMEN",
+              "start": 42.5,
+              "end": 43.2,
+              "animation": [
+                {
+                  "type": "scale"
+                }
+              ]
+            },
+            {
+              "text": "SAÇMALIK!",
+              "start": 43.2,
+              "end": 44.7,
+              "animation": [
+                {
+                  "type": "scale"
+                },
+                {
+                  "type": "jiggle"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "YETER!",
+              "start": 46.0,
+              "end": 47.5,
+              "font_weight": 700,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 2.0
+                },
+                {
+                  "type": "jiggle",
+                  "angle_deg": 10,
+                  "cycles": 10
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "sfx",
+          "text": "[♪ Trompetle Amerikan milli marşı çalıyor ♪]",
+          "font_color": "#FFBF00",
+          "font_style": "italic",
+          "start": 50.1,
+          "end": 52.65
+        },
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 51.31,
+              "end": 51.45
+            },
+            {
+              "text": "noktaya",
+              "start": 51.45,
+              "end": 51.78
+            },
+            {
+              "text": "mı",
+              "start": 51.78,
+              "end": 51.93
+            },
+            {
+              "text": "geldik",
+              "start": 51.93,
+              "end": 52.18
+            },
+            {
+              "text": "yani,",
+              "start": 52.18,
+              "end": 52.36
+            },
+            {
+              "text": "arkadaşlar?",
+              "start": 52.36,
+              "end": 52.65,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Telefonda",
+              "start": 53.99,
+              "end": 54.45
+            },
+            {
+              "text": "gördüğümüz",
+              "start": 54.45,
+              "end": 54.92
+            },
+            {
+              "text": "YZ",
+              "start": 54.92,
+              "end": 55.17,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.16,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "videoları",
+              "start": 55.17,
+              "end": 55.56
+            },
+            {
+              "text": "yüzünden",
+              "start": 55.56,
+              "end": 55.98
+            },
+            {
+              "text": "genç",
+              "start": 55.98,
+              "end": 56.14
+            },
+            {
+              "text": "bir",
+              "start": 56.14,
+              "end": 56.23
+            },
+            {
+              "text": "adamın",
+              "start": 56.23,
+              "end": 56.49
+            },
+            {
+              "text": "yeteneğini",
+              "start": 56.49,
+              "end": 57.02,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "takdir",
+              "start": 57.02,
+              "end": 57.35
+            },
+            {
+              "text": "edemeyecek",
+              "start": 57.35,
+              "end": 57.92
+            },
+            {
+              "text": "miyiz?",
+              "start": 57.92,
+              "end": 59.41
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Hı?",
+              "start": 60.53,
+              "end": 60.81,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.16
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "defaults": {
+            "font_weight": 700,
+            "animation_defaults": {
+              "scale": {
+                "scale": 2.0
+              },
+              "bounce": {
+                "amplitude_px": 12,
+                "cycles": 1
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "UYANIN!",
+              "start": 62.05,
+              "end": 62.71,
+              "animation": [
+                {
+                  "type": "scale"
+                },
+                {
+                  "type": "bounce"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Bu",
+              "start": 65.05,
+              "end": 65.23
+            },
+            {
+              "text": "gerçek",
+              "start": 65.23,
+              "end": 65.74,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "hayat.",
+              "start": 65.74,
+              "end": 66.27
+            },
+            {
+              "text": "Bu,",
+              "start": 66.27,
+              "end": 66.45
+            },
+            {
+              "text": "gerçek",
+              "start": 66.45,
+              "end": 66.96,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "bir",
+              "start": 66.96,
+              "end": 67.15
+            },
+            {
+              "text": "adam",
+              "start": 67.15,
+              "end": 67.54
+            },
+            {
+              "text": "ve",
+              "start": 67.54,
+              "end": 67.72
+            },
+            {
+              "text": "gerçek",
+              "start": 67.72,
+              "end": 68.23,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "bir",
+              "start": 68.23,
+              "end": 68.42
+            },
+            {
+              "text": "yetenek.",
+              "start": 68.42,
+              "end": 69.15,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.14
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Peşimden",
+              "start": 71.88,
+              "end": 72.28,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18
+                }
+              ]
+            },
+            {
+              "text": "gelin!",
+              "start": 72.28,
+              "end": 72.54,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "sfx",
+          "text": "[uygun adım marş]",
+          "start": 73.0,
+          "end": 77.0,
+          "animation": [
+            {
+              "type": "pop",
+              "cycles": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "defaults": {
+            "animation_defaults": {
+              "pop": {
+                "scale": 1.16
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Genç",
+              "start": 78.9,
+              "end": 79.18
+            },
+            {
+              "text": "adam,",
+              "start": 79.18,
+              "end": 79.5
+            },
+            {
+              "text": "[gülüyor]",
+              "start": 79.5,
+              "end": 80.5,
+              "animation": [
+                {
+                  "type": "pop"
+                }
+              ]
+            },
+            {
+              "text": "taklalarını",
+              "start": 80.8,
+              "end": 81.38,
+              "animation": [
+                {
+                  "type": "bounce",
+                  "amplitude_px": 10,
+                  "cycles": 1
+                }
+              ]
+            },
+            {
+              "text": "ve",
+              "start": 81.38,
+              "end": 81.5
+            },
+            {
+              "text": "yeteneğini",
+              "start": 81.5,
+              "end": 82.06,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "gerçekten",
+              "start": 82.06,
+              "end": 82.48
+            },
+            {
+              "text": "takdir",
+              "start": 82.48,
+              "end": 82.88,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "ettiğimizi",
+              "start": 82.88,
+              "end": 83.56
+            },
+            {
+              "text": "belirtmek",
+              "start": 83.56,
+              "end": 84.26
+            },
+            {
+              "text": "istedik.",
+              "start": 84.26,
+              "end": 85.68
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "defaults": {
+        "font_weight": 700,
+        "animation_defaults": {
+          "bounce": {
+            "amplitude_px": 15,
+            "cycles": 1,
+            "time_margin": 0
+          }
+        }
+      },
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "BAKIN!",
+              "start": 85.68,
+              "end": 85.94,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "ALTI",
+              "start": 86.4,
+              "end": 86.77,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.5
+                },
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "PARMAĞI",
+              "start": 86.77,
+              "end": 87.39,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.5
+                },
+                {
+                  "type": "bounce"
+                }
+              ]
+            },
+            {
+              "text": "VAR!",
+              "start": 87.39,
+              "end": 87.72,
+              "animation": [
+                {
+                  "type": "bounce"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "crowd",
+          "words": [
+            {
+              "text": "BU YZ!",
+              "start": 89.08,
+              "end": 89.46,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.18,
+                  "cycles": 2
+                },
+                {
+                  "type": "jiggle",
+                  "angle_deg": 4,
+                  "cycles": 2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "sfx",
+          "text": "[YUH YUHH]",
+          "start": 90.0,
+          "end": 95.0
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Ben",
+              "start": 95.55,
+              "end": 95.73
+            },
+            {
+              "text": "sana",
+              "start": 95.73,
+              "end": 95.98
+            },
+            {
+              "text": "demiştim.",
+              "start": 95.98,
+              "end": 96.45
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "defaults": {
+            "animation_defaults": {
+              "pop": {
+                "scale": 1.16
+              }
+            }
+          },
+          "words": [
+            {
+              "text": "Y,",
+              "start": 96.65,
+              "end": 97.42,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.28
+                }
+              ]
+            },
+            {
+              "text": "Z.",
+              "start": 98.0,
+              "end": 98.52,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.28
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "sfx",
+          "text": "[♪ Funk müzik başlıyor ♪]",
+          "font_style": "italic",
+          "start": 99.52,
+          "end": 102.2
+        },
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Adamın",
+              "start": 101.2,
+              "end": 101.42
+            },
+            {
+              "text": "altı",
+              "start": 101.42,
+              "end": 101.62,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.14
+                }
+              ]
+            },
+            {
+              "text": "parmağı",
+              "start": 101.62,
+              "end": 101.86,
+              "animation": [
+                {
+                  "type": "jiggle",
+                  "angle_deg": 4,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "var,",
+              "start": 101.86,
+              "end": 102.02
+            },
+            {
+              "text": "dostum.",
+              "start": 102.02,
+              "end": 102.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "sections": [
+        {
+          "type": "dialogue",
+          "speaker": "john",
+          "words": [
+            {
+              "text": "Hayatımda",
+              "start": 103.26,
+              "end": 103.56,
+              "animation": [
+                {
+                  "type": "scale",
+                  "scale": 1.12
+                }
+              ]
+            },
+            {
+              "text": "böyle",
+              "start": 103.56,
+              "end": 103.76
+            },
+            {
+              "text": "saçma",
+              "start": 103.76,
+              "end": 104.02,
+              "animation": [
+                {
+                  "type": "jiggle",
+                  "angle_deg": 4,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "bir",
+              "start": 104.02,
+              "end": 104.18
+            },
+            {
+              "text": "şey",
+              "start": 104.18,
+              "end": 104.4
+            },
+            {
+              "text": "görmedim.",
+              "start": 104.4,
+              "end": 104.92
+            }
+          ]
+        },
+        {
+          "type": "dialogue",
+          "speaker": "zee",
+          "words": [
+            {
+              "text": "Ben",
+              "start": 105.2,
+              "end": 105.38
+            },
+            {
+              "text": "demiştim.",
+              "start": 105.38,
+              "end": 106.12
+            },
+            {
+              "text": "YZ,",
+              "start": 106.12,
+              "end": 106.3,
+              "animation": [
+                {
+                  "type": "pop",
+                  "scale": 1.18,
+                  "cycles": 2
+                }
+              ]
+            },
+            {
+              "text": "adamım.",
+              "start": 106.3,
+              "end": 106.92
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

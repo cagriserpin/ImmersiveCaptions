@@ -1,16 +1,25 @@
 import json
+from pathlib import Path
+
 from faster_whisper import WhisperModel
 
-AUDIO_PATH = "audio/audio.mp3"
-OUTPUT_PATH = "words/words.json"
+# whisper.py -> scripts/caption-creator/whisper.py
+# project root -> iki klasör yukarı
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+AUDIO_PATH = PROJECT_ROOT / "media" / "audio" / "yan_yana.mp3"
+OUTPUT_PATH = PROJECT_ROOT / "media" / "captions" / "yan_yana" / "words.json"
 
 print("Loading model...")
 model = WhisperModel("small", device="cpu", compute_type="int8")
 print("Model loaded.")
 
+# Output klasörü yoksa oluştur
+OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
 segments, info = model.transcribe(
-    AUDIO_PATH,
-    language="en",
+    str(AUDIO_PATH),
+    language="tr",
     beam_size=5,
     best_of=5,
     word_timestamps=True,
