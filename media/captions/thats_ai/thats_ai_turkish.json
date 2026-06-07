@@ -1,7 +1,7 @@
 {
   "defaults": {
     "font": "Calibri",
-    "font_size": 25,
+    "font_size": 35,
     "font_weight": 400,
     "font_color": "#ffffff",
     "font_style": "normal",
