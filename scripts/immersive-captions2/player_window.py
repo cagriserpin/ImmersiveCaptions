@@ -1,16 +1,28 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
+import subprocess
 import sys
+import tempfile
+
+try:
+    import imageio_ffmpeg  # type: ignore
+except Exception:
+    imageio_ffmpeg = None
+
+import cv2
+import numpy as np
 
 from PySide6.QtCore import Qt, QSettings, QTimer, QUrl
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtGui import QImage, QKeySequence, QPainter, QPixmap, QShortcut
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
     QFrame,
+    QGraphicsPixmapItem,
     QGraphicsScene,
     QGraphicsView,
     QGroupBox,
@@ -18,6 +30,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QProgressDialog,
     QPushButton,
     QSizePolicy,
     QSlider,
@@ -103,6 +116,7 @@ class MainWindow(QMainWindow):
         self.open_identities_button = QPushButton("Open Identities JSON")
         self.open_transcript_button = QPushButton("Open Transcript JSON")
         self.extract_faces_button = QPushButton("Extract Faces")
+        self.export_video_button = QPushButton("Export Captioned MP4")
         self.toggle_boxes_button = QPushButton("Hide Boxes")
         self.toggle_landmarks_button = QPushButton("Hide Landmarks")
         self.toggle_scores_button = QPushButton("Hide Labels")
@@ -135,6 +149,7 @@ class MainWindow(QMainWindow):
         self.open_identities_button.clicked.connect(self.open_identities)
         self.open_transcript_button.clicked.connect(self.open_transcript)
         self.extract_faces_button.clicked.connect(self.extract_faces_for_current_video)
+        self.export_video_button.clicked.connect(self.export_captioned_video)
         self.toggle_boxes_button.clicked.connect(self.toggle_boxes)
         self.toggle_landmarks_button.clicked.connect(self.toggle_landmarks)
         self.toggle_scores_button.clicked.connect(self.toggle_scores)
@@ -186,6 +201,7 @@ class MainWindow(QMainWindow):
         files_layout.addWidget(self.open_identities_button)
         files_layout.addWidget(self.open_transcript_button)
         files_layout.addWidget(self.extract_faces_button)
+        files_layout.addWidget(self.export_video_button)
         files_group.setLayout(files_layout)
 
         loaded_group = QGroupBox("Loaded Resources")
@@ -565,6 +581,255 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             progress_dialog.close()
             QMessageBox.critical(self, "Extraction failed", str(exc))
+
+
+    def _copy_renderer_visual_settings(self, export_renderer: DetectionRenderer) -> None:
+        export_renderer.show_boxes = self.renderer.show_boxes
+        export_renderer.show_landmarks = self.renderer.show_landmarks
+        export_renderer.show_scores = self.renderer.show_scores
+        export_renderer.caption_font_point_size = self.renderer.caption_font_point_size
+
+    def _find_ffmpeg_executable(self) -> str | None:
+        candidates: list[str] = []
+
+        for name in ("ffmpeg", "ffmpeg.exe"):
+            found = shutil.which(name)
+            if found:
+                candidates.append(found)
+
+        local_candidates = [
+            Path(__file__).resolve().parent / "ffmpeg.exe",
+            Path(__file__).resolve().parent / "ffmpeg",
+            Path.cwd() / "ffmpeg.exe",
+            Path.cwd() / "ffmpeg",
+        ]
+        for candidate in local_candidates:
+            if candidate.exists():
+                candidates.append(str(candidate))
+
+        if imageio_ffmpeg is not None:
+            try:
+                exe = imageio_ffmpeg.get_ffmpeg_exe()
+                if exe:
+                    candidates.append(str(exe))
+            except Exception:
+                pass
+
+        for candidate in candidates:
+            if candidate:
+                return candidate
+        return None
+
+    def _run_ffmpeg_mux(self, ffmpeg_exe: str, silent_video_path: Path, source_video_path: Path, output_path: Path) -> tuple[bool, str]:
+        commands = [
+            [
+                ffmpeg_exe,
+                "-y",
+                "-i",
+                str(silent_video_path),
+                "-i",
+                str(source_video_path),
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a:0",
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                "-movflags",
+                "+faststart",
+                "-shortest",
+                str(output_path),
+            ],
+            [
+                ffmpeg_exe,
+                "-y",
+                "-i",
+                str(silent_video_path),
+                "-i",
+                str(source_video_path),
+                "-map",
+                "0:v:0",
+                "-map",
+                "1:a?",
+                "-c:v",
+                "copy",
+                "-c:a",
+                "aac",
+                "-b:a",
+                "192k",
+                "-movflags",
+                "+faststart",
+                "-shortest",
+                str(output_path),
+            ],
+        ]
+
+        last_err = ""
+        for cmd in commands:
+            result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if result.returncode == 0 and output_path.exists() and output_path.stat().st_size > 0:
+                return True, result.stderr
+            last_err = result.stderr
+            if output_path.exists():
+                try:
+                    output_path.unlink()
+                except Exception:
+                    pass
+
+        return False, last_err
+
+    def _mux_original_audio(self, silent_video_path: Path, output_path: Path) -> tuple[bool, str]:
+        if self.video_path is None:
+            return False, "No source video loaded."
+
+        ffmpeg_exe = self._find_ffmpeg_executable()
+        if ffmpeg_exe is None:
+            return False, "ffmpeg executable not found. Install ffmpeg or place ffmpeg.exe next to player_window.py."
+
+        return self._run_ffmpeg_mux(ffmpeg_exe, silent_video_path, self.video_path, output_path)
+
+    def export_captioned_video(self):
+        if self.video_path is None:
+            QMessageBox.warning(self, "No video", "Open a video first.")
+            return
+
+        suggested_output = self.video_path.with_name(self.video_path.stem + "_captioned.mp4")
+        output_path_str, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export Captioned MP4",
+            str(suggested_output),
+            "MP4 Video (*.mp4)",
+        )
+        if not output_path_str:
+            return
+
+        output_path = Path(output_path_str)
+        if output_path.suffix.lower() != ".mp4":
+            output_path = output_path.with_suffix(".mp4")
+
+        cap = cv2.VideoCapture(str(self.video_path))
+        if not cap.isOpened():
+            QMessageBox.critical(self, "Export failed", f"Could not open video:\n{self.video_path}")
+            return
+
+        fps = float(cap.get(cv2.CAP_PROP_FPS) or 0.0)
+        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 0)
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+
+        if fps <= 0 or width <= 0 or height <= 0:
+            cap.release()
+            QMessageBox.critical(self, "Export failed", "Could not read video metadata.")
+            return
+
+        progress = QProgressDialog("Exporting captioned video...", "Cancel", 0, max(1, frame_count), self)
+        progress.setWindowTitle("Exporting")
+        progress.setMinimumDuration(0)
+        progress.setValue(0)
+        QApplication.processEvents()
+
+        with tempfile.TemporaryDirectory(prefix="ic2_export_") as temp_dir:
+            temp_dir_path = Path(temp_dir)
+            silent_video_path = temp_dir_path / "captioned_silent.mp4"
+
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            writer = cv2.VideoWriter(str(silent_video_path), fourcc, fps, (width, height))
+            if not writer.isOpened():
+                cap.release()
+                progress.close()
+                QMessageBox.critical(self, "Export failed", "Could not create output video writer.")
+                return
+
+            export_scene = QGraphicsScene()
+            export_scene.setSceneRect(0, 0, width, height)
+            background_item = QGraphicsPixmapItem()
+            background_item.setZValue(0)
+            export_scene.addItem(background_item)
+
+            export_renderer = DetectionRenderer(export_scene)
+            export_renderer.set_identity_store(self.identity_store)
+            self._copy_renderer_visual_settings(export_renderer)
+
+            frame_index = 0
+            canceled = False
+
+            while True:
+                ok, frame_bgr = cap.read()
+                if not ok:
+                    break
+
+                current_time = frame_index / fps
+                faces = self.face_store.get_faces(current_time)
+                captions = self.transcript_store.get_active_entries(current_time) if self.transcript_store.is_loaded() else []
+
+                frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
+                qimage = QImage(
+                    frame_rgb.data,
+                    width,
+                    height,
+                    frame_rgb.strides[0],
+                    QImage.Format.Format_RGB888,
+                ).copy()
+                background_item.setPixmap(QPixmap.fromImage(qimage))
+
+                export_renderer.render_faces(faces, captions, current_time=current_time)
+
+                canvas = QImage(width, height, QImage.Format.Format_ARGB32)
+                canvas.fill(Qt.black)
+                painter = QPainter(canvas)
+                export_scene.render(painter)
+                painter.end()
+
+                ptr = canvas.bits()
+                frame_bgra = np.frombuffer(ptr, np.uint8).reshape((height, width, 4))
+                frame_out = cv2.cvtColor(frame_bgra, cv2.COLOR_BGRA2BGR)
+                writer.write(frame_out)
+
+                frame_index += 1
+                progress.setValue(frame_index)
+                if frame_index % 10 == 0:
+                    QApplication.processEvents()
+                    if progress.wasCanceled():
+                        canceled = True
+                        break
+
+            writer.release()
+            cap.release()
+            progress.close()
+
+            if canceled:
+                QMessageBox.information(self, "Export canceled", "Video export was canceled.")
+                return
+
+            if output_path.exists():
+                output_path.unlink()
+
+            muxed, mux_message = self._mux_original_audio(silent_video_path, output_path)
+            if not muxed:
+                shutil.copy2(silent_video_path, output_path)
+
+        self.set_session_status(f"Exported captioned video: {output_path.name}")
+        if muxed:
+            QMessageBox.information(
+                self,
+                "Export complete",
+                f"Saved captioned video with audio to:\n{output_path}\n\n"
+                "Font size setting: detection_renderer.py -> self.caption_font_point_size",
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                "Export complete (silent video)",
+                f"Saved captioned video to:\n{output_path}\n\n"
+                "Audio could not be muxed, so the export is silent.\n\n"
+                f"Reason:\n{mux_message}\n\n"
+                "Install ffmpeg or place ffmpeg.exe next to player_window.py, then export again.\n\n"
+                "Font size setting: detection_renderer.py -> self.caption_font_point_size",
+            )
 
     def toggle_boxes(self):
         self.renderer.show_boxes = not self.renderer.show_boxes

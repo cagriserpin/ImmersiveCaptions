@@ -65,3 +65,24 @@ Beklenen davranış:
 - Transcript entries can now include optional `end_time`.
 - If `end_time` is missing, the app computes a readable default duration automatically.
 - Active captions are now independent per entry, so one character speaking will not immediately replace another character\'s caption just because the next global timestamp started.
+
+
+## Caption font size
+
+Caption size is controlled in:
+
+- `detection_renderer.py`
+- setting: `self.caption_font_point_size = 16`
+
+You can make subtitles bigger or smaller by changing that number.
+
+## Export
+
+The player now has an **Export Captioned MP4** button.
+
+How it works:
+- exports the video with the current transcript captions burned in
+- uses the current face / identity / transcript data
+- keeps the current overlay visibility settings
+- tries to keep the original audio by muxing it back with `ffmpeg`
+- if audio muxing is not available, it still exports a silent MP4

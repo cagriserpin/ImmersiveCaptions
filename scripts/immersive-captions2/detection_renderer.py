@@ -18,6 +18,9 @@ class DetectionRenderer:
         self.show_scores = True
         self.identity_store: FaceIdentityStore | None = None
 
+        # Caption font size. Increase / decrease this value to change the subtitle size.
+        self.caption_font_point_size = 16
+
         self.caption_stack_spacing = 30.0
         self.caption_anchor_margin_y = 16.0
         self.caption_hold_seconds = 0.5
@@ -84,7 +87,7 @@ class DetectionRenderer:
             return
 
         item = QGraphicsSimpleTextItem(text)
-        font = QFont("Arial", 14)
+        font = QFont("Arial", self.caption_font_point_size)
         font.setWeight(QFont.Weight.Bold)
         item.setFont(font)
         item.setBrush(QBrush(QColor(255, 255, 255)))
