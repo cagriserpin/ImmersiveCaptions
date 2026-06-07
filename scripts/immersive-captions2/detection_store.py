@@ -140,12 +140,11 @@ class FaceIdentityStore:
         return manual_name or None
 
 
+
 class TranscriptStore:
     def __init__(self, json_path: str | Path | None = None) -> None:
         self.json_path = Path(json_path) if json_path else None
         self.entries: list[dict] = []
-        self.group_times: list[float] = []
-        self.groups_by_time: dict[float, list[dict]] = {}
 
         if self.json_path is not None:
             self.load(self.json_path)
@@ -153,8 +152,6 @@ class TranscriptStore:
     def clear(self) -> None:
         self.json_path = None
         self.entries = []
-        self.group_times = []
-        self.groups_by_time = {}
 
     def load(self, json_path: str | Path) -> None:
         self.json_path = Path(json_path)
@@ -168,32 +165,92 @@ class TranscriptStore:
                 if not isinstance(entry, dict):
                     continue
                 try:
-                    time_value = float(entry.get("time", 0.0))
+                    start_time = float(entry.get("time", 0.0))
                 except Exception:
                     continue
+
                 normalized = dict(entry)
-                normalized["time"] = time_value
+                normalized["time"] = start_time
                 normalized["type"] = str(entry.get("type", "dialogue")).strip().lower() or "dialogue"
                 normalized["name"] = str(entry.get("name", "")).strip()
                 normalized["text"] = str(entry.get("text", "")).strip()
+
+                explicit_end = entry.get("end_time")
+                if isinstance(explicit_end, (int, float)):
+                    normalized["end_time"] = float(explicit_end)
+                else:
+                    try:
+                        normalized["end_time"] = float(explicit_end)
+                    except Exception:
+                        normalized["end_time"] = None
+
                 self.entries.append(normalized)
 
         self.entries.sort(key=lambda item: (float(item.get("time", 0.0)), int(item.get("id", 0))))
-        self.groups_by_time = {}
+        self._apply_default_end_times()
+
+    def _estimate_duration(self, entry: dict) -> float:
+        text = str(entry.get("text", "")).replace("\n", " ").strip()
+        text_len = len(text)
+
+        # Slightly longer timings for readability.
+        if str(entry.get("type", "dialogue")) == "sfx":
+            base = 1.9
+            chars_per_second = 15.0
+            min_dur = 1.8
+            max_dur = 4.8
+        else:
+            base = 1.6
+            chars_per_second = 17.0
+            min_dur = 1.5
+            max_dur = 4.2
+
+        duration = base + (text_len / chars_per_second)
+        return max(min_dur, min(max_dur, duration))
+
+    def _apply_default_end_times(self) -> None:
+        # Independent caption lifetime per entry.
+        next_by_name: dict[str, list[float]] = {}
         for entry in self.entries:
-            self.groups_by_time.setdefault(float(entry["time"]), []).append(entry)
-        self.group_times = sorted(self.groups_by_time.keys())
+            name = str(entry.get("name", "")).strip()
+            if not name:
+                continue
+            next_by_name.setdefault(name, []).append(float(entry["time"]))
+
+        # Precompute next same-speaker time after each entry.
+        for idx, entry in enumerate(self.entries):
+            start_time = float(entry["time"])
+            end_time = entry.get("end_time")
+            if isinstance(end_time, (int, float)) and float(end_time) > start_time:
+                entry["end_time"] = float(end_time)
+                continue
+
+            target_end = start_time + self._estimate_duration(entry)
+
+            name = str(entry.get("name", "")).strip()
+            if name:
+                same_name_future = [
+                    float(other["time"])
+                    for j, other in enumerate(self.entries)
+                    if j > idx and str(other.get("name", "")).strip() == name and float(other["time"]) > start_time
+                ]
+                if same_name_future:
+                    next_same_name = min(same_name_future)
+                    target_end = min(target_end, max(start_time + 0.45, next_same_name - 0.05))
+
+            entry["end_time"] = round(float(target_end), 3)
 
     def is_loaded(self) -> bool:
         return bool(self.entries)
 
     def get_active_entries(self, time_seconds: float) -> list[dict]:
-        if not self.group_times:
-            return []
+        current = float(time_seconds)
+        active = []
+        for entry in self.entries:
+            start_time = float(entry.get("time", 0.0))
+            end_time = float(entry.get("end_time", start_time))
+            if start_time <= current < end_time:
+                active.append(entry)
+        active.sort(key=lambda item: (float(item.get("time", 0.0)), int(item.get("id", 0))))
+        return active
 
-        idx = bisect_right(self.group_times, float(time_seconds)) - 1
-        if idx < 0:
-            return []
-
-        active_time = self.group_times[idx]
-        return list(self.groups_by_time.get(active_time, []))

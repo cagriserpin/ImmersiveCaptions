@@ -20,11 +20,11 @@ class DetectionRenderer:
 
         self.caption_stack_spacing = 30.0
         self.caption_anchor_margin_y = 16.0
-        self.caption_hold_seconds = 0.22
-        self.caption_dead_zone_px = 6.0
-        self.caption_snap_distance_px = 42.0
-        self.caption_smooth_alpha_small = 0.18
-        self.caption_smooth_alpha_medium = 0.35
+        self.caption_hold_seconds = 0.5
+        self.caption_dead_zone_px = 5.0
+        self.caption_snap_distance_px = 200.0
+        self.caption_smooth_alpha_small = 0.1
+        self.caption_smooth_alpha_medium = 0.2
 
         self.caption_anchor_states: dict[str, dict[str, float]] = {}
         self.last_render_time: float | None = None
@@ -89,12 +89,19 @@ class DetectionRenderer:
         item.setFont(font)
         item.setBrush(QBrush(QColor(255, 255, 255)))
 
-        metrics = QFontMetricsF(font)
-        width = metrics.horizontalAdvance(text)
-        height = metrics.height()
+        bounds = item.boundingRect()
+        width = bounds.width()
+        height = bounds.height()
 
+        scene_rect = self.scene.sceneRect()
+        padding = 8.0
         item_x = center_x - (width / 2.0)
         item_y = top_y
+
+        max_x = max(padding, scene_rect.width() - width - padding)
+        max_y = max(padding, scene_rect.height() - height - padding)
+        item_x = min(max(item_x, padding), max_x)
+        item_y = min(max(item_y, padding), max_y)
 
         bg_rect = QGraphicsRectItem(QRectF(item_x - 8.0, item_y - 4.0, width + 16.0, height + 8.0))
         bg_rect.setPen(QPen(Qt.PenStyle.NoPen))
@@ -216,8 +223,10 @@ class DetectionRenderer:
 
             anchor = anchors_by_name.get(name)
             if anchor is None:
+                # If the face is temporarily lost, keep the caption at the last known
+                # location for as long as the caption itself is still active.
                 state = self.caption_anchor_states.get(name)
-                if state is not None and (current_time - float(state.get("last_seen", current_time))) <= self.caption_hold_seconds:
+                if state is not None:
                     anchor = (float(state["x"]), float(state["y"]))
                 else:
                     continue

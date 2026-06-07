@@ -58,3 +58,10 @@ Beklenen davranış:
 - `type = "dialogue"` olan satırlar, transcript içindeki `name` ile identity JSON içindeki `manual_name` eşleşirse ilgili yüzün biraz altında görünür
 - `type = "sfx"` olan satırlar, `x` ve `y` koordinatlarında görünür
 - uygulama son açılan dosyaları otomatik geri yüklemeye çalışır
+
+
+## Transcript timing
+
+- Transcript entries can now include optional `end_time`.
+- If `end_time` is missing, the app computes a readable default duration automatically.
+- Active captions are now independent per entry, so one character speaking will not immediately replace another character\'s caption just because the next global timestamp started.
