@@ -1,5 +1,6 @@
-
 from __future__ import annotations
+
+from math import hypot
 
 from PySide6.QtCore import QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QFontMetricsF, QPen
@@ -17,8 +18,24 @@ class DetectionRenderer:
         self.show_scores = True
         self.identity_store: FaceIdentityStore | None = None
 
+        self.caption_stack_spacing = 30.0
+        self.caption_anchor_margin_y = 16.0
+        self.caption_hold_seconds = 0.22
+        self.caption_dead_zone_px = 6.0
+        self.caption_snap_distance_px = 42.0
+        self.caption_smooth_alpha_small = 0.18
+        self.caption_smooth_alpha_medium = 0.35
+
+        self.caption_anchor_states: dict[str, dict[str, float]] = {}
+        self.last_render_time: float | None = None
+
     def set_identity_store(self, identity_store: FaceIdentityStore | None) -> None:
         self.identity_store = identity_store
+        self.reset_caption_tracking()
+
+    def reset_caption_tracking(self) -> None:
+        self.caption_anchor_states.clear()
+        self.last_render_time = None
 
     def clear(self) -> None:
         for item in self.items:
@@ -61,7 +78,7 @@ class DetectionRenderer:
         self.scene.addItem(bg)
         self.items.append(bg)
 
-    def _add_caption(self, anchor_x: float, anchor_y: float, text: str, bg_color: QColor | None = None) -> None:
+    def _add_caption(self, center_x: float, top_y: float, text: str, bg_color: QColor | None = None) -> None:
         text = text.strip()
         if not text:
             return
@@ -76,8 +93,8 @@ class DetectionRenderer:
         width = metrics.horizontalAdvance(text)
         height = metrics.height()
 
-        item_x = anchor_x - (width / 2.0)
-        item_y = anchor_y - height
+        item_x = center_x - (width / 2.0)
+        item_y = top_y
 
         bg_rect = QGraphicsRectItem(QRectF(item_x - 8.0, item_y - 4.0, width + 16.0, height + 8.0))
         bg_rect.setPen(QPen(Qt.PenStyle.NoPen))
@@ -97,10 +114,8 @@ class DetectionRenderer:
 
         if self.identity_store is not None and self.identity_store.is_loaded():
             name = self.identity_store.get_label_for_detection(detection_id)
-
             if name == "":
                 return None
-
             if name:
                 if isinstance(score, (float, int)):
                     return f"{name}  {float(score):.2f}"
@@ -118,44 +133,99 @@ class DetectionRenderer:
             return None
         return self.identity_store.get_manual_name_for_detection(face.get("detection_id"))
 
-    def _render_dialogue_captions(self, faces: list[dict], captions: list[dict]) -> None:
+    def _raw_anchor_for_face(self, face: dict) -> tuple[float, float] | None:
+        bbox = face.get("bbox", [])
+        if not isinstance(bbox, list) or len(bbox) != 4:
+            return None
+        x, y, w, h = [float(v) for v in bbox]
+        return (x + (w / 2.0), y + h + self.caption_anchor_margin_y)
+
+    def _smooth_anchor(self, key: str, raw_x: float, raw_y: float, current_time: float) -> tuple[float, float]:
+        state = self.caption_anchor_states.get(key)
+        if state is None:
+            self.caption_anchor_states[key] = {"x": raw_x, "y": raw_y, "last_seen": current_time}
+            return raw_x, raw_y
+
+        prev_x = float(state["x"])
+        prev_y = float(state["y"])
+        distance = hypot(raw_x - prev_x, raw_y - prev_y)
+
+        if distance <= self.caption_dead_zone_px:
+            new_x, new_y = prev_x, prev_y
+        elif distance >= self.caption_snap_distance_px:
+            new_x, new_y = raw_x, raw_y
+        else:
+            alpha = self.caption_smooth_alpha_small if distance < 18.0 else self.caption_smooth_alpha_medium
+            new_x = prev_x + ((raw_x - prev_x) * alpha)
+            new_y = prev_y + ((raw_y - prev_y) * alpha)
+
+        state["x"] = new_x
+        state["y"] = new_y
+        state["last_seen"] = current_time
+        return new_x, new_y
+
+    def _prune_anchor_states(self, current_time: float, active_names: set[str]) -> None:
+        stale_keys = []
+        for key, state in self.caption_anchor_states.items():
+            if key in active_names:
+                continue
+            last_seen = float(state.get("last_seen", current_time))
+            if (current_time - last_seen) > self.caption_hold_seconds:
+                stale_keys.append(key)
+        for key in stale_keys:
+            self.caption_anchor_states.pop(key, None)
+
+    def _render_dialogue_captions(self, faces: list[dict], captions: list[dict], current_time: float) -> None:
         if self.identity_store is None or not self.identity_store.is_loaded():
             return
 
-        faces_by_name: dict[str, list[dict]] = {}
+        anchors_by_name: dict[str, tuple[float, float]] = {}
         for face in faces:
             manual_name = self._get_manual_name_for_face(face)
             if not manual_name:
                 continue
-            faces_by_name.setdefault(manual_name, []).append(face)
+            raw_anchor = self._raw_anchor_for_face(face)
+            if raw_anchor is None:
+                continue
+            anchors_by_name[manual_name] = self._smooth_anchor(
+                manual_name,
+                raw_anchor[0],
+                raw_anchor[1],
+                current_time,
+            )
 
-        stacked_offsets: dict[str, int] = {}
+        captions_by_name: dict[str, list[dict]] = {}
+        active_names: set[str] = set()
         for caption in captions:
             if str(caption.get("type", "dialogue")).strip().lower() != "dialogue":
                 continue
-
             name = str(caption.get("name", "")).strip()
             text = str(caption.get("text", "")).strip()
             if not name or not text:
                 continue
+            captions_by_name.setdefault(name, []).append(caption)
+            active_names.add(name)
 
-            matched_faces = faces_by_name.get(name, [])
-            if not matched_faces:
-                continue
+        self._prune_anchor_states(current_time, active_names)
 
-            for face in matched_faces:
-                bbox = face.get("bbox", [])
-                if not isinstance(bbox, list) or len(bbox) != 4:
+        for name, name_captions in captions_by_name.items():
+            sorted_captions = sorted(
+                name_captions,
+                key=lambda item: (float(item.get("time", 0.0)), int(item.get("id", 0))),
+            )
+
+            anchor = anchors_by_name.get(name)
+            if anchor is None:
+                state = self.caption_anchor_states.get(name)
+                if state is not None and (current_time - float(state.get("last_seen", current_time))) <= self.caption_hold_seconds:
+                    anchor = (float(state["x"]), float(state["y"]))
+                else:
                     continue
-                x, y, w, h = [float(v) for v in bbox]
 
-                stack_key = f"{name}:{int(face.get('detection_id', -1))}"
-                offset_index = stacked_offsets.get(stack_key, 0)
-                stacked_offsets[stack_key] = offset_index + 1
-
-                anchor_x = x + (w / 2.0)
-                anchor_y = max(24.0, y - 10.0 - (offset_index * 30.0))
-                self._add_caption(anchor_x, anchor_y, text)
+            base_x, base_y = anchor
+            for idx, caption in enumerate(sorted_captions):
+                top_y = base_y + (idx * self.caption_stack_spacing)
+                self._add_caption(base_x, top_y, str(caption.get("text", "")))
 
     def _render_sfx_captions(self, captions: list[dict]) -> None:
         for caption in captions:
@@ -173,7 +243,11 @@ class DetectionRenderer:
 
             self._add_caption(float(x), float(y), text, bg_color=QColor(25, 25, 25, 205))
 
-    def render_faces(self, faces: list[dict], captions: list[dict] | None = None) -> None:
+    def render_faces(self, faces: list[dict], captions: list[dict] | None = None, current_time: float = 0.0) -> None:
+        if self.last_render_time is not None and abs(current_time - self.last_render_time) > 0.35:
+            self.reset_caption_tracking()
+        self.last_render_time = current_time
+
         self.clear()
 
         if not faces and not captions:
@@ -205,5 +279,5 @@ class DetectionRenderer:
                     self._add_label(x, y, label_text, box_color)
 
         if captions:
-            self._render_dialogue_captions(faces, captions)
+            self._render_dialogue_captions(faces, captions, current_time)
             self._render_sfx_captions(captions)

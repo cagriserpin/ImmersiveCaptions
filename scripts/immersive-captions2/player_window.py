@@ -1,18 +1,19 @@
-
 from __future__ import annotations
 
 from pathlib import Path
 import sys
 
-from PySide6.QtCore import Qt, QUrl, QTimer
+from PySide6.QtCore import Qt, QSettings, QTimer, QUrl
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
 from PySide6.QtWidgets import (
     QApplication,
     QFileDialog,
+    QFrame,
     QGraphicsScene,
     QGraphicsView,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -49,11 +50,18 @@ class ClickableSlider(QSlider):
 
 
 class MainWindow(QMainWindow):
+    SETTINGS_VIDEO = "session/video_path"
+    SETTINGS_DETECTIONS = "session/detections_path"
+    SETTINGS_IDENTITIES = "session/identities_path"
+    SETTINGS_TRANSCRIPT = "session/transcript_path"
+
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Immersive Captions 2 — Face + Transcript Preview")
-        self.resize(1280, 820)
+        self.resize(1500, 900)
+
+        self.settings = QSettings("OpenAI", "ImmersiveCaptions2")
 
         self.video_path: Path | None = None
         self.face_json_path: Path | None = None
@@ -63,10 +71,10 @@ class MainWindow(QMainWindow):
         self.face_store = FaceDetectionStore()
         self.identity_store = FaceIdentityStore()
         self.transcript_store = TranscriptStore()
-        self.renderer: DetectionRenderer | None = None
 
         self.is_user_scrubbing = False
         self.duration_ms = 0
+        self.last_session_status = "No session restored yet."
 
         self.player = QMediaPlayer(self)
         self.audio_output = QAudioOutput(self)
@@ -81,6 +89,14 @@ class MainWindow(QMainWindow):
         self.view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.view.setFrameShape(QFrame.Shape.NoFrame)
+        self.view.setStyleSheet("background:#0d0f14; border-radius: 12px;")
+
+        self.renderer = DetectionRenderer(self.scene)
+        self.renderer.set_identity_store(self.identity_store)
+
+        self.ui_timer = QTimer(self)
+        self.ui_timer.setInterval(33)
 
         self.open_video_button = QPushButton("Open Video")
         self.open_detections_button = QPushButton("Open Face JSON")
@@ -91,37 +107,28 @@ class MainWindow(QMainWindow):
         self.toggle_landmarks_button = QPushButton("Hide Landmarks")
         self.toggle_scores_button = QPushButton("Hide Labels")
         self.play_pause_button = QPushButton("Play")
-        self.time_label = QLabel("00:00 / 00:00")
 
+        self.time_label = QLabel("00:00 / 00:00")
+        self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.seek_slider = ClickableSlider(Qt.Orientation.Horizontal)
         self.seek_slider.setRange(0, 0)
 
-        controls_layout = QHBoxLayout()
-        controls_layout.addWidget(self.open_video_button)
-        controls_layout.addWidget(self.open_detections_button)
-        controls_layout.addWidget(self.open_identities_button)
-        controls_layout.addWidget(self.open_transcript_button)
-        controls_layout.addWidget(self.extract_faces_button)
-        controls_layout.addWidget(self.toggle_boxes_button)
-        controls_layout.addWidget(self.toggle_landmarks_button)
-        controls_layout.addWidget(self.toggle_scores_button)
-        controls_layout.addWidget(self.play_pause_button)
-        controls_layout.addWidget(self.time_label)
+        self.video_value_label = QLabel("No video loaded")
+        self.detections_value_label = QLabel("No face JSON loaded")
+        self.identities_value_label = QLabel("No identities JSON loaded")
+        self.transcript_value_label = QLabel("No transcript JSON loaded")
 
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.view, stretch=1)
-        main_layout.addWidget(self.seek_slider)
-        main_layout.addLayout(controls_layout)
+        self.playback_state_value_label = QLabel("Stopped")
+        self.visible_faces_value_label = QLabel("0")
+        self.active_captions_value_label = QLabel("0")
+        self.current_frame_value_label = QLabel("-")
+        self.scene_size_value_label = QLabel("0 × 0")
+        self.sample_step_value_label = QLabel("-")
+        self.session_status_value_label = QLabel(self.last_session_status)
+        self.session_status_value_label.setWordWrap(True)
 
-        container = QWidget()
-        container.setLayout(main_layout)
-        self.setCentralWidget(container)
-
-        self.renderer = DetectionRenderer(self.scene)
-        self.renderer.set_identity_store(self.identity_store)
-
-        self.ui_timer = QTimer(self)
-        self.ui_timer.setInterval(33)
+        self._build_ui()
+        self._apply_style()
 
         self.open_video_button.clicked.connect(self.open_video)
         self.open_detections_button.clicked.connect(self.open_detections)
@@ -148,11 +155,235 @@ class MainWindow(QMainWindow):
         self.space_shortcut = QShortcut(QKeySequence(Qt.Key.Key_Space), self)
         self.space_shortcut.activated.connect(self.toggle_play_pause)
 
+        self.update_loaded_file_labels()
+        self.update_runtime_info()
+        QTimer.singleShot(0, self.restore_last_session)
+
+    def _build_ui(self) -> None:
+        video_layout = QVBoxLayout()
+        video_layout.setContentsMargins(0, 0, 0, 0)
+        video_layout.setSpacing(10)
+        video_layout.addWidget(self.view, stretch=1)
+
+        slider_row = QHBoxLayout()
+        slider_row.setSpacing(10)
+        slider_row.addWidget(self.seek_slider, stretch=1)
+        slider_row.addWidget(self.time_label)
+        video_layout.addLayout(slider_row)
+
+        video_panel = QWidget()
+        video_panel.setLayout(video_layout)
+
+        side_layout = QVBoxLayout()
+        side_layout.setContentsMargins(0, 0, 0, 0)
+        side_layout.setSpacing(12)
+
+        files_group = QGroupBox("Files")
+        files_layout = QVBoxLayout()
+        files_layout.setSpacing(8)
+        files_layout.addWidget(self.open_video_button)
+        files_layout.addWidget(self.open_detections_button)
+        files_layout.addWidget(self.open_identities_button)
+        files_layout.addWidget(self.open_transcript_button)
+        files_layout.addWidget(self.extract_faces_button)
+        files_group.setLayout(files_layout)
+
+        loaded_group = QGroupBox("Loaded Resources")
+        loaded_layout = QVBoxLayout()
+        loaded_layout.setSpacing(8)
+        loaded_layout.addWidget(self._make_label_pair("Video", self.video_value_label))
+        loaded_layout.addWidget(self._make_label_pair("Face JSON", self.detections_value_label))
+        loaded_layout.addWidget(self._make_label_pair("Identities", self.identities_value_label))
+        loaded_layout.addWidget(self._make_label_pair("Transcript", self.transcript_value_label))
+        loaded_group.setLayout(loaded_layout)
+
+        playback_group = QGroupBox("Playback & Overlay")
+        playback_layout = QVBoxLayout()
+        playback_layout.setSpacing(8)
+        playback_layout.addWidget(self.play_pause_button)
+        playback_layout.addWidget(self.toggle_boxes_button)
+        playback_layout.addWidget(self.toggle_landmarks_button)
+        playback_layout.addWidget(self.toggle_scores_button)
+        playback_group.setLayout(playback_layout)
+
+        info_group = QGroupBox("Runtime Info")
+        info_layout = QVBoxLayout()
+        info_layout.setSpacing(8)
+        info_layout.addWidget(self._make_label_pair("State", self.playback_state_value_label))
+        info_layout.addWidget(self._make_label_pair("Visible Faces", self.visible_faces_value_label))
+        info_layout.addWidget(self._make_label_pair("Active Captions", self.active_captions_value_label))
+        info_layout.addWidget(self._make_label_pair("Current Frame", self.current_frame_value_label))
+        info_layout.addWidget(self._make_label_pair("Video Size", self.scene_size_value_label))
+        info_layout.addWidget(self._make_label_pair("Sample Step", self.sample_step_value_label))
+        info_group.setLayout(info_layout)
+
+        session_group = QGroupBox("Session Restore")
+        session_layout = QVBoxLayout()
+        session_layout.addWidget(self.session_status_value_label)
+        session_group.setLayout(session_layout)
+
+        side_layout.addWidget(files_group)
+        side_layout.addWidget(loaded_group)
+        side_layout.addWidget(playback_group)
+        side_layout.addWidget(info_group)
+        side_layout.addWidget(session_group)
+        side_layout.addStretch(1)
+
+        side_panel = QWidget()
+        side_panel.setLayout(side_layout)
+        side_panel.setObjectName("sidePanel")
+        side_panel.setMinimumWidth(320)
+        side_panel.setMaximumWidth(390)
+
+        root_layout = QHBoxLayout()
+        root_layout.setContentsMargins(12, 12, 12, 12)
+        root_layout.setSpacing(14)
+        root_layout.addWidget(video_panel, stretch=1)
+        root_layout.addWidget(side_panel)
+
+        container = QWidget()
+        container.setLayout(root_layout)
+        self.setCentralWidget(container)
+
+    def _apply_style(self) -> None:
+        self.setStyleSheet(
+            """
+            QMainWindow, QWidget {
+                background: #12151c;
+                color: #e8ecf3;
+                font-size: 13px;
+            }
+            QGroupBox {
+                border: 1px solid #2c3342;
+                border-radius: 10px;
+                margin-top: 10px;
+                padding-top: 10px;
+                background: #171b24;
+                font-weight: 600;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 12px;
+                padding: 0 6px 0 6px;
+                color: #b7c0d4;
+            }
+            QPushButton {
+                background: #232a36;
+                border: 1px solid #364056;
+                border-radius: 8px;
+                padding: 10px 12px;
+                text-align: left;
+            }
+            QPushButton:hover {
+                background: #2b3444;
+            }
+            QPushButton:pressed {
+                background: #1d2430;
+            }
+            QLabel {
+                color: #e8ecf3;
+            }
+            QSlider::groove:horizontal {
+                border: 0px;
+                height: 6px;
+                background: #293241;
+                border-radius: 3px;
+            }
+            QSlider::handle:horizontal {
+                background: #7bb3ff;
+                width: 14px;
+                margin: -5px 0;
+                border-radius: 7px;
+            }
+            #sidePanel {
+                background: transparent;
+            }
+            """
+        )
+
+    def _make_label_pair(self, title: str, value_label: QLabel) -> QWidget:
+        row = QWidget()
+        layout = QHBoxLayout(row)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        title_label = QLabel(f"{title}:")
+        title_label.setStyleSheet("color:#9aa6bd;")
+        title_label.setMinimumWidth(92)
+
+        value_label.setWordWrap(True)
+        value_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+
+        layout.addWidget(title_label)
+        layout.addWidget(value_label, stretch=1)
+        return row
+
     def format_time(self, ms: int) -> str:
         total_seconds = max(0, ms // 1000)
         minutes = total_seconds // 60
         seconds = total_seconds % 60
         return f"{minutes:02d}:{seconds:02d}"
+
+    def set_session_status(self, text: str) -> None:
+        self.last_session_status = text
+        self.session_status_value_label.setText(text)
+        self.statusBar().showMessage(text, 4000)
+
+    def remember_path(self, key: str, path: Path | None) -> None:
+        if path is None:
+            self.settings.remove(key)
+            return
+        self.settings.setValue(key, str(path.resolve()))
+
+    def _path_from_settings(self, key: str) -> tuple[Path | None, str | None]:
+        value = self.settings.value(key)
+        if not value:
+            return None, None
+        path = Path(str(value))
+        return (path if path.exists() else None), str(value)
+
+    def restore_last_session(self) -> None:
+        restored = []
+        missing = []
+
+        video_path, raw_video = self._path_from_settings(self.SETTINGS_VIDEO)
+        detections_path, raw_detections = self._path_from_settings(self.SETTINGS_DETECTIONS)
+        identities_path, raw_identities = self._path_from_settings(self.SETTINGS_IDENTITIES)
+        transcript_path, raw_transcript = self._path_from_settings(self.SETTINGS_TRANSCRIPT)
+
+        for resolved, raw in (
+            (video_path, raw_video),
+            (detections_path, raw_detections),
+            (identities_path, raw_identities),
+            (transcript_path, raw_transcript),
+        ):
+            if raw and resolved is None:
+                missing.append(Path(raw).name)
+
+        if video_path is not None:
+            self.load_video(str(video_path), remember=False)
+            restored.append(video_path.name)
+        if detections_path is not None:
+            self.load_detections(str(detections_path), remember=False, auto_load_identities=(identities_path is None))
+            restored.append(detections_path.name)
+        if identities_path is not None:
+            self.load_identities(str(identities_path), remember=False, update_overlay=False)
+            restored.append(identities_path.name)
+        if transcript_path is not None:
+            self.load_transcript(str(transcript_path), remember=False, update_overlay=False)
+            restored.append(transcript_path.name)
+
+        self.update_overlay()
+
+        if restored:
+            msg = f"Restored: {', '.join(restored)}"
+            if missing:
+                msg += f" | Missing: {', '.join(missing)}"
+            self.set_session_status(msg)
+        elif missing:
+            self.set_session_status(f"Previous files missing: {', '.join(missing)}")
+        else:
+            self.set_session_status("No saved session found.")
 
     def reset_player_state(self):
         self.player.pause()
@@ -165,17 +396,22 @@ class MainWindow(QMainWindow):
         self.play_pause_button.setText("Play")
         self.is_user_scrubbing = False
 
-        if self.renderer is not None:
-            self.renderer.clear()
+        self.renderer.clear()
+        self.renderer.reset_caption_tracking()
 
         self.scene.setSceneRect(0, 0, 1280, 720)
         self.video_item.setSize(self.scene.sceneRect().size())
+        self.update_runtime_info()
 
-    def load_video(self, file_path: str):
+    def load_video(self, file_path: str, remember: bool = True):
         self.video_path = Path(file_path)
         self.reset_player_state()
         self.player.setSource(QUrl.fromLocalFile(str(self.video_path)))
         self.player.pause()
+        if remember:
+            self.remember_path(self.SETTINGS_VIDEO, self.video_path)
+        self.update_loaded_file_labels()
+        self.update_runtime_info()
         self.update_window_title()
         self.ui_timer.start()
 
@@ -189,82 +425,100 @@ class MainWindow(QMainWindow):
                 return candidate
         return None
 
-    def load_detections(self, file_path: str):
+    def load_detections(self, file_path: str, remember: bool = True, auto_load_identities: bool = True):
         self.face_json_path = Path(file_path)
         self.face_store.load(self.face_json_path)
 
-        auto_identities = self._auto_identity_path_for_detection_json(self.face_json_path)
-        if auto_identities is not None:
-            self.load_identities(str(auto_identities), update_overlay=False)
-        else:
-            self.face_identities_path = None
-            self.identity_store.clear()
+        if auto_load_identities:
+            auto_identities = self._auto_identity_path_for_detection_json(self.face_json_path)
+            if auto_identities is not None:
+                self.load_identities(str(auto_identities), remember=remember, update_overlay=False)
+            else:
+                self.face_identities_path = None
+                self.identity_store.clear()
+                self.renderer.set_identity_store(self.identity_store)
 
+        if remember:
+            self.remember_path(self.SETTINGS_DETECTIONS, self.face_json_path)
         self.update_overlay()
+        self.update_loaded_file_labels()
+        self.update_runtime_info()
         self.update_window_title()
 
-    def load_identities(self, file_path: str, update_overlay: bool = True):
+    def load_identities(self, file_path: str, remember: bool = True, update_overlay: bool = True):
         self.face_identities_path = Path(file_path)
         self.identity_store.load(self.face_identities_path)
-        if self.renderer is not None:
-            self.renderer.set_identity_store(self.identity_store)
+        self.renderer.set_identity_store(self.identity_store)
+        self.renderer.reset_caption_tracking()
+        if remember:
+            self.remember_path(self.SETTINGS_IDENTITIES, self.face_identities_path)
+        self.update_loaded_file_labels()
         if update_overlay:
             self.update_overlay()
+            self.update_runtime_info()
             self.update_window_title()
 
-    def load_transcript(self, file_path: str, update_overlay: bool = True):
+    def load_transcript(self, file_path: str, remember: bool = True, update_overlay: bool = True):
         self.transcript_json_path = Path(file_path)
         self.transcript_store.load(self.transcript_json_path)
+        if remember:
+            self.remember_path(self.SETTINGS_TRANSCRIPT, self.transcript_json_path)
+        self.update_loaded_file_labels()
         if update_overlay:
             self.update_overlay()
+            self.update_runtime_info()
             self.update_window_title()
 
     def open_video(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Video",
-            "",
+            str(self.video_path.parent if self.video_path else ""),
             "Video Files (*.mp4 *.mov *.mkv *.avi *.webm);;All Files (*)",
         )
         if file_path:
             self.load_video(file_path)
+            self.set_session_status(f"Loaded video: {Path(file_path).name}")
 
     def open_detections(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Face JSON",
-            "",
+            str(self.face_json_path.parent if self.face_json_path else ""),
             "JSON Files (*.json);;All Files (*)",
         )
         if file_path:
             self.load_detections(file_path)
+            self.set_session_status(f"Loaded face JSON: {Path(file_path).name}")
 
     def open_identities(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Identities JSON",
-            "",
+            str(self.face_identities_path.parent if self.face_identities_path else ""),
             "JSON Files (*.json);;All Files (*)",
         )
         if file_path:
             self.load_identities(file_path)
+            self.set_session_status(f"Loaded identities JSON: {Path(file_path).name}")
 
     def open_transcript(self):
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             "Open Transcript JSON",
-            "",
+            str(self.transcript_json_path.parent if self.transcript_json_path else ""),
             "JSON Files (*.json);;All Files (*)",
         )
         if file_path:
             self.load_transcript(file_path)
+            self.set_session_status(f"Loaded transcript JSON: {Path(file_path).name}")
 
     def extract_faces_for_current_video(self):
         if self.video_path is None:
             QMessageBox.warning(self, "No video", "Open a video first.")
             return
 
-        suggested_json = self.video_path.with_suffix(".faces_raw.json")
+        suggested_json = self.video_path.with_suffix(".face_tracks.json")
         output_json_path, _ = QFileDialog.getSaveFileName(
             self,
             "Save Face JSON",
@@ -307,27 +561,22 @@ class MainWindow(QMainWindow):
                 "Done",
                 f"Saved face detections to:\n{output_json}\n\nSaved crops to:\n{crops_dir}",
             )
+            self.set_session_status(f"Processed and loaded face JSON: {output_json.name}")
         except Exception as exc:
             progress_dialog.close()
             QMessageBox.critical(self, "Extraction failed", str(exc))
 
     def toggle_boxes(self):
-        if self.renderer is None:
-            return
         self.renderer.show_boxes = not self.renderer.show_boxes
         self.toggle_boxes_button.setText("Hide Boxes" if self.renderer.show_boxes else "Show Boxes")
         self.update_overlay()
 
     def toggle_landmarks(self):
-        if self.renderer is None:
-            return
         self.renderer.show_landmarks = not self.renderer.show_landmarks
         self.toggle_landmarks_button.setText("Hide Landmarks" if self.renderer.show_landmarks else "Show Landmarks")
         self.update_overlay()
 
     def toggle_scores(self):
-        if self.renderer is None:
-            return
         self.renderer.show_scores = not self.renderer.show_scores
         self.toggle_scores_button.setText("Hide Labels" if self.renderer.show_scores else "Show Labels")
         self.update_overlay()
@@ -345,26 +594,31 @@ class MainWindow(QMainWindow):
 
     def on_slider_moved(self, value: int):
         self.time_label.setText(f"{self.format_time(value)} / {self.format_time(self.duration_ms)}")
+        self.update_runtime_info(position_override=value)
 
     def on_slider_released(self):
         self.is_user_scrubbing = False
         self.player.setPosition(self.seek_slider.value())
+        self.renderer.reset_caption_tracking()
         self.update_overlay()
 
     def on_position_changed(self, position: int):
         if not self.is_user_scrubbing:
             self.seek_slider.setValue(position)
         self.time_label.setText(f"{self.format_time(position)} / {self.format_time(self.duration_ms)}")
+        self.update_runtime_info(position_override=position)
 
     def on_duration_changed(self, duration: int):
         self.duration_ms = duration
         self.seek_slider.setRange(0, duration)
         self.time_label.setText(f"{self.format_time(self.player.position())} / {self.format_time(duration)}")
+        self.update_runtime_info()
 
     def on_playback_state_changed(self, state: QMediaPlayer.PlaybackState):
         self.play_pause_button.setText("Pause" if state == QMediaPlayer.PlaybackState.PlayingState else "Play")
         if state == QMediaPlayer.PlaybackState.PlayingState and not self.ui_timer.isActive():
             self.ui_timer.start()
+        self.update_runtime_info()
 
     def on_media_status_changed(self, status: QMediaPlayer.MediaStatus):
         if status in (QMediaPlayer.MediaStatus.LoadedMedia, QMediaPlayer.MediaStatus.BufferedMedia):
@@ -373,10 +627,11 @@ class MainWindow(QMainWindow):
                 self.scene.setSceneRect(0, 0, video_size.width(), video_size.height())
                 self.video_item.setSize(video_size)
                 self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
+        self.update_runtime_info()
 
     def on_player_error(self, error, error_string: str):
         if error_string:
-            print("Player error:", error_string)
+            self.set_session_status(f"Player error: {error_string}")
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -384,12 +639,51 @@ class MainWindow(QMainWindow):
             self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
 
     def update_overlay(self):
-        if self.renderer is None:
-            return
         current_time = self.player.position() / 1000.0
         faces = self.face_store.get_faces(current_time)
         captions = self.transcript_store.get_active_entries(current_time) if self.transcript_store.is_loaded() else []
-        self.renderer.render_faces(faces, captions)
+        self.renderer.render_faces(faces, captions, current_time=current_time)
+        self.update_runtime_info()
+
+    def update_loaded_file_labels(self) -> None:
+        self._set_path_label(self.video_value_label, self.video_path, "No video loaded")
+        self._set_path_label(self.detections_value_label, self.face_json_path, "No face JSON loaded")
+        self._set_path_label(self.identities_value_label, self.face_identities_path, "No identities JSON loaded")
+        self._set_path_label(self.transcript_value_label, self.transcript_json_path, "No transcript JSON loaded")
+
+    def _set_path_label(self, label: QLabel, path: Path | None, empty_text: str) -> None:
+        if path is None:
+            label.setText(empty_text)
+            label.setToolTip("")
+            return
+        label.setText(path.name)
+        label.setToolTip(str(path.resolve()))
+
+    def update_runtime_info(self, position_override: int | None = None) -> None:
+        position_ms = self.player.position() if position_override is None else position_override
+        playback_state = self.player.playbackState()
+        if playback_state == QMediaPlayer.PlaybackState.PlayingState:
+            state_text = "Playing"
+        elif playback_state == QMediaPlayer.PlaybackState.PausedState:
+            state_text = "Paused"
+        else:
+            state_text = "Stopped"
+        self.playback_state_value_label.setText(state_text)
+
+        current_time_seconds = position_ms / 1000.0
+        faces = self.face_store.get_faces(current_time_seconds)
+        captions = self.transcript_store.get_active_entries(current_time_seconds) if self.transcript_store.is_loaded() else []
+        frame = self.face_store.get_frame(current_time_seconds)
+
+        current_frame_text = str(frame.get("frame_index", "-")) if frame is not None else "-"
+        sample_value = self.face_store.metadata.get("sample_every_n_frames")
+        self.visible_faces_value_label.setText(str(len(faces)))
+        self.active_captions_value_label.setText(str(len(captions)))
+        self.current_frame_value_label.setText(current_frame_text)
+        self.sample_step_value_label.setText(str(sample_value) if sample_value is not None else "-")
+
+        scene_rect = self.scene.sceneRect()
+        self.scene_size_value_label.setText(f"{int(scene_rect.width())} × {int(scene_rect.height())}")
 
     def update_window_title(self):
         video_name = self.video_path.name if self.video_path else "No Video"
@@ -397,13 +691,14 @@ class MainWindow(QMainWindow):
         identities_name = self.face_identities_path.name if self.face_identities_path else "No Identities JSON"
         transcript_name = self.transcript_json_path.name if self.transcript_json_path else "No Transcript JSON"
         self.setWindowTitle(
-            f"Immersive Captions 2 — Face + Transcript Preview — "
-            f"{video_name} — {detections_name} — {identities_name} — {transcript_name}"
+            f"Immersive Captions 2 — {video_name} — {detections_name} — {identities_name} — {transcript_name}"
         )
 
 
 def main():
     app = QApplication(sys.argv)
+    app.setOrganizationName("OpenAI")
+    app.setApplicationName("ImmersiveCaptions2")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())

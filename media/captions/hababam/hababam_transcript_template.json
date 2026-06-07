@@ -1,581 +1,699 @@
 {
   "source_text_file": "hababam.txt",
   "time_unit": "seconds",
-  "description": "Transcript converted from TXT. 'name' fields are intentionally left empty for manual matching.",
+  "description": "Transcript converted from TXT. Named lines were added manually. Entries named 'herkes' or 'mufettis_sfx' are tagged as sfx and include x/y placeholders.",
   "entries": [
     {
       "id": 1,
       "time": 0.0,
       "name": "okul_muduru",
       "text": "Çocuklar okulumuzda müfettiş var!",
-      "original_timestamp": "00:00"
+      "original_timestamp": "00:00",
+      "type": "dialogue"
     },
     {
       "id": 2,
       "time": 3.0,
       "name": "okul_muduru",
       "text": "Şimdi Mahmut Hoca'nın Tarih dersine girecek.",
-      "original_timestamp": "00:03"
+      "original_timestamp": "00:03",
+      "type": "dialogue"
     },
     {
       "id": 3,
       "time": 5.0,
       "name": "okul_muduru",
       "text": "Kendisini çok iyi tanırım. Hep aynı soruları sorar.",
-      "original_timestamp": "00:05"
+      "original_timestamp": "00:05",
+      "type": "dialogue"
     },
     {
       "id": 4,
       "time": 8.0,
       "name": "okul_muduru",
       "text": "Sırası bile katiyen değişmez.",
-      "original_timestamp": "00:08"
+      "original_timestamp": "00:08",
+      "type": "dialogue"
     },
     {
       "id": 5,
       "time": 10.0,
       "name": "okul_muduru",
       "text": "Soruları çok basittir. Bileceksiniz.",
-      "original_timestamp": "00:10"
+      "original_timestamp": "00:10",
+      "type": "dialogue"
     },
     {
       "id": 6,
       "time": 13.0,
       "name": "okul_muduru",
       "text": "Mesela evladım sen!",
-      "original_timestamp": "00:13"
+      "original_timestamp": "00:13",
+      "type": "dialogue"
     },
     {
       "id": 7,
       "time": 14.0,
       "name": "saban",
       "text": "Ben mi?",
-      "original_timestamp": "00:14"
+      "original_timestamp": "00:14",
+      "type": "dialogue"
     },
     {
       "id": 8,
       "time": 14.0,
       "name": "okul_muduru",
       "text": "Evet, sen.",
-      "original_timestamp": "00:14"
+      "original_timestamp": "00:14",
+      "type": "dialogue"
     },
     {
       "id": 9,
       "time": 15.0,
       "name": "okul_muduru",
       "text": "Romayı kim yaktı?",
-      "original_timestamp": "00:15"
+      "original_timestamp": "00:15",
+      "type": "dialogue"
     },
     {
       "id": 10,
       "time": 16.0,
       "name": "saban",
       "text": "Vallahi ben yakmadım.",
-      "original_timestamp": "00:16"
+      "original_timestamp": "00:16",
+      "type": "dialogue"
     },
     {
       "id": 11,
       "time": 17.0,
       "name": "okul_muduru",
       "text": "Oğlum! Romayı kim yaktı dedim!",
-      "original_timestamp": "00:17"
+      "original_timestamp": "00:17",
+      "type": "dialogue"
     },
     {
       "id": 12,
       "time": 19.0,
       "name": "saban",
       "text": "Vallahi ben yakmadım dedim Müdür Bey!",
-      "original_timestamp": "00:19"
+      "original_timestamp": "00:19",
+      "type": "dialogue"
     },
     {
       "id": 13,
       "time": 21.0,
       "name": "okul_muduru",
       "text": "Ne diyor bu?",
-      "original_timestamp": "00:21"
+      "original_timestamp": "00:21",
+      "type": "dialogue"
     },
     {
       "id": 14,
       "time": 21.0,
       "name": "guduk_necmi",
       "text": "Şaban yalan söylemez Müdür Bey. Ben yakmadım diyorsa yakmamıştır.",
-      "original_timestamp": "00:21"
+      "original_timestamp": "00:21",
+      "type": "dialogue"
     },
     {
       "id": 15,
       "time": 25.0,
       "name": "saban",
       "text": "Evet!",
-      "original_timestamp": "00:25"
+      "original_timestamp": "00:25",
+      "type": "dialogue"
     },
     {
       "id": 16,
       "time": 27.0,
       "name": "okul_muduru",
       "text": "Sulu herifler! Ezberleyin bakayım şunları.",
-      "original_timestamp": "00:27"
+      "original_timestamp": "00:27",
+      "type": "dialogue"
     },
     {
       "id": 17,
       "time": 29.0,
       "name": "okul_muduru",
       "text": "İlk halife kimdir?",
-      "original_timestamp": "00:29"
+      "original_timestamp": "00:29",
+      "type": "dialogue"
     },
     {
       "id": 18,
       "time": 30.0,
       "name": "okul_muduru",
       "text": "Hz. Ebubekir.",
-      "original_timestamp": "00:30"
+      "original_timestamp": "00:30",
+      "type": "dialogue"
     },
     {
       "id": 19,
       "time": 32.0,
       "name": "okul_muduru",
       "text": "Söyleyin bakayım",
-      "original_timestamp": "00:32"
+      "original_timestamp": "00:32",
+      "type": "dialogue"
     },
     {
       "id": 20,
       "time": 33.0,
       "name": "herkes",
-      "text": "Hz. Ebubekir.",
-      "original_timestamp": "00:33"
+      "text": "Herkes: Hz. Ebubekir.",
+      "original_timestamp": "00:33",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 21,
       "time": 34.0,
       "name": "okul_muduru",
       "text": "Hah! İstanbul hangi tarihte fethedildi?",
-      "original_timestamp": "00:34"
+      "original_timestamp": "00:34",
+      "type": "dialogue"
     },
     {
       "id": 22,
       "time": 37.0,
       "name": "okul_muduru",
       "text": "1453",
-      "original_timestamp": "00:37"
+      "original_timestamp": "00:37",
+      "type": "dialogue"
     },
     {
       "id": 23,
       "time": 39.0,
       "name": "herkes",
-      "text": "1453!",
-      "original_timestamp": "00:39"
+      "text": "Herkes: 1453!",
+      "original_timestamp": "00:39",
+      "type": "sfx",
+      "x": 512,
+      "y": 512
     },
     {
       "id": 24,
       "time": 40.0,
       "name": "okul_muduru",
       "text": "Vatan bizim neyimiz?",
-      "original_timestamp": "00:40"
+      "original_timestamp": "00:40",
+      "type": "dialogue"
     },
     {
       "id": 25,
       "time": 41.0,
       "name": "okul_muduru",
       "text": "Anamız.",
-      "original_timestamp": "00:41"
+      "original_timestamp": "00:41",
+      "type": "dialogue"
     },
     {
       "id": 26,
       "time": 43.0,
       "name": "herkes",
-      "text": "Anamız!",
-      "original_timestamp": "00:43"
+      "text": "Herkes: Anamız!",
+      "original_timestamp": "00:43",
+      "type": "sfx",
+      "x": 512,
+      "y": 512
     },
     {
       "id": 27,
       "time": 44.0,
       "name": "okul_muduru",
       "text": "Yükselme devrinin son padişahı kimdir?",
-      "original_timestamp": "00:44"
+      "original_timestamp": "00:44",
+      "type": "dialogue"
     },
     {
       "id": 28,
       "time": 46.0,
       "name": "okul_muduru",
       "text": "Kanuni Sultan Süleyman.",
-      "original_timestamp": "00:46"
+      "original_timestamp": "00:46",
+      "type": "dialogue"
     },
     {
       "id": 29,
       "time": 48.0,
       "name": "herkes",
-      "text": "Kanuni Sultan Süleyman!",
-      "original_timestamp": "00:48"
+      "text": "Herkes: Kanuni Sultan Süleyman!",
+      "original_timestamp": "00:48",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 30,
       "time": 50.0,
       "name": "okul_muduru",
       "text": "Ha! Romayı kim yaktı?",
-      "original_timestamp": "00:50"
+      "original_timestamp": "00:50",
+      "type": "dialogue"
     },
     {
       "id": 31,
       "time": 52.0,
       "name": "okul_muduru",
       "text": "İmparator Neron.",
-      "original_timestamp": "00:52"
+      "original_timestamp": "00:52",
+      "type": "dialogue"
     },
     {
       "id": 32,
       "time": 54.0,
       "name": "herkes",
-      "text": "İmparator Neron!",
-      "original_timestamp": "00:54"
+      "text": "Herkes: İmparator Neron!",
+      "original_timestamp": "00:54",
+      "type": "sfx",
+      "x": 512,
+      "y": 512
     },
     {
       "id": 33,
       "time": 55.0,
       "name": "okul_muduru",
       "text": "Hah! Tekrarlayın.",
-      "original_timestamp": "00:55"
+      "original_timestamp": "00:55",
+      "type": "dialogue"
     },
     {
       "id": 34,
       "time": 56.0,
       "name": "okul_muduru",
       "text": "Hz.Ebubekir",
-      "original_timestamp": "00:56"
+      "original_timestamp": "00:56",
+      "type": "dialogue"
     },
     {
       "id": 35,
       "time": 57.0,
       "name": "okul_muduru",
       "text": "1453.",
-      "original_timestamp": "00:57"
+      "original_timestamp": "00:57",
+      "type": "dialogue"
     },
     {
       "id": 36,
       "time": 58.0,
       "name": "okul_muduru",
       "text": "Anamız.",
-      "original_timestamp": "00:58"
+      "original_timestamp": "00:58",
+      "type": "dialogue"
     },
     {
       "id": 37,
       "time": 59.0,
       "name": "okul_muduru",
       "text": "Kanuni Sultan Süleyman",
-      "original_timestamp": "00:59"
+      "original_timestamp": "00:59",
+      "type": "dialogue"
     },
     {
       "id": 38,
       "time": 61.0,
       "name": "okul_muduru",
       "text": "İmparator Neron.",
-      "original_timestamp": "01:01"
+      "original_timestamp": "01:01",
+      "type": "dialogue"
     },
     {
       "id": 39,
       "time": 62.0,
       "name": "herkes",
       "text": "Tekrarlayın!",
-      "original_timestamp": "01:02"
+      "original_timestamp": "01:02",
+      "type": "sfx",
+      "x": 230,
+      "y": 230
     },
     {
       "id": 40,
       "time": 63.0,
       "name": "herkes",
-      "text": "Hz.Ebubekir!",
-      "original_timestamp": "01:03"
+      "text": "Herkes: Hz.Ebubekir!",
+      "original_timestamp": "01:03",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 41,
       "time": 64.0,
       "name": "herkes",
-      "text": "1453!",
-      "original_timestamp": "01:04"
+      "text": "Herkes: 1453!",
+      "original_timestamp": "01:04",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 42,
       "time": 66.0,
       "name": "herkes",
-      "text": "Anamız!",
-      "original_timestamp": "01:06"
+      "text": "Herkes: Anamız!",
+      "original_timestamp": "01:06",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 43,
       "time": 67.0,
       "name": "herkes",
-      "text": "Kanuni Sultan Süleyman!",
-      "original_timestamp": "01:07"
+      "text": "Herkes: Kanuni Sultan Süleyman!",
+      "original_timestamp": "01:07",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 44,
       "time": 69.0,
       "name": "herkes",
-      "text": "İmparator Neron!",
-      "original_timestamp": "01:09"
+      "text": "Herkes: İmparator Neron!",
+      "original_timestamp": "01:09",
+      "type": "sfx",
+      "x": 512,
+      "y": 256
     },
     {
       "id": 45,
       "time": 71.0,
       "name": "okul_muduru",
       "text": "Güzel.",
-      "original_timestamp": "01:11"
+      "original_timestamp": "01:11",
+      "type": "dialogue"
     },
     {
       "id": 46,
       "time": 73.0,
       "name": "okul_muduru",
       "text": "Ooo! Hoşgeldiniz.",
-      "original_timestamp": "01:13"
+      "original_timestamp": "01:13",
+      "type": "dialogue"
     },
     {
       "id": 47,
       "time": 74.0,
       "name": "okul_muduru",
       "text": "Çocuklar Sayın Müfettiş Hüseyin Şevki Topuz.",
-      "original_timestamp": "01:14"
+      "original_timestamp": "01:14",
+      "type": "dialogue"
     },
     {
       "id": 48,
       "time": 77.0,
       "name": "mufettis",
       "text": "Günaydın çocuklar.",
-      "original_timestamp": "01:17"
+      "original_timestamp": "01:17",
+      "type": "dialogue"
     },
     {
       "id": 49,
       "time": 78.0,
       "name": "herkes",
-      "text": "Günaydın!",
-      "original_timestamp": "01:18"
+      "text": "Herkes: Günaydın!",
+      "original_timestamp": "01:18",
+      "type": "sfx",
+      "x": 512,
+      "y": 600
     },
     {
       "id": 50,
       "time": 79.0,
       "name": "mufettis",
       "text": "Oturun!",
-      "original_timestamp": "01:19"
+      "original_timestamp": "01:19",
+      "type": "dialogue"
     },
     {
       "id": 51,
       "time": 80.0,
       "name": "okul_muduru",
       "text": "Müsaadeniz ile efendim.",
-      "original_timestamp": "01:20"
+      "original_timestamp": "01:20",
+      "type": "dialogue"
     },
     {
       "id": 52,
       "time": 81.0,
       "name": "mufettis",
       "text": "Güle güle.",
-      "original_timestamp": "01:21"
+      "original_timestamp": "01:21",
+      "type": "dialogue"
     },
     {
       "id": 53,
       "time": 81.0,
       "name": "mufettis",
       "text": "Konumuz nedir Mahmut Bey?",
-      "original_timestamp": "01:21"
+      "original_timestamp": "01:21",
+      "type": "dialogue"
     },
     {
       "id": 54,
       "time": 83.0,
       "name": "mahmut_hoca",
       "text": "Yükselme Devri.",
-      "original_timestamp": "01:23"
+      "original_timestamp": "01:23",
+      "type": "dialogue"
     },
     {
       "id": 55,
       "time": 84.0,
       "name": "mufettis",
       "text": "Güzel!",
-      "original_timestamp": "01:24"
+      "original_timestamp": "01:24",
+      "type": "dialogue"
     },
     {
       "id": 56,
       "time": 84.0,
       "name": "mufettis",
       "text": "Önce ben müsaadeniz ile çocuklara bir iki soru sorayım",
-      "original_timestamp": "01:24"
+      "original_timestamp": "01:24",
+      "type": "dialogue"
     },
     {
       "id": 57,
       "time": 86.0,
       "name": "mahmut_hoca",
       "text": "Buyurun sorun.",
-      "original_timestamp": "01:26"
+      "original_timestamp": "01:26",
+      "type": "dialogue"
     },
     {
       "id": 58,
       "time": 88.0,
       "name": "mufettis",
       "text": "Sen!",
-      "original_timestamp": "01:28"
+      "original_timestamp": "01:28",
+      "type": "dialogue"
     },
     {
       "id": 59,
       "time": 89.0,
       "name": "saban",
       "text": "Ben?",
-      "original_timestamp": "01:29"
+      "original_timestamp": "01:29",
+      "type": "dialogue"
     },
     {
       "id": 60,
       "time": 91.0,
       "name": "mufettis",
       "text": "Adın ne?",
-      "original_timestamp": "01:31"
+      "original_timestamp": "01:31",
+      "type": "dialogue"
     },
     {
       "id": 61,
       "time": 92.0,
       "name": "saban",
       "text": "Hz. Ebubekir",
-      "original_timestamp": "01:32"
+      "original_timestamp": "01:32",
+      "type": "dialogue"
     },
     {
       "id": 62,
       "time": 94.0,
       "name": "mufettis",
       "text": "Adın ne? Dedim.",
-      "original_timestamp": "01:34"
+      "original_timestamp": "01:34",
+      "type": "dialogue"
     },
     {
       "id": 63,
       "time": 95.0,
       "name": "saban",
       "text": "Hz. Ebubekir dedim.",
-      "original_timestamp": "01:35"
+      "original_timestamp": "01:35",
+      "type": "dialogue"
     },
     {
       "id": 64,
       "time": 97.0,
       "name": "mufettis",
       "text": "Adın ne? Adın.",
-      "original_timestamp": "01:37"
+      "original_timestamp": "01:37",
+      "type": "dialogue"
     },
     {
       "id": 65,
       "time": 99.0,
       "name": "saban",
       "text": "Ha! Adım. Hz. Şaban",
-      "original_timestamp": "01:39"
+      "original_timestamp": "01:39",
+      "type": "dialogue"
     },
     {
       "id": 66,
       "time": 101.0,
       "name": "mufettis",
       "text": "Kaç yaşındasın?",
-      "original_timestamp": "01:41"
+      "original_timestamp": "01:41",
+      "type": "dialogue"
     },
     {
       "id": 67,
       "time": 103.0,
       "name": "saban",
       "text": "1453",
-      "original_timestamp": "01:43"
+      "original_timestamp": "01:43",
+      "type": "dialogue"
     },
     {
       "id": 68,
       "time": 106.0,
       "name": "mufettis",
       "text": "Sen kaç yaşındasın?",
-      "original_timestamp": "01:46"
+      "original_timestamp": "01:46",
+      "type": "dialogue"
     },
     {
       "id": 69,
       "time": 107.0,
       "name": "guduk_necmi",
       "text": "1453!",
-      "original_timestamp": "01:47"
+      "original_timestamp": "01:47",
+      "type": "dialogue"
     },
     {
       "id": 70,
       "time": 109.0,
       "name": "mufettis",
       "text": "Romayı kim yaktı?",
-      "original_timestamp": "01:49"
+      "original_timestamp": "01:49",
+      "type": "dialogue"
     },
     {
       "id": 71,
       "time": 110.0,
       "name": "guduk_necmi",
       "text": "Anam",
-      "original_timestamp": "01:50"
+      "original_timestamp": "01:50",
+      "type": "dialogue"
     },
     {
       "id": 72,
       "time": 112.0,
       "name": "mufettis",
       "text": "Evladım! Senin anan kim?",
-      "original_timestamp": "01:52"
+      "original_timestamp": "01:52",
+      "type": "dialogue"
     },
     {
       "id": 73,
       "time": 114.0,
       "name": "guduk_necmi",
       "text": "Kanuni Sultan Süleyman!",
-      "original_timestamp": "01:54"
+      "original_timestamp": "01:54",
+      "type": "dialogue"
     },
     {
       "id": 74,
       "time": 117.0,
       "name": "mufettis",
       "text": "İlk halife kimdir?",
-      "original_timestamp": "01:57"
+      "original_timestamp": "01:57",
+      "type": "dialogue"
     },
     {
       "id": 75,
       "time": 119.0,
       "name": "guduk_necmi",
       "text": "İmparator Neron.",
-      "original_timestamp": "01:59"
+      "original_timestamp": "01:59",
+      "type": "dialogue"
     },
     {
       "id": 76,
       "time": 120.0,
       "name": "saban",
       "text": "Evet",
-      "original_timestamp": "01:60"
+      "original_timestamp": "01:60",
+      "type": "dialogue"
     },
     {
       "id": 77,
       "time": 121.0,
       "name": "mufettis",
       "text": "Çocuğum karıştırıyorsun",
-      "original_timestamp": "02:01"
+      "original_timestamp": "02:01",
+      "type": "dialogue"
     },
     {
       "id": 78,
       "time": 122.0,
       "name": "mufettis",
       "text": "Romayı yakan Hz.Şabandı",
-      "original_timestamp": "02:02"
+      "original_timestamp": "02:02",
+      "type": "dialogue"
     },
     {
       "id": 79,
       "time": 125.0,
       "name": "mufettis",
       "text": "İlk halife İmparator Neron",
-      "original_timestamp": "02:05"
+      "original_timestamp": "02:05",
+      "type": "dialogue"
     },
     {
       "id": 80,
       "time": 127.0,
       "name": "mufettis",
       "text": "Yani padişah Neron, Roma'da",
-      "original_timestamp": "02:07"
+      "original_timestamp": "02:07",
+      "type": "dialogue"
     },
     {
       "id": 81,
       "time": 129.0,
       "name": "mufettis",
       "text": "Hz.Şaban ile beraber ananı günde 1453 kere kanunen.",
-      "original_timestamp": "02:09"
+      "original_timestamp": "02:09",
+      "type": "dialogue"
     },
     {
       "id": 82,
       "time": 136.0,
       "name": "mufettis_sfx",
-      "text": "Afedersiniz Mahmut Bey.Ben biraz karıştırdım galiba.",
-      "original_timestamp": "02:16"
+      "text": "Afedersiniz Mahmut Bey. Ben biraz karıştırdım galiba.",
+      "original_timestamp": "02:16",
+      "type": "sfx",
+      "x": 1028,
+      "y": 300
+    },
+    {
+      "id": 82,
+      "time": 138.5,
+      "name": "mahmut_sfx",
+      "text": "Evet efendim. Buyurun.",
+      "original_timestamp": "02:16",
+      "type": "sfx",
+      "x": 800,
+      "y": 200
     }
   ]
 }
