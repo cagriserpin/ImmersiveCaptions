@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 import json
@@ -138,6 +139,29 @@ def crop_face(frame, bbox: tuple[int, int, int, int], padding_ratio: float = 0.2
     return frame[y0:y1, x0:x1].copy()
 
 
+def normalize_existing_paths_in_result(result: dict, output_json_path: Path, crops_dir: Path) -> dict:
+    output_json_path = output_json_path.resolve()
+    crops_dir = crops_dir.resolve()
+
+    result["json_path"] = str(output_json_path)
+    result["crops_dir"] = str(crops_dir)
+    result["video_path"] = str(Path(str(result.get("video_path", ""))).resolve()) if result.get("video_path") else ""
+    if result.get("model_path"):
+        result["model_path"] = str(Path(str(result["model_path"])).resolve())
+
+    frames = result.get("frames", [])
+    for frame in frames:
+        frame_index = int(frame.get("frame_index", 0))
+        faces = frame.get("faces", [])
+        if not isinstance(faces, list):
+            continue
+        for face_idx, face in enumerate(faces):
+            crop_path_value = str(face.get("crop_path", "")).strip()
+            crop_name = Path(crop_path_value).name if crop_path_value else f"frame_{frame_index:06d}_face_{face_idx:02d}.jpg"
+            face["crop_path"] = str((crops_dir / crop_name).resolve())
+    return result
+
+
 def process_video_faces(
     video_path: str | Path,
     output_json_path: str | Path,
@@ -145,10 +169,10 @@ def process_video_faces(
     model_path: str | Path,
     progress_callback: Callable[[int, int], None] | None = None,
 ) -> dict:
-    video_path = Path(video_path)
-    output_json_path = Path(output_json_path)
-    crops_dir = Path(crops_dir)
-    model_path = Path(model_path)
+    video_path = Path(video_path).resolve()
+    output_json_path = Path(output_json_path).resolve()
+    crops_dir = Path(crops_dir).resolve()
+    model_path = Path(model_path).resolve()
 
     crops_dir.mkdir(parents=True, exist_ok=True)
     output_json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -180,7 +204,7 @@ def process_video_faces(
         for local_index, raw in enumerate(raw_detections):
             crop = crop_face(frame, raw["bbox"])
             crop_filename = f"frame_{frame_index:06d}_face_{local_index:02d}.jpg"
-            crop_path = crops_dir / crop_filename
+            crop_path = (crops_dir / crop_filename).resolve()
             if crop.size > 0:
                 cv2.imwrite(str(crop_path), crop)
 
@@ -209,6 +233,8 @@ def process_video_faces(
     cap.release()
 
     result = {
+        "json_path": str(output_json_path),
+        "crops_dir": str(crops_dir),
         "video_path": str(video_path),
         "fps": float(fps),
         "width": width,

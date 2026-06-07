@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -24,7 +25,7 @@ from PySide6.QtWidgets import (
 )
 
 from detection_renderer import DetectionRenderer
-from detection_store import FaceDetectionStore
+from detection_store import FaceDetectionStore, FaceIdentityStore, TranscriptStore
 from face_tracker import process_video_faces
 
 
@@ -51,13 +52,17 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Immersive Captions 2 — Phase 1")
+        self.setWindowTitle("Immersive Captions 2 — Face + Transcript Preview")
         self.resize(1280, 820)
 
         self.video_path: Path | None = None
         self.face_json_path: Path | None = None
+        self.face_identities_path: Path | None = None
+        self.transcript_json_path: Path | None = None
 
         self.face_store = FaceDetectionStore()
+        self.identity_store = FaceIdentityStore()
+        self.transcript_store = TranscriptStore()
         self.renderer: DetectionRenderer | None = None
 
         self.is_user_scrubbing = False
@@ -79,6 +84,8 @@ class MainWindow(QMainWindow):
 
         self.open_video_button = QPushButton("Open Video")
         self.open_detections_button = QPushButton("Open Face JSON")
+        self.open_identities_button = QPushButton("Open Identities JSON")
+        self.open_transcript_button = QPushButton("Open Transcript JSON")
         self.extract_faces_button = QPushButton("Extract Faces")
         self.toggle_boxes_button = QPushButton("Hide Boxes")
         self.toggle_landmarks_button = QPushButton("Hide Landmarks")
@@ -92,6 +99,8 @@ class MainWindow(QMainWindow):
         controls_layout = QHBoxLayout()
         controls_layout.addWidget(self.open_video_button)
         controls_layout.addWidget(self.open_detections_button)
+        controls_layout.addWidget(self.open_identities_button)
+        controls_layout.addWidget(self.open_transcript_button)
         controls_layout.addWidget(self.extract_faces_button)
         controls_layout.addWidget(self.toggle_boxes_button)
         controls_layout.addWidget(self.toggle_landmarks_button)
@@ -109,12 +118,15 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(container)
 
         self.renderer = DetectionRenderer(self.scene)
+        self.renderer.set_identity_store(self.identity_store)
 
         self.ui_timer = QTimer(self)
         self.ui_timer.setInterval(33)
 
         self.open_video_button.clicked.connect(self.open_video)
         self.open_detections_button.clicked.connect(self.open_detections)
+        self.open_identities_button.clicked.connect(self.open_identities)
+        self.open_transcript_button.clicked.connect(self.open_transcript)
         self.extract_faces_button.clicked.connect(self.extract_faces_for_current_video)
         self.toggle_boxes_button.clicked.connect(self.toggle_boxes)
         self.toggle_landmarks_button.clicked.connect(self.toggle_landmarks)
@@ -167,11 +179,45 @@ class MainWindow(QMainWindow):
         self.update_window_title()
         self.ui_timer.start()
 
+    def _auto_identity_path_for_detection_json(self, detection_path: Path) -> Path | None:
+        candidates = [
+            detection_path.with_name(detection_path.stem + '.face_identities.json'),
+            detection_path.parent / (detection_path.name + '.face_identities.json'),
+        ]
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+        return None
+
     def load_detections(self, file_path: str):
         self.face_json_path = Path(file_path)
         self.face_store.load(self.face_json_path)
+
+        auto_identities = self._auto_identity_path_for_detection_json(self.face_json_path)
+        if auto_identities is not None:
+            self.load_identities(str(auto_identities), update_overlay=False)
+        else:
+            self.face_identities_path = None
+            self.identity_store.clear()
+
         self.update_overlay()
         self.update_window_title()
+
+    def load_identities(self, file_path: str, update_overlay: bool = True):
+        self.face_identities_path = Path(file_path)
+        self.identity_store.load(self.face_identities_path)
+        if self.renderer is not None:
+            self.renderer.set_identity_store(self.identity_store)
+        if update_overlay:
+            self.update_overlay()
+            self.update_window_title()
+
+    def load_transcript(self, file_path: str, update_overlay: bool = True):
+        self.transcript_json_path = Path(file_path)
+        self.transcript_store.load(self.transcript_json_path)
+        if update_overlay:
+            self.update_overlay()
+            self.update_window_title()
 
     def open_video(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -192,6 +238,26 @@ class MainWindow(QMainWindow):
         )
         if file_path:
             self.load_detections(file_path)
+
+    def open_identities(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Identities JSON",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if file_path:
+            self.load_identities(file_path)
+
+    def open_transcript(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Transcript JSON",
+            "",
+            "JSON Files (*.json);;All Files (*)",
+        )
+        if file_path:
+            self.load_transcript(file_path)
 
     def extract_faces_for_current_video(self):
         if self.video_path is None:
@@ -320,13 +386,20 @@ class MainWindow(QMainWindow):
     def update_overlay(self):
         if self.renderer is None:
             return
-        faces = self.face_store.get_faces(self.player.position() / 1000.0)
-        self.renderer.render_faces(faces)
+        current_time = self.player.position() / 1000.0
+        faces = self.face_store.get_faces(current_time)
+        captions = self.transcript_store.get_active_entries(current_time) if self.transcript_store.is_loaded() else []
+        self.renderer.render_faces(faces, captions)
 
     def update_window_title(self):
         video_name = self.video_path.name if self.video_path else "No Video"
         detections_name = self.face_json_path.name if self.face_json_path else "No Face JSON"
-        self.setWindowTitle(f"Immersive Captions 2 — Phase 1 — {video_name} — {detections_name}")
+        identities_name = self.face_identities_path.name if self.face_identities_path else "No Identities JSON"
+        transcript_name = self.transcript_json_path.name if self.transcript_json_path else "No Transcript JSON"
+        self.setWindowTitle(
+            f"Immersive Captions 2 — Face + Transcript Preview — "
+            f"{video_name} — {detections_name} — {identities_name} — {transcript_name}"
+        )
 
 
 def main():

@@ -1,12 +1,35 @@
-# Immersive Captions 2 — Brief Plan
+# Phase 2 Brief
 
-## Goal
-Build a new pipeline for subtitle placement that first understands who is on screen.
+## Amaç
 
-## Order
-1. detect faces on every frame
-2. collect all detections
-3. cluster repeated faces into unique identities
-4. manually assign names
-5. build stable character-following
-6. only then add subtitles
+Phase 1'de bulunan ham yüzleri şimdi **unique identity adaylarına** dönüştürmek.
+
+Bu aşamada hedef:
+- videoda tekrar eden yüzleri kümelendirmek
+- önemli karakterleri ayırmak
+- kullanıcıya manuel isim verme ve ignore etme imkânı vermek
+
+## Girdi
+- `faces_raw.json`
+- `face_crops/`
+
+## Çıktı
+- `face_identities.json`
+- preview klasörü
+- `index.html` review sayfası
+
+## Kullanım mantığı
+1. Face extraction yapılır.
+2. Cluster çıkarılır.
+3. Kullanıcı önemli karakterleri isimlendirir.
+4. Gereksiz identity'ler ignore edilir.
+5. Sonraki aşamada sadece bu isimlendirilmiş karakterler takip edilir.
+
+## Bu aşamada ne yok?
+- altyazı bağlama yok
+- crowd konuşma yerleştirme yok
+- nihai karakter tracking yok
+
+## Sonraki aşama
+- manuel isim verilmiş identity'leri videoda kutu + isim olarak göstermek
+- ignore edilenleri göstermemek

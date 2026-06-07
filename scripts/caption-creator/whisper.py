@@ -7,11 +7,11 @@ from faster_whisper import WhisperModel
 # project root -> iki klasör yukarı
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
-AUDIO_PATH = PROJECT_ROOT / "media" / "audio" / "yan_yana.mp3"
-OUTPUT_PATH = PROJECT_ROOT / "media" / "captions" / "yan_yana" / "words.json"
+AUDIO_PATH = PROJECT_ROOT / "media" / "audio" / "hababam.mp3"
+OUTPUT_PATH = PROJECT_ROOT / "media" / "captions" / "hababam" / "words.json"
 
 print("Loading model...")
-model = WhisperModel("small", device="cpu", compute_type="int8")
+model = WhisperModel("large", device="cpu", compute_type="int8")
 print("Model loaded.")
 
 # Output klasörü yoksa oluştur
